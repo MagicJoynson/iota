@@ -566,10 +566,12 @@
     const idle = () => setState(Rules.urgency() > .05 ? 'aware' : 'idle', modeLabel());
     $('[data-deep]', el)?.addEventListener('click', e => { edenDeep = !edenDeep; sessionStorage.setItem('iota.eden.deep', edenDeep ? '1' : '0'); e.currentTarget.classList.toggle('accent', edenDeep); e.currentTarget.setAttribute('aria-pressed', edenDeep); idle(); });
 
-    // Replay recent live history so the thread has continuity, else the rules opener
-    const hist = live ? Eden.history.slice(-8) : [];
+    // Pinned: today's briefing at the top. Then the last few live turns (auto-pruned after 12h), else the rules opener.
+    const b0 = Rules.todaysBriefing('morning');
+    if (b0) { const pb = bubble('eden', b0.md, 'morning briefing · pinned'); pb.classList.add('pinned'); }
+    const hist = live ? Eden.history.slice(-6) : [];
     if (hist.length) { for (const m of hist) bubble(m.role === 'user' ? 'me' : 'eden', m.content); }
-    setTimeout(() => { if (!hist.length) { bubble('eden', Rules.observation()); orb?.ripple(); } const b = Rules.todaysBriefing('morning'); if (b) setTimeout(() => { bubble('eden', b.md, b.kind + ' briefing'); orb?.ripple(); }, 500); const w = Rules.dueWatches(new Date(), 3); if (w.length && !hist.length) setTimeout(() => { bubble('eden', 'Watching: ' + w.map(x => x.text).join(' · ') + '.', 'promise watcher'); }, b ? 900 : 500); }, 250);
+    setTimeout(() => { if (!hist.length && !b0) { bubble('eden', Rules.observation()); orb?.ripple(); } const w = Rules.dueWatches(new Date(), 3); if (w.length && !hist.length) setTimeout(() => { bubble('eden', 'Watching: ' + w.map(x => x.text).join(' · ') + '.', 'promise watcher'); }, 400); }, 250);
 
     ta.addEventListener('focus', () => setState('listening', 'listening'));
     ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = Math.min(120, ta.scrollHeight) + 'px'; });

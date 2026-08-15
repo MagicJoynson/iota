@@ -13,7 +13,10 @@
 
   let history = []; try { history = JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); } catch (_) {}
   let usage = { in: 0, out: 0, cin: 0, cw: 0, usd: 0, calls: 0 }; try { usage = { ...usage, ...JSON.parse(localStorage.getItem(USAGE_KEY) || '{}') }; } catch (_) {}
-  const saveHist = () => localStorage.setItem(HIST_KEY, JSON.stringify(history.slice(-40)));
+  const HIST_TTL_MS = 12 * 3600000, HIST_MAX = 20;
+  const pruneHist = () => { const cut = Date.now() - HIST_TTL_MS; history = history.filter(m => (m.t || 0) >= cut).slice(-HIST_MAX); };
+  const saveHist = () => { pruneHist(); localStorage.setItem(HIST_KEY, JSON.stringify(history)); };
+  pruneHist();
   const saveUsage = () => localStorage.setItem(USAGE_KEY, JSON.stringify(usage));
 
   // Stable persona (prompt-cached). Anything that changes lives in the context block, not here.
@@ -124,7 +127,7 @@ Principles: one diagnosis and one next action beats twenty charts. Money is a gr
   const Eden = {
     get available() { return !!(Store.settings.apiKey || '').trim(); },
     get usage() { return { ...usage }; },
-    get history() { return history.slice(); },
+    get history() { pruneHist(); return history.slice(); },
     resetUsage() { usage = { in: 0, out: 0, cin: 0, cw: 0, usd: 0, calls: 0 }; saveUsage(); },
     clearHistory() { history = []; saveHist(); },
     modelFor(deep) { return deep ? MODELS.deep : MODELS.fast; },
@@ -137,7 +140,7 @@ Principles: one diagnosis and one next action beats twenty charts. Money is a gr
       const key = (Store.settings.apiKey || '').trim();
       if (!key) throw Object.assign(new Error('No API key'), { code: 'nokey' });
       const model = this.modelFor(deep);
-      history.push({ role: 'user', content: userText });
+      history.push({ role: 'user', content: userText, t: Date.now() });
       const msgs = history.slice(-20).map(m => ({ role: m.role, content: m.content }));
       while (msgs.length && msgs[0].role !== 'user') msgs.shift();
       const system = [
@@ -158,7 +161,7 @@ Principles: one diagnosis and one next action beats twenty charts. Money is a gr
         msgs.push({ role: 'user', content: results });
       }
       const text = parts.join('\n').trim() || 'Done.';
-      history.push({ role: 'assistant', content: text });
+      history.push({ role: 'assistant', content: text, t: Date.now() });
       saveHist();
       return { text, parts, actions, model };
     },
