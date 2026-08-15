@@ -75,6 +75,7 @@
     if (old) { old.classList.add('leaving'); setTimeout(() => old.remove(), 260); }
 
     document.body.dataset.section = r.screen === 'section' ? r.sec : '';
+    document.body.dataset.screen = r.screen;
     let el;
     if (r.screen === 'ring') el = renderRing();
     else if (r.screen === 'eden') el = renderEden();
@@ -173,7 +174,7 @@
 
     const badges = ARCS.map(a => {
       const n = next[a.key]; if (!n) return '';
-      const mid = (a.from + a.to) / 2, [x, y] = pt(RING.rOut + 22, mid);
+      const ang = a.key === 'uni' ? 243 : a.key === 'work' ? -63 : 90, [x, y] = pt(RING.rOut + (a.key === 'kart' ? 24 : 30), ang);
       const label = `${Rules.fmtWhen(n.starts_at)} ${n.title}`;
       return `<div class="arc-badge" style="left:${x / 4}%;top:${y / 4}%;color:${SECTIONS[a.key].color}">${esc(label.length > 24 ? label.slice(0, 23) + '…' : label)}</div>`;
     }).join('');
@@ -471,9 +472,9 @@
       </header>
       <div class="scroll" style="padding-bottom:40px">
         <div class="setting-group"><h3>Account</h3>
-          <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-            <div><b>${esc(SB.user?.email || 'Not signed in')}</b><br><span class="sub">Synced ${esc(synced)}${Store.pending ? ` · ${Store.pending} pending` : ''}</span></div>
-            <div style="display:flex;gap:8px"><button class="btn ghost" data-sync>Sync</button><button class="btn ghost" data-signout style="color:var(--danger)">Sign out</button></div>
+          <div class="card account-card">
+            <div class="who"><b>${esc(SB.user?.email || 'Not signed in')}</b><br><span class="sub">Synced ${esc(synced)}${Store.pending ? ` · ${Store.pending} pending` : ''}</span></div>
+            <div class="acts"><button class="btn ghost" data-sync>Sync</button><button class="btn ghost" data-signout style="color:var(--danger)">Sign out</button></div>
           </div>
         </div>
         <div class="setting-group"><h3>You</h3>${one(f('name', 'Name'))}${one(f('homeAddress', 'Home'))}</div>
@@ -621,8 +622,11 @@
   }
   boot();
   SB.onAuth(s => { if (!s && current !== null) { toast('Signed out — please sign in again'); boot(); } });
-  // Splash: hold the brand art for a beat, then reveal
-  setTimeout(() => $('#splash').classList.add('gone'), sessionStorage.getItem('iota.booted') ? 150 : 1100);
+  // Splash: EDEN wakes up (thinking → idle), then the Ring fades in beneath her
+  const splashOrb = new EdenOrb($('#splashOrb'), { size: 260, state: 'thinking' }); splashOrb.start();
+  const splashMs = sessionStorage.getItem('iota.booted') ? 500 : 1700;
+  setTimeout(() => splashOrb.setState('speaking'), Math.max(200, splashMs - 500));
+  setTimeout(() => { $('#splash').classList.add('gone'); setTimeout(() => splashOrb.destroy(), 800); }, splashMs);
   sessionStorage.setItem('iota.booted', '1');
   // Re-evaluate urgency every minute (drives orb 'aware' + Ring badges); resync every 5 min when visible
   setInterval(() => { refreshOrbs(); if (current?.screen === 'ring') render(); }, 60000);

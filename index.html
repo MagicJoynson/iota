@@ -27,12 +27,10 @@
 </div>
 
 <!-- Boot splash: brand art, fades out once the app is ready -->
-<div id="splash" aria-hidden="true">
-  <img src="./assets/brand-512.png" alt="" width="220" height="220">
-  <div class="wordmark">I O T A</div>
-</div>
+<div id="splash" aria-hidden="true"><canvas id="splashOrb"></canvas></div>
 
 <!-- App root: screens render here -->
+<div id="ringbg" aria-hidden="true"></div>
 <main id="app" aria-live="polite"></main>
 
 <!-- Quick capture sheet (long-press orb) -->
@@ -55,6 +53,7 @@
 <script src="./js/orb.js"></script>
 <script src="./js/supabase.js"></script>
 <script src="./js/store.js"></script>
+<script src="./js/preview.js"></script>
 <script src="./js/app.js"></script>
 </body>
 </html>

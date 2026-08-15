@@ -219,6 +219,11 @@
       const nx = Rules.nextPayday(now); if (!nx) return null; const s = Store.settings;
       const d = new Date(nx); if (s.payFrequency === 'monthly') d.setMonth(d.getMonth() - 1); else d.setDate(d.getDate() - (s.payFrequency === 'weekly' ? 7 : 14)); return d;
     },
+    /** Unpaid break for a shift length, from settings.breakRule ({overHours, longBreakMin, shortBreakMin}). */
+    breakFor(hours) {
+      const r = Store.settings.breakRule || { overHours: 6, longBreakMin: 45, shortBreakMin: 30 };
+      return hours > (+r.overHours || 6) ? (+r.longBreakMin || 45) : (+r.shortBreakMin || 30);
+    },
     payEstimate(shifts) {
       const rate = +Store.settings.rateHourly || 0;
       const hrs = shifts.reduce((a, s) => a + Rules.hours(s.starts_at, s.ends_at) - (s.break_min || 0) / 60, 0);
@@ -307,7 +312,7 @@
       const section = isUni ? 'uni' : isKart ? 'kart' : isShift ? 'work' : 'personal';
       const title = Rules.cleanTitle(t);
       if (isNote) return { table: 'notes', row: { section, md: t.replace(/^(note|remember)[:\s]+/i, ''), title: null, tags: [] }, label: 'note' };
-      if (isShift && when) return { table: 'shifts', row: { starts_at: when.start.toISOString(), ends_at: (when.end || new Date(when.start.getTime() + 4 * 3600000)).toISOString(), status: 'planned', source: 'manual', location: Store.settings.employer || null }, label: 'shift' };
+      if (isShift && when) { const end = when.end || new Date(when.start.getTime() + 4 * 3600000); return { table: 'shifts', row: { starts_at: when.start.toISOString(), ends_at: end.toISOString(), status: 'planned', source: 'manual', break_min: Rules.breakFor((end - when.start) / 3600000), location: Store.settings.employer || null }, label: 'shift' }; }
       if (isDeadline || (!when?.end && when && isUni)) return { table: 'tasks', row: { title, section, due: when ? when.start.toISOString() : null, status: 'open' }, label: 'task' };
       if (when) return { table: 'events', row: { kind: section, title, starts_at: when.start.toISOString(), ends_at: (when.end || new Date(when.start.getTime() + 3600000)).toISOString(), source: 'manual', status: 'planned' }, label: 'event' };
       return { table: 'tasks', row: { title, section, due: null, status: 'open' }, label: 'task' };
