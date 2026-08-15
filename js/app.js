@@ -29,7 +29,7 @@
 
   const SECTIONS = {
     uni:  { name: 'University', color: '#8B7CFF', rgb: '139,124,255', tabs: ['today', 'modules', 'deadlines', 'notes'], tabNames: { today: 'Today', modules: 'Modules', deadlines: 'Deadlines', notes: 'Notes' } },
-    work: { name: 'Work', color: '#2DD4BF', rgb: '45,212,191', tabs: ['shifts', 'earnings', 'requests', 'info'], tabNames: { shifts: 'Shifts', earnings: 'Earnings', requests: 'Requests', info: 'Info' } },
+    work: { name: 'Work', color: '#2DD4BF', rgb: '45,212,191', tabs: ['shifts', 'earnings', 'requests', 'info'], tabNames: { shifts: 'Shifts', earnings: 'Earnings', requests: 'Time off', info: 'Info' } },
     kart: { name: 'Karting & Societies', short: 'Karting', color: '#FF8A4C', rgb: '255,138,76', tabs: ['mmu', 'racing', 'societies', 'events'], tabNames: { mmu: 'MMU Karting', racing: 'My Racing', societies: 'Societies', events: 'Events' } },
   };
 
@@ -337,6 +337,7 @@
             <div class="stat card"><div class="k">This payslip</div><div class="v">${rate ? '£' + all.gross.toFixed(0) : '—'}<small>gross</small></div></div>
           </div>`;
           html += paydayCard(now);
+          html += earningsChart(now);
           if (nxt.length) html += `<div class="card"><div class="sub" style="display:flex;justify-content:space-between"><span>Then ${esc(fmtD(pp.following.payday))}</span><b style="color:var(--text)">${nxt.length} shift${nxt.length === 1 ? '' : 's'} booked · ${rate ? '≈ £' + n.gross.toFixed(0) : n.hours.toFixed(1) + ' h'}</b></div><p class="sub" style="margin-top:6px">${esc(fmtS(pp.following.start))} – ${esc(fmtS(pp.following.end))}</p></div>`;
         } else {
           const month = shifts.filter(x => new Date(x.starts_at).getMonth() === now.getMonth() && new Date(x.ends_at) < now);
@@ -346,7 +347,24 @@
         if (rate) html += `<div class="card"><div class="sub" style="display:flex;justify-content:space-between"><span>Rate</span><b style="color:var(--text)">£${rate.toFixed(2)}/h</b></div><div class="sub" style="display:flex;justify-content:space-between;margin-top:6px"><span>Pay</span><b style="color:var(--text)">${esc(s.payFrequency || '')}${s.payAnchor ? ' · Thursdays' : ''}</b></div><p class="sub" style="margin-top:10px">Each Thursday payslip covers the fortnight ending the Sunday before it. Gross estimates (hours minus unpaid breaks × rate); student income under the personal allowance means little or no tax — payslip reconcile arrives with the Payday Plan.</p></div>`;
         else html += `<div class="card"><h3>Set your hourly rate</h3><p class="sub">Earnings, projections and the Payday Plan all hang off it.</p><button class="btn" data-go="#/settings" style="margin-top:12px">Open settings</button></div>`;
       } else if (tab === 'requests') {
-        html += `<div class="tab-title">Availability & requests</div>` + empty('🗓️', 'Nothing tracked yet', 'Availability, holiday requests and swap notes — clash-aware against lectures — arrive next. <b>"Can you do Friday?"</b> gets a yes / no / risky answer from EDEN.');
+        const items = Store.list('time_off').filter(t => t.status !== 'cancelled').sort((a, b) => a.starts_on.localeCompare(b.starts_on));
+        const fmtD = d => new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+        const STATUS = { needed: ['Need to ask', 'var(--warn)'], asked: ['Asked', 'var(--work)'], approved: ['Approved', 'var(--ok)'], declined: ['Declined', 'var(--danger)'] };
+        html += `<div class="tab-title">Time off to book</div>`;
+        html += `<p class="field-note" style="padding:0 4px 10px">Exams, karting rounds, trips — anything work mustn't rota you for. Tap the status to move it along; EDEN nags you before the ask-by date.</p>`;
+        if (!items.length) html += empty('🗓️', 'Nothing to book off yet', 'Add a date range and an "ask by" date and it shows here — and in EDEN\'s reminders. Or just tell her: <i>"book me off 3–5 Oct for BUKC"</i>.', { label: 'Add time off', hint: '__timeoff' });
+        else html += `<div class="list">${items.map(t => {
+          const clashes = Rules.timeOffClashes(t);
+          const st = STATUS[t.status] || [t.status, 'var(--text-3)'];
+          const range = t.starts_on === t.ends_on ? fmtD(t.starts_on) : `${fmtD(t.starts_on)} – ${fmtD(t.ends_on)}`;
+          const askBy = t.ask_by ? ` · ask by ${new Date(t.ask_by + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : '';
+          return `<div class="row timeoff" data-id="${t.id}">
+            <span class="bar" style="background:${SECTIONS[t.reason]?.color || 'var(--text-3)'}"></span>
+            <div class="t"><b>${esc(t.title)}</b><span>${esc(range)}${t.status === 'needed' ? esc(askBy) : ''}${clashes.length ? `<span style="color:var(--danger)">${clashes.length} shift${clashes.length === 1 ? '' : 's'} clash — currently rota'd</span>` : ''}</span></div>
+            <button class="pill status" data-status="${t.id}" style="background:color-mix(in srgb, ${st[1]} 18%, transparent);color:${st[1]}">${esc(st[0])}</button>
+            <button class="del" aria-label="Delete">${ICONS.trash}</button>
+          </div>`;
+        }).join('')}</div><button class="btn" data-capture-hint="__timeoff" style="margin-top:12px">${ICONS.plus} Add time off</button>`;
       } else if (tab === 'info') {
         const rates = Store.list('pay_rates');
         html += `<div class="tab-title">Work info</div>
@@ -389,11 +407,61 @@
 
     body.innerHTML = html;
     body.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
-    body.querySelectorAll('[data-capture-hint]').forEach(b => b.addEventListener('click', () => openCapture(sec, b.dataset.captureHint)));
+    body.querySelectorAll('[data-capture-hint]').forEach(b => b.addEventListener('click', () => b.dataset.captureHint === '__timeoff' ? openTimeOff(() => renderTabBody(el, sec, tab)) : openCapture(sec, b.dataset.captureHint)));
     body.querySelectorAll('.row .del').forEach(b => b.addEventListener('click', e => {
       const row = e.currentTarget.closest('.row');
+      if (row.classList.contains('timeoff')) { Store.update('time_off', row.dataset.id, { status: 'cancelled' }); toast('Removed'); renderTabBody(el, sec, tab); return; }
       Store.remove(row.dataset.table, row.dataset.id); toast('Removed'); renderTabBody(el, sec, tab);
     }));
+    body.querySelectorAll('[data-status]').forEach(b => b.addEventListener('click', e => {
+      e.stopPropagation(); const t = Store.get('time_off', b.dataset.status); if (!t) return;
+      const order = ['needed', 'asked', 'approved', 'declined']; const nx = order[(order.indexOf(t.status) + 1) % order.length];
+      Store.update('time_off', t.id, { status: nx }); toast(nx === 'needed' ? 'Back to: need to ask' : nx === 'asked' ? 'Marked as asked' : nx === 'approved' ? 'Approved — nice' : 'Declined'); renderTabBody(el, sec, tab);
+    }));
+  }
+
+
+  /** Earnings by payday — hand-rolled SVG bars: worked (solid) vs still-to-work (hatched), current payday highlighted. */
+  function earningsChart(now) {
+    const hist = Rules.payHistory(now, 6); if (!hist.length) return '';
+    const rate = +Store.settings.rateHourly || 0;
+    const past = hist.filter(h => h.isPast && h.shifts > 0);
+    const max = Math.max(1, ...hist.map(h => h.grossTotal));
+    const W = 340, H = 150, padL = 8, padR = 8, padT = 22, padB = 30, bw = (W - padL - padR) / hist.length;
+    const y = v => padT + (H - padT - padB) * (1 - v / max);
+    const fmtP = d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    const bars = hist.map((h, i) => {
+      const x = padL + i * bw + bw * 0.18, w = bw * 0.64;
+      const yW = y(h.grossWorked), yT = y(h.grossTotal), y0 = y(0);
+      const col = h.isCurrent ? 'var(--work)' : h.isFuture ? 'rgba(45,212,191,.55)' : 'rgba(244,246,251,.55)';
+      const label = h.grossTotal > 0 ? `£${Math.round(h.grossTotal)}` : '';
+      return `<g>
+        ${h.grossTotal > h.grossWorked ? `<rect x="${x}" y="${yT}" width="${w}" height="${Math.max(0, yW - yT)}" rx="4" fill="url(#hatch)" stroke="${col}" stroke-width="1"/>` : ''}
+        ${h.grossWorked > 0 ? `<rect x="${x}" y="${yW}" width="${w}" height="${Math.max(0, y0 - yW)}" rx="4" fill="${col}"/>` : ''}
+        ${h.grossTotal === 0 ? `<rect x="${x}" y="${y0 - 2}" width="${w}" height="2" rx="1" fill="rgba(255,255,255,.12)"/>` : ''}
+        ${label ? `<text x="${x + w / 2}" y="${yT - 6}" text-anchor="middle" font-size="10.5" font-weight="600" fill="${h.isCurrent ? 'var(--text)' : 'var(--text-2)'}">${label}</text>` : ''}
+        <text x="${x + w / 2}" y="${H - 14}" text-anchor="middle" font-size="9.5" fill="${h.isCurrent ? 'var(--work)' : 'var(--text-3)'}" ${h.isCurrent ? 'font-weight="700"' : ''}>${esc(fmtP(h.payday))}</text>
+        ${h.isCurrent ? `<text x="${x + w / 2}" y="${H - 3}" text-anchor="middle" font-size="8.5" letter-spacing=".08em" fill="var(--work)">NEXT</text>` : h.isFuture ? `<text x="${x + w / 2}" y="${H - 3}" text-anchor="middle" font-size="8.5" letter-spacing=".08em" fill="var(--text-3)">THEN</text>` : ''}
+      </g>`;
+    }).join('');
+    const avg = past.length ? past.reduce((a, h) => a + h.grossTotal, 0) / past.length : 0;
+    const best = past.length ? past.reduce((a, h) => h.grossTotal > a.grossTotal ? h : a, past[0]) : null;
+    const ytd = hist.filter(h => h.payday.getFullYear() === now.getFullYear() && !h.isFuture).reduce((a, h) => a + (h.isCurrent ? h.grossWorked : h.grossTotal), 0);
+    const hrsAvg = past.length ? past.reduce((a, h) => a + h.hoursTotal, 0) / past.length : 0;
+    return `<div class="card chart-card">
+      <div class="sub" style="display:flex;justify-content:space-between;align-items:baseline"><b style="color:var(--text)">Pay by payday</b><span>gross · ${rate ? '£' + rate.toFixed(2) + '/h' : 'set rate'}</span></div>
+      <svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Gross pay per payday">
+        <defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="rgba(45,212,191,.10)"/><line x1="0" y1="0" x2="0" y2="6" stroke="rgba(45,212,191,.55)" stroke-width="1.5"/></pattern></defs>
+        <line x1="${padL}" x2="${W - padR}" y1="${y(0)}" y2="${y(0)}" stroke="rgba(255,255,255,.12)"/>
+        ${bars}
+      </svg>
+      <div class="legend"><span><i style="background:var(--work)"></i>worked</span><span><i style="background:url(#hatch);border:1px solid rgba(45,212,191,.6);background:repeating-linear-gradient(45deg,rgba(45,212,191,.55) 0 1.5px,transparent 1.5px 5px)"></i>still to work</span><span><i style="background:rgba(244,246,251,.55)"></i>past payslips</span></div>
+      <div class="kpis">
+        <div><span>Avg payslip</span><b>${past.length ? '£' + avg.toFixed(0) : '—'}</b><small>${past.length ? hrsAvg.toFixed(1) + ' h avg' : 'no history yet'}</small></div>
+        <div><span>Best</span><b>${best ? '£' + best.grossTotal.toFixed(0) : '—'}</b><small>${best ? fmtP(best.payday) : ''}</small></div>
+        <div><span>Paid ${now.getFullYear()}</span><b>£${ytd.toFixed(0)}</b><small>earned so far</small></div>
+      </div>
+    </div>`;
   }
 
   function termProgress() {
@@ -732,6 +800,33 @@
   // ------------------------------------------------------------
   // Quick capture (long-press orb anywhere)
   // ------------------------------------------------------------
+  /** Time-off request sheet. */
+  function openTimeOff(onDone) {
+    const sheet = document.createElement('div'); sheet.className = 'sheet';
+    const today = new Date().toLocaleDateString('en-CA');
+    sheet.innerHTML = `<div class="sheet-backdrop" data-close></div>
+      <form class="sheet-panel glass" autocomplete="off">
+        <div class="sheet-grip"></div>
+        <div class="sheet-title">Time off to book</div>
+        <div class="field"><label>What</label><input name="title" required placeholder="e.g. BUKC Round 1, exam, home for the weekend"></div>
+        <div class="field"><div class="row2"><div><label>From</label><input name="starts_on" type="date" required min="${today}"></div><div><label>To</label><input name="ends_on" type="date" required min="${today}"></div></div></div>
+        <div class="field"><div class="row2"><div><label>Ask by</label><input name="ask_by" type="date"></div><div><label>Reason</label><select name="reason"><option value="kart">Karting</option><option value="uni">Uni</option><option value="personal" selected>Personal</option><option value="holiday">Holiday</option><option value="other">Other</option></select></div></div></div>
+        <div class="field"><label>Note (optional)</label><input name="notes" placeholder="who to ask, why, anything useful"></div>
+        <div class="sheet-row"><span class="hint">Shows in EDEN's reminders before the ask-by date.</span><button class="btn primary" type="submit">Add</button></div>
+      </form>`;
+    document.body.appendChild(sheet);
+    const f = sheet.querySelector('form');
+    f.starts_on.addEventListener('change', () => { if (!f.ends_on.value || f.ends_on.value < f.starts_on.value) f.ends_on.value = f.starts_on.value; });
+    sheet.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => sheet.remove()));
+    f.addEventListener('submit', e => {
+      e.preventDefault(); const d = Object.fromEntries(new FormData(f).entries());
+      if (!d.title.trim() || !d.starts_on) return;
+      if (!d.ends_on || d.ends_on < d.starts_on) d.ends_on = d.starts_on;
+      Store.insert('time_off', { title: d.title.trim(), starts_on: d.starts_on, ends_on: d.ends_on, ask_by: d.ask_by || null, reason: d.reason || 'personal', status: 'needed', notes: d.notes || null });
+      sheet.remove(); toast('Added — EDEN will remind you to ask'); onDone?.();
+    });
+    setTimeout(() => f.title.focus(), 60);
+  }
   const cap = $('#capture'), capForm = $('#captureForm'), capInput = $('#captureInput'), capHint = $('#captureHint');
   let capSection = null;
   function openCapture(section = null, prefill = '') {

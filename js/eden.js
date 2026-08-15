@@ -37,6 +37,8 @@ Principles: one diagnosis and one next action beats twenty charts. Money is a gr
     { name: 'delete_item', description: 'Delete a shift/event/task/note by id. Ask first if it\'s not obviously what he meant.', input_schema: { type: 'object', properties: { table: { type: 'string', enum: ['shifts', 'events', 'tasks', 'notes'] }, id: { type: 'string' } }, required: ['table', 'id'] } },
     { name: 'add_note', description: 'Save a note (kit lists, things to remember, track debriefs).', input_schema: { type: 'object', properties: { section: { type: 'string', enum: ['uni', 'work', 'kart', 'personal'] }, title: { type: 'string' }, md: { type: 'string' } }, required: ['md'] } },
     { name: 'add_watch', description: 'Promise watcher: something Alex is waiting on with an expected date ("marks back next week", "manager confirms Friday").', input_schema: { type: 'object', properties: { text: { type: 'string' }, expected_by: { type: 'string', description: 'YYYY-MM-DD' } }, required: ['text'] } },
+    { name: 'add_time_off', description: 'Record dates Alex needs booked OFF work (exam, karting round, trip). Creates a request he must ask his manager for; include an ask_by date if the rota deadline is known.', input_schema: { type: 'object', properties: { title: { type: 'string' }, starts_on: { type: 'string', description: 'YYYY-MM-DD' }, ends_on: { type: 'string', description: 'YYYY-MM-DD (same as starts_on for one day)' }, ask_by: { type: 'string', description: 'YYYY-MM-DD, optional' }, reason: { type: 'string', enum: ['uni', 'kart', 'personal', 'holiday', 'other'] }, notes: { type: 'string' } }, required: ['title', 'starts_on'] } },
+    { name: 'update_time_off', description: 'Move a time-off request along: status needed|asked|approved|declined, or change dates.', input_schema: { type: 'object', properties: { id: { type: 'string' }, patch: { type: 'object', additionalProperties: true } }, required: ['id', 'patch'] } },
     { name: 'set_setting', description: 'Change a setting (rateHourly, travelWorkMin, activeBase = "sheffield"|"manchester", etc.). Only when he clearly asks.', input_schema: { type: 'object', properties: { key: { type: 'string' }, value: {} }, required: ['key', 'value'] } },
   ];
 
@@ -57,6 +59,7 @@ Principles: one diagnosis and one next action beats twenty charts. Money is a gr
     const tasks = Store.tasks_open().filter(t => !t.due);
     if (tasks.length) { lines.push('Open undated tasks — id | section | title:'); for (const t of tasks) lines.push(`- ${t.id} | ${t.section} | ${t.title}`); }
     const w = Store.list('watches'); if (w.length) { lines.push('Watching — id | text | expected:'); for (const x of w) lines.push(`- ${x.id} | ${x.text} | ${x.expected_by || '?'}`); }
+    const to = Store.list('time_off').filter(x => x.status !== 'cancelled'); if (to.length) { lines.push('Time off requests — id | title | dates | status | ask by:'); for (const x of to) lines.push(`- ${x.id} | ${x.title} | ${x.starts_on}→${x.ends_on} | ${x.status} | ${x.ask_by || '-'}`); }
     const socs = Store.list('societies'); if (socs.length) lines.push('Societies: ' + socs.map(x => `${x.name} (${x.status})`).join(', ') + '.');
     const b = Rules.todaysBriefing('morning', now); if (b) lines.push(`Your morning briefing today: ${b.md}`);
     const notes = Store.list('notes').slice(0, 8); if (notes.length) lines.push('Recent notes: ' + notes.map(n => (n.title ? n.title + ': ' : '') + n.md.slice(0, 80)).join(' · '));
@@ -78,11 +81,13 @@ Principles: one diagnosis and one next action beats twenty charts. Money is a gr
       case 'delete_item': { if (!Store.get(input.table, input.id)) return { ok: false, error: 'not found' }; Store.remove(input.table, input.id); return { ok: true }; }
       case 'add_note': { const r = Store.insert('notes', { section: input.section || 'personal', title: input.title || null, md: input.md, tags: [] }); return { ok: true, id: r.id }; }
       case 'add_watch': { const r = Store.insert('watches', { text: input.text, expected_by: input.expected_by || null, status: 'open' }); return { ok: true, id: r.id }; }
+      case 'add_time_off': { const r = Store.insert('time_off', { title: input.title, starts_on: input.starts_on, ends_on: input.ends_on || input.starts_on, ask_by: input.ask_by || null, reason: input.reason || 'personal', status: 'needed', notes: input.notes || null }); const cl = Rules.timeOffClashes(r); return { ok: true, id: r.id, clashing_shifts: cl.length }; }
+      case 'update_time_off': { const r = Store.update('time_off', input.id, input.patch || {}); return r ? { ok: true } : { ok: false, error: 'not found' }; }
       case 'set_setting': { if (input.key === 'activeBase' && window.applyBase) { window.applyBase(input.value); return { ok: true }; } Store.setSetting(input.key, input.value); return { ok: true }; }
       default: return { ok: false, error: 'unknown tool' };
     }
   }
-  const TOOL_LABEL = { add_shift: 'Added shift', add_event: 'Added event', add_task: 'Added task', complete_task: 'Completed task', update_item: 'Updated', delete_item: 'Deleted', add_note: 'Saved note', add_watch: 'Watching', set_setting: 'Setting changed' };
+  const TOOL_LABEL = { add_time_off: 'Time off to book', update_time_off: 'Time off updated', add_shift: 'Added shift', add_event: 'Added event', add_task: 'Added task', complete_task: 'Completed task', update_item: 'Updated', delete_item: 'Deleted', add_note: 'Saved note', add_watch: 'Watching', set_setting: 'Setting changed' };
 
   function track(model, u) {
     if (!u) return;

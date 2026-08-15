@@ -9,7 +9,7 @@
 
   const CACHE_KEY = 'iota.cache.v2';
   const OUTBOX_KEY = 'iota.outbox.v1';
-  const TABLES = ['events', 'shifts', 'pay_rates', 'tasks', 'notes', 'societies', 'watches', 'briefings', 'modules', 'assessments', 'captures'];
+  const TABLES = ['events', 'shifts', 'pay_rates', 'tasks', 'notes', 'societies', 'watches', 'briefings', 'modules', 'assessments', 'captures', 'time_off'];
   const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }));
 
   const DEFAULT_SETTINGS = {
@@ -99,7 +99,8 @@
       const since = new Date(Date.now() - 45 * 86400000).toISOString(); // events/shifts: last 45 days onward
       const q = {
         events: `events?select=*&or=(ends_at.gte.${since},starts_at.gte.${since})&order=starts_at`,
-        shifts: `shifts?select=*&ends_at=gte.${since}&order=starts_at`,
+        shifts: `shifts?select=*&ends_at=gte.${new Date(Date.now() - 200 * 86400000).toISOString()}&order=starts_at`,
+        time_off: 'time_off?select=*&status=neq.cancelled&order=starts_on',
         pay_rates: 'pay_rates?select=*&order=effective_from.desc',
         tasks: 'tasks?select=*&status=neq.dropped&order=due.asc.nullslast',
         notes: 'notes?select=*&order=created_at.desc&limit=200',
@@ -282,7 +283,26 @@
     },
     dueWatches(now = new Date(), days = 3) {
       const lim = new Date(now); lim.setDate(lim.getDate() + days);
-      return Store.list('watches').filter(w => w.status !== 'resolved' && w.expected_by && new Date(w.expected_by) <= lim);
+      const w = Store.list('watches').filter(x => x.status !== 'resolved' && x.expected_by && new Date(x.expected_by) <= lim);
+      const t = Store.list('time_off').filter(x => x.status === 'needed' && x.ask_by && new Date(x.ask_by) <= lim).map(x => ({ id: x.id, text: `Ask work for ${x.title} off (${new Date(x.starts_on + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })})`, expected_by: x.ask_by, _timeOff: true }));
+      return [...w, ...t].sort((a, b) => new Date(a.expected_by) - new Date(b.expected_by));
+    },
+    /** Shifts that fall inside a time-off request's dates (i.e. rota clash). */
+    timeOffClashes(t) { const a = new Date(t.starts_on + 'T00:00:00'), b = new Date(t.ends_on + 'T23:59:59'); return Store.list('shifts').filter(s => s.status !== 'cancelled' && new Date(s.starts_at) <= b && new Date(s.ends_at) >= a); },
+    /** Pay per payday: past N periods + current + next, from shifts (paid hours × current rate). */
+    payHistory(now = new Date(), back = 6) {
+      const pp = Rules.payPeriods(now); if (!pp) return [];
+      const rate = +Store.settings.rateHourly || 0, step = Store.settings.payFrequency === 'weekly' ? 7 : 14;
+      const shifts = Store.list('shifts').filter(x => x.status !== 'cancelled');
+      const out = [];
+      for (let i = -back; i <= 1; i++) {
+        const pd = new Date(pp.current.payday); pd.setDate(pd.getDate() + i * step);
+        const p = Rules.payPeriodFor(pd);
+        const inP = shifts.filter(x => Rules.inPeriod(x, p)), done = inP.filter(x => new Date(x.ends_at) <= now);
+        const w = Rules.payEstimate(done), all = Rules.payEstimate(inP);
+        out.push({ payday: p.payday, start: p.start, end: p.end, shifts: inP.length, hoursWorked: w.hours, hoursTotal: all.hours, grossWorked: w.gross, grossTotal: all.gross, rate, isCurrent: i === 0, isFuture: i > 0, isPast: i < 0 });
+      }
+      return out;
     },
     /** Rules-mode chat answers. Returns a string or null (→ "ask me properly"). */
     answer(q, now = new Date()) {

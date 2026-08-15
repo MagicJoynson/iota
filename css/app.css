@@ -453,3 +453,15 @@ button.next-up:active { transform: scale(.985); background: var(--glass-2); }
 .composer .send:disabled { opacity: .5; }
 .msg.pinned { border-color: rgba(139,124,255,.45); background: linear-gradient(180deg, rgba(139,124,255,.10), var(--glass)); }
 .msg.pinned .meta { color: var(--uni); }
+
+/* ---------- Earnings chart + time off ---------- */
+.chart-card svg { display: block; margin: 8px 0 4px; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 11px; color: var(--text-3); margin: 2px 0 10px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.kpis > div { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.07); border-radius: 12px; padding: 8px 10px; }
+.kpis span { display: block; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); }
+.kpis b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 20px; margin-top: 2px; }
+.kpis small { color: var(--text-3); font-size: 11px; }
+.row .pill.status { flex: none; min-height: 28px; padding: 4px 10px; }
+.row.timeoff .t span { display: block; }

@@ -13,6 +13,12 @@
       { id: 's2', owner: U, starts_at: iso(0, 22), ends_at: iso(1, 6), role: 'Crew', status: 'planned', break_min: 45, source: 'claude' },
       { id: 's3', owner: U, starts_at: iso(3, 16), ends_at: iso(3, 22), role: 'Crew', status: 'planned', break_min: 30, source: 'claude' },
       { id: 's4', owner: U, starts_at: iso(5, 17), ends_at: iso(6, 0), role: 'Crew', status: 'planned', break_min: 45, source: 'claude' },
+      { id: 's5', owner: U, starts_at: iso(-16, 16), ends_at: iso(-16, 22), role: 'Crew', status: 'worked', break_min: 30, source: 'claude' },
+      { id: 's6', owner: U, starts_at: iso(-19, 12), ends_at: iso(-19, 21), role: 'Crew', status: 'worked', break_min: 45, source: 'claude' },
+      { id: 's7', owner: U, starts_at: iso(-30, 22), ends_at: iso(-29, 6), role: 'Crew', status: 'worked', break_min: 45, source: 'claude' },
+      { id: 's8', owner: U, starts_at: iso(-33, 16), ends_at: iso(-33, 22), role: 'Crew', status: 'worked', break_min: 30, source: 'claude' },
+      { id: 's9', owner: U, starts_at: iso(-44, 12), ends_at: iso(-44, 20), role: 'Crew', status: 'worked', break_min: 45, source: 'claude' },
+      { id: 's10', owner: U, starts_at: iso(9, 12), ends_at: iso(9, 20), role: 'Crew', status: 'planned', break_min: 45, source: 'claude' },
     ],
     pay_rates: [{ id: 'r1', employer: "McDonald's (Oxford Road)", role: 'Crew member', hourly: 12.64, effective_from: '2026-08-01' }],
     events: [
@@ -26,6 +32,7 @@
     ],
     watches: [{ id: 'w1', text: 'MMU timetable arrives — import into Iota', expected_by: '2026-08-18', status: 'open' }],
     tasks: [{ id: 't1', title: 'Sort student finance letter', section: 'personal', due: iso(4, 12), status: 'open' }],
+    time_off: [{ id: 'to1', title: 'BUKC Round 1', starts_on: iso(9, 9).slice(0, 10), ends_on: iso(10, 9).slice(0, 10), ask_by: iso(2, 9).slice(0, 10), reason: 'kart', status: 'needed' }, { id: 'to2', title: 'Home for the weekend', starts_on: iso(20, 9).slice(0, 10), ends_on: iso(21, 9).slice(0, 10), ask_by: null, reason: 'personal', status: 'asked' }],
     notes: [], briefings: [], modules: [], assessments: [], captures: [],
   };
   window.__previewWrites = [];
