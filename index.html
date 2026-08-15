@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Iota</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="description" content="Iota — the smallest thing that runs everything. University, work and karting, with EDEN at the centre.">
+<meta name="theme-color" content="#070B14">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Iota">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<link rel="stylesheet" href="./css/app.css">
+</head>
+<body>
+
+<!-- Aurora canvas (always behind everything) -->
+<div id="aurora" aria-hidden="true">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+  <div class="blob b4"></div>
+</div>
+
+<!-- Boot splash: brand art, fades out once the app is ready -->
+<div id="splash" aria-hidden="true">
+  <img src="./assets/brand-512.png" alt="" width="220" height="220">
+  <div class="wordmark">I O T A</div>
+</div>
+
+<!-- App root: screens render here -->
+<main id="app" aria-live="polite"></main>
+
+<!-- Quick capture sheet (long-press orb) -->
+<div id="capture" class="sheet" hidden>
+  <div class="sheet-backdrop" data-close></div>
+  <form class="sheet-panel glass" id="captureForm" autocomplete="off">
+    <div class="sheet-grip"></div>
+    <label for="captureInput" class="sheet-title">Tell EDEN anything</label>
+    <textarea id="captureInput" rows="3" placeholder="e.g. Shift Sat 12–8 · Essay due Thu 4pm · Note: bring kit"></textarea>
+    <div class="sheet-row">
+      <span class="hint" id="captureHint">EDEN will file it as a task, event, shift or note.</span>
+      <button type="submit" class="btn primary">Capture</button>
+    </div>
+  </form>
+</div>
+
+<!-- Toast -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="./js/orb.js"></script>
+<script src="./js/store.js"></script>
+<script src="./js/app.js"></script>
+</body>
+</html>
