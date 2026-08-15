@@ -247,8 +247,8 @@
         const mins = Math.round((new Date(soon.starts_at) - now) / 60000);
         if (mins > 0 && mins <= 120) {
           const buf = Rules.leaveBufferFor(soon), leaveIn = mins - buf;
-          if (buf && leaveIn > 0) return pick([`Leave in ${leaveIn} min for ${soon.title}. It's a ${buf}-minute walk, I've done the maths.`, `${soon.title} in ${mins} — shoes on in ${leaveIn}.`]);
-          if (buf && leaveIn <= 0) return pick([`You should already be moving for ${soon.title}. I'm not covering for you.`, `${soon.title} in ${mins} min and it's a ${buf}-minute walk. Go.`]);
+          if (buf && leaveIn > 0) return pick([`Leave in ${leaveIn} min for ${soon.title}. It's ${buf} minutes by ${Store.settings.travelMode || 'foot'}, I've done the maths.`, `${soon.title} in ${mins} — shoes on in ${leaveIn}.`]);
+          if (buf && leaveIn <= 0) return pick([`You should already be moving for ${soon.title}. I'm not covering for you.`, `${soon.title} in ${mins} min and it's ${buf} minutes away. Go.`]);
           return `${soon.title} in ${mins} min.`;
         }
         if (mins <= 0 && soon.ends_at && new Date(soon.ends_at) > now) return `${soon.title} — happening now. Focus.`;

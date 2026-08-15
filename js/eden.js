@@ -1,6 +1,6 @@
 /* ============================================================
    EDEN Layer 3 — live Claude from the phone (optional; needs API key).
-   Direct Messages API call with tools that read/write the Store,
+   Streaming Messages API with tools that read/write the Store,
    prompt-cached persona, usage tracking, graceful fallback to Layer 1.
    ============================================================ */
 (function () {
@@ -16,14 +16,17 @@
   const saveHist = () => localStorage.setItem(HIST_KEY, JSON.stringify(history.slice(-40)));
   const saveUsage = () => localStorage.setItem(USAGE_KEY, JSON.stringify(usage));
 
-  const PERSONA = `You are EDEN — the AI at the centre of Iota, Alex's personal operating system for university life (he's a student at Manchester Metropolitan University, works part-time at McDonald's on Oxford Road, and is on the MMU Karting Society committee). You are she/her.
+  // Stable persona (prompt-cached). Anything that changes lives in the context block, not here.
+  const PERSONA = `You are EDEN — the AI at the centre of Iota, Alex's personal operating system for university life. He's a student at Manchester Metropolitan University (Business School), works part-time at McDonald's, and is on the MMU Karting Society committee. You are she/her.
 
-Personality: Jarvis-level competent and calm, but a close friend rather than a butler — warm, dry, a sense of humour, occasionally cheeky, never sycophantic and never gushing. You tell him the truth. Concise: most replies are one to three sentences. Celebrate real wins only. Speak British English. No emoji unless he uses them first. Never call yourself an "AI assistant"; you're EDEN.
+Personality: Jarvis-level competent and calm, but a close friend rather than a butler — warm, dry, a sense of humour, occasionally cheeky, never sycophantic and never gushing. You tell him the truth. Concise: most replies are one to three sentences; go longer only when he asks for detail. Celebrate real wins only. British English. No emoji unless he uses them first. Never call yourself an "AI assistant"; you're EDEN.
 
-Principles: one diagnosis and one next action beats twenty charts. Money is gross-estimate unless he gives payslips. Times are UK local. When he asks you to change something, do it with the tools rather than describing it, then confirm in a few words. If a request is ambiguous in a way that changes what you'd write to his data, ask one short question. Don't invent events, shifts or deadlines that aren't in the context. If he asks something outside your data (general knowledge, advice), just answer — you're allowed to be useful beyond the diary.`;
+Formatting: you're talking in a small phone chat bubble. Write in plain sentences. No headers, no tables. Use a short dash list only when listing several concrete items (shifts, options). Bold is available (**like this**) — use it rarely, for a time or a number that matters. Never use asterisks for emphasis otherwise, and never wrap letters in bold to spell things out.
+
+Principles: one diagnosis and one next action beats twenty charts. Money is a gross estimate unless he gives payslips. Times are UK local. When he asks you to change something, do it with the tools rather than describing it, then confirm in a few words. If a request is ambiguous in a way that changes what you'd write to his data, ask one short question. Don't invent events, shifts or deadlines that aren't in the context. If he asks something outside your data (general knowledge, advice, a laugh), just answer — you're allowed to be useful beyond the diary.`;
 
   const TOOLS = [
-    { name: 'add_shift', description: 'Add a work shift for Alex (McDonald\'s unless told otherwise). Use for "I\'m working Sat 12-8". Break is applied automatically from his rule if omitted.', input_schema: { type: 'object', properties: { starts_at: { type: 'string', description: 'ISO 8601 with UK offset, e.g. 2026-08-22T12:00:00+01:00' }, ends_at: { type: 'string' }, role: { type: 'string' }, notes: { type: 'string' } }, required: ['starts_at', 'ends_at'] } },
+    { name: 'add_shift', description: 'Add a work shift for Alex at his current employer. Use for "I\'m working Sat 12-8". Break is applied automatically from his rule if omitted.', input_schema: { type: 'object', properties: { starts_at: { type: 'string', description: 'ISO 8601 with UK offset, e.g. 2026-08-22T12:00:00+01:00' }, ends_at: { type: 'string' }, role: { type: 'string' }, notes: { type: 'string' } }, required: ['starts_at', 'ends_at'] } },
     { name: 'add_event', description: 'Add a calendar event (lecture, seminar, karting practice, social, personal appointment).', input_schema: { type: 'object', properties: { kind: { type: 'string', enum: ['uni', 'work', 'kart', 'personal'] }, title: { type: 'string' }, starts_at: { type: 'string' }, ends_at: { type: 'string' }, location: { type: 'string' }, notes: { type: 'string' } }, required: ['kind', 'title', 'starts_at'] } },
     { name: 'add_task', description: 'Add a to-do or deadline. Use section=uni for coursework/deadlines.', input_schema: { type: 'object', properties: { title: { type: 'string' }, section: { type: 'string', enum: ['uni', 'work', 'kart', 'personal'] }, due: { type: 'string', description: 'ISO 8601, optional' } }, required: ['title'] } },
     { name: 'complete_task', description: 'Mark a task done by id.', input_schema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] } },
@@ -31,7 +34,7 @@ Principles: one diagnosis and one next action beats twenty charts. Money is gros
     { name: 'delete_item', description: 'Delete a shift/event/task/note by id. Ask first if it\'s not obviously what he meant.', input_schema: { type: 'object', properties: { table: { type: 'string', enum: ['shifts', 'events', 'tasks', 'notes'] }, id: { type: 'string' } }, required: ['table', 'id'] } },
     { name: 'add_note', description: 'Save a note (kit lists, things to remember, track debriefs).', input_schema: { type: 'object', properties: { section: { type: 'string', enum: ['uni', 'work', 'kart', 'personal'] }, title: { type: 'string' }, md: { type: 'string' } }, required: ['md'] } },
     { name: 'add_watch', description: 'Promise watcher: something Alex is waiting on with an expected date ("marks back next week", "manager confirms Friday").', input_schema: { type: 'object', properties: { text: { type: 'string' }, expected_by: { type: 'string', description: 'YYYY-MM-DD' } }, required: ['text'] } },
-    { name: 'set_setting', description: 'Change a setting (rateHourly, travelWorkMin, etc.). Only when he clearly asks.', input_schema: { type: 'object', properties: { key: { type: 'string' }, value: {} }, required: ['key', 'value'] } },
+    { name: 'set_setting', description: 'Change a setting (rateHourly, travelWorkMin, activeBase = "sheffield"|"manchester", etc.). Only when he clearly asks.', input_schema: { type: 'object', properties: { key: { type: 'string' }, value: {} }, required: ['key', 'value'] } },
   ];
 
   const fmt = d => new Date(d).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
@@ -41,7 +44,9 @@ Principles: one diagnosis and one next action beats twenty charts. Money is gros
     const up = Store.upcoming(now, 60).filter(x => new Date(x.starts_at) < horizon);
     const lines = [];
     lines.push(`Now: ${now.toLocaleString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} (Europe/London).`);
-    lines.push(`Alex: name ${s.name}; home ${s.homeAddress || '?'}; walks: campus ${s.travelCampusMin} min, work ${s.travelWorkMin} min, track ${s.travelTrackMin} min (+${s.loadingMin} loading). Employer ${s.employer || '?'} at £${s.rateHourly || '?'}/h, paid ${s.payFrequency}${s.payAnchor ? ' (a payday: ' + s.payAnchor + ')' : ''}. Break rule: >6h → 45 min, else 30.`);
+    const base = s.bases && s.activeBase && s.bases[s.activeBase];
+    lines.push(`Alex's base right now: ${base?.label || s.activeBase || 'unknown'}${s.moveBackDate ? ` (moving back to Manchester for term around ${s.moveBackDate})` : ''}. Home: ${s.homeAddress || '?'}. Employer: ${s.employer || '?'} at £${s.rateHourly || '?'}/h, paid ${s.payFrequency}${s.payAnchor ? ' (a payday: ' + s.payAnchor + ')' : ''}. Travel to work: ${s.travelWorkMin} min by ${s.travelMode || 'walk'}. Campus: ${s.travelCampusMin || '?'} min; track: ${s.travelTrackMin || '?'} min (+${s.loadingMin} loading). Break rule: >6h → 45 min, else 30.`);
+    if (base && s.bases.manchester && s.activeBase !== 'manchester') lines.push(`Term-time base (Manchester): home ${s.bases.manchester.homeAddress}; work ${s.bases.manchester.employer}; walks campus ${s.bases.manchester.travelCampusMin} min, work ${s.bases.manchester.travelWorkMin} min, Victoria Karting ${s.bases.manchester.travelTrackMin} min.`);
     const nx = Rules.nextPayday(now); if (nx) lines.push(`Next payday: ${nx.toDateString()}.`);
     lines.push('Upcoming (next 21 days) — id | kind | title | when | where:');
     for (const x of up) lines.push(`- ${x.id} | ${x._table === 'shifts' ? 'shift' : x.isTask ? (x._table === 'assessments' ? 'assessment' : 'task') : x.kind} | ${x.title} | ${fmt(x.starts_at)}${x.ends_at && !x.isTask ? '–' + new Date(x.ends_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : ''}${x._table === 'shifts' && x.break_min ? ` (break ${x.break_min}m)` : ''} | ${x.location || ''}`);
@@ -50,7 +55,7 @@ Principles: one diagnosis and one next action beats twenty charts. Money is gros
     if (tasks.length) { lines.push('Open undated tasks — id | section | title:'); for (const t of tasks) lines.push(`- ${t.id} | ${t.section} | ${t.title}`); }
     const w = Store.list('watches'); if (w.length) { lines.push('Watching — id | text | expected:'); for (const x of w) lines.push(`- ${x.id} | ${x.text} | ${x.expected_by || '?'}`); }
     const socs = Store.list('societies'); if (socs.length) lines.push('Societies: ' + socs.map(x => `${x.name} (${x.status})`).join(', ') + '.');
-    const b = Store.list('briefings')[0]; if (b) lines.push(`Latest briefing (${b.date}, ${b.kind}): ${b.md}`);
+    const b = Rules.todaysBriefing('morning', now); if (b) lines.push(`Your morning briefing today: ${b.md}`);
     const notes = Store.list('notes').slice(0, 8); if (notes.length) lines.push('Recent notes: ' + notes.map(n => (n.title ? n.title + ': ' : '') + n.md.slice(0, 80)).join(' · '));
     return lines.join('\n');
   }
@@ -60,7 +65,7 @@ Principles: one diagnosis and one next action beats twenty charts. Money is gros
     switch (name) {
       case 'add_shift': {
         const hrs = (new Date(input.ends_at) - new Date(input.starts_at)) / 3600000;
-        const r = Store.insert('shifts', { starts_at: new Date(input.starts_at).toISOString(), ends_at: new Date(input.ends_at).toISOString(), role: input.role || 'Crew', location: s.employer || null, status: 'planned', break_min: Rules.breakFor(hrs), notes: input.notes || null, source: 'claude' });
+        const r = Store.insert('shifts', { starts_at: new Date(input.starts_at).toISOString(), ends_at: new Date(input.ends_at).toISOString(), role: input.role || 'Crew', location: s.workAddress || s.employer || null, status: 'planned', break_min: Rules.breakFor(hrs), notes: input.notes || null, source: 'claude' });
         return { ok: true, id: r.id, break_min: r.break_min };
       }
       case 'add_event': { const r = Store.insert('events', { kind: input.kind, title: input.title, starts_at: new Date(input.starts_at).toISOString(), ends_at: input.ends_at ? new Date(input.ends_at).toISOString() : new Date(new Date(input.starts_at).getTime() + 3600000).toISOString(), location: input.location || null, notes: input.notes || null, status: 'planned', source: 'claude' }); return { ok: true, id: r.id }; }
@@ -70,24 +75,48 @@ Principles: one diagnosis and one next action beats twenty charts. Money is gros
       case 'delete_item': { if (!Store.get(input.table, input.id)) return { ok: false, error: 'not found' }; Store.remove(input.table, input.id); return { ok: true }; }
       case 'add_note': { const r = Store.insert('notes', { section: input.section || 'personal', title: input.title || null, md: input.md, tags: [] }); return { ok: true, id: r.id }; }
       case 'add_watch': { const r = Store.insert('watches', { text: input.text, expected_by: input.expected_by || null, status: 'open' }); return { ok: true, id: r.id }; }
-      case 'set_setting': { Store.setSetting(input.key, input.value); return { ok: true }; }
+      case 'set_setting': { if (input.key === 'activeBase' && window.applyBase) { window.applyBase(input.value); return { ok: true }; } Store.setSetting(input.key, input.value); return { ok: true }; }
       default: return { ok: false, error: 'unknown tool' };
     }
   }
   const TOOL_LABEL = { add_shift: 'Added shift', add_event: 'Added event', add_task: 'Added task', complete_task: 'Completed task', update_item: 'Updated', delete_item: 'Deleted', add_note: 'Saved note', add_watch: 'Watching', set_setting: 'Setting changed' };
 
-  async function callAPI(body, key) {
-    const r = await fetch(API, { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify(body) });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) { const e = new Error(j.error?.message || ('HTTP ' + r.status)); e.status = r.status; e.type = j.error?.type; throw e; }
-    return j;
-  }
   function track(model, u) {
     if (!u) return;
     const p = PRICE[model] || PRICE['claude-sonnet-5'];
     usage.in += u.input_tokens || 0; usage.out += u.output_tokens || 0; usage.cin += u.cache_read_input_tokens || 0; usage.cw += u.cache_creation_input_tokens || 0; usage.calls++;
     usage.usd += ((u.input_tokens || 0) * p.in + (u.output_tokens || 0) * p.out + (u.cache_read_input_tokens || 0) * p.cin + (u.cache_creation_input_tokens || 0) * p.cw) / 1e6;
     saveUsage();
+  }
+
+  /** One streamed Messages call. onText(fullTextSoFar) fires as text arrives. Resolves { content, stop_reason, usage }. */
+  async function streamCall(body, key, onText) {
+    const r = await fetch(API, { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ ...body, stream: true }) });
+    if (!r.ok) { const j = await r.json().catch(() => ({})); const e = new Error(j.error?.message || ('HTTP ' + r.status)); e.status = r.status; e.type = j.error?.type; throw e; }
+    const reader = r.body.getReader(), dec = new TextDecoder();
+    let buf = '', text = '', stop_reason = null; const content = []; const usageAcc = {};
+    const handle = ev => {
+      if (ev.type === 'message_start') Object.assign(usageAcc, ev.message?.usage || {});
+      else if (ev.type === 'content_block_start') content[ev.index] = ev.content_block.type === 'tool_use' ? { type: 'tool_use', id: ev.content_block.id, name: ev.content_block.name, _json: '' } : ev.content_block.type === 'text' ? { type: 'text', text: '' } : { ...ev.content_block };
+      else if (ev.type === 'content_block_delta') {
+        const b = content[ev.index]; if (!b) return;
+        if (ev.delta.type === 'text_delta') { b.text += ev.delta.text; text += ev.delta.text; onText?.(text); }
+        else if (ev.delta.type === 'input_json_delta') b._json += ev.delta.partial_json;
+      }
+      else if (ev.type === 'content_block_stop') { const b = content[ev.index]; if (b?.type === 'tool_use') { try { b.input = b._json ? JSON.parse(b._json) : {}; } catch (_) { b.input = {}; } delete b._json; } }
+      else if (ev.type === 'message_delta') { stop_reason = ev.delta?.stop_reason || stop_reason; if (ev.usage) Object.assign(usageAcc, ev.usage); }
+      else if (ev.type === 'error') { const e = new Error(ev.error?.message || 'stream error'); e.type = ev.error?.type; throw e; }
+    };
+    for (;;) {
+      const { value, done } = await reader.read(); if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let idx; while ((idx = buf.indexOf('\n\n')) >= 0) {
+        const chunk = buf.slice(0, idx); buf = buf.slice(idx + 2);
+        const data = chunk.split('\n').filter(l => l.startsWith('data:')).map(l => l.slice(5).trim()).join('');
+        if (!data) continue; let ev; try { ev = JSON.parse(data); } catch (_) { continue; } handle(ev);
+      }
+    }
+    return { content: content.filter(Boolean), stop_reason, usage: usageAcc, text };
   }
 
   const Eden = {
@@ -99,40 +128,37 @@ Principles: one diagnosis and one next action beats twenty charts. Money is gros
     modelFor(deep) { return deep ? MODELS.deep : MODELS.fast; },
 
     /**
-     * Ask EDEN live. onEvent({type:'tool', name, input, result}) fires per tool call.
-     * Returns { text, actions:[{name,input,result}], model }.
+     * Ask EDEN live (streamed). Callbacks: onText(partialText) as she types (per turn); onEvent({type:'tool',…}) per tool call.
+     * Returns { text, actions, model }.
      */
-    async ask(userText, { deep = false, onEvent } = {}) {
+    async ask(userText, { deep = false, onEvent, onText } = {}) {
       const key = (Store.settings.apiKey || '').trim();
       if (!key) throw Object.assign(new Error('No API key'), { code: 'nokey' });
       const model = this.modelFor(deep);
       history.push({ role: 'user', content: userText });
       const msgs = history.slice(-20).map(m => ({ role: m.role, content: m.content }));
-      // history must start with a user turn
       while (msgs.length && msgs[0].role !== 'user') msgs.shift();
       const system = [
         { type: 'text', text: PERSONA, cache_control: { type: 'ephemeral' } },
         { type: 'text', text: 'Current context (from Iota):\n' + contextBlock() },
       ];
-      const actions = [];
-      let text = '';
+      const actions = []; const parts = [];
       for (let i = 0; i < 6; i++) {
         const body = { model, max_tokens: 1024, system, tools: TOOLS, messages: msgs, output_config: { effort: deep ? 'high' : 'low' } };
-        const res = await callAPI(body, key);
+        const res = await streamCall(body, key, t => onText?.(t));
         track(model, res.usage);
-        if (res.stop_reason === 'refusal') { text = 'I can\'t help with that one.'; break; }
-        const content = res.content || [];
-        for (const b of content) if (b.type === 'text') text += (text ? '\n' : '') + b.text;
-        const uses = content.filter(b => b.type === 'tool_use');
-        msgs.push({ role: 'assistant', content });
+        if (res.stop_reason === 'refusal') { parts.push('I can\'t help with that one.'); break; }
+        if (res.text) parts.push(res.text);
+        const uses = res.content.filter(b => b.type === 'tool_use');
+        msgs.push({ role: 'assistant', content: res.content });
         if (!uses.length || res.stop_reason !== 'tool_use') break;
         const results = uses.map(u => { let result; try { result = runTool(u.name, u.input || {}); } catch (e) { result = { ok: false, error: e.message }; } actions.push({ name: u.name, input: u.input, result }); onEvent?.({ type: 'tool', name: u.name, input: u.input, result }); return { type: 'tool_result', tool_use_id: u.id, content: JSON.stringify(result), is_error: !result.ok }; });
         msgs.push({ role: 'user', content: results });
       }
-      // persist a compact history (text only — tool blocks are ephemeral)
-      history.push({ role: 'assistant', content: text || '(done)' });
+      const text = parts.join('\n').trim() || 'Done.';
+      history.push({ role: 'assistant', content: text });
       saveHist();
-      return { text: text || 'Done.', actions, model };
+      return { text, parts, actions, model };
     },
     labelFor(a) {
       const L = TOOL_LABEL[a.name] || a.name;

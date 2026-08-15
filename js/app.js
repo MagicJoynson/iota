@@ -8,6 +8,24 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const app = $('#app');
+  /** Tiny safe markdown for chat bubbles: bold, italic, code, links, dash lists, line breaks. HTML is escaped first. */
+  function md(src) {
+    let t = esc(src || '');
+    t = t.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+      .replace(/(^|[^*\w])\*(?!\s)([^*\n]+?)(?<!\s)\*(?!\w)/g, '$1<i>$2</i>')
+      .replace(/`([^`\n]+)`/g, '<code>$1</code>');
+    t = t.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    const lines = t.split(/\r?\n/); let out = '', inList = false;
+    for (const ln of lines) {
+      const m = ln.match(/^\s*(?:[-•*]|\d+[.)])\s+(.*)$/);
+      if (m) { if (!inList) { out += '<ul>'; inList = true; } out += '<li>' + m[1] + '</li>'; continue; }
+      if (inList) { out += '</ul>'; inList = false; }
+      if (ln.trim() === '') { out += '<span class="br"></span>'; continue; }
+      out += (out && !out.endsWith('</ul>') && !out.endsWith('</span>') ? '<br>' : '') + ln.replace(/^#+\s*/, '');
+    }
+    if (inList) out += '</ul>';
+    return out;
+  }
 
   const SECTIONS = {
     uni:  { name: 'University', color: '#8B7CFF', rgb: '139,124,255', tabs: ['today', 'modules', 'deadlines', 'notes'], tabNames: { today: 'Today', modules: 'Modules', deadlines: 'Deadlines', notes: 'Notes' } },
@@ -541,7 +559,7 @@
     const thread = $('[data-thread]', el), ta = $('textarea', el), form = $('[data-composer]', el);
     const bubble = (who, text, meta) => {
       const m = document.createElement('div'); m.className = 'msg ' + who;
-      m.innerHTML = esc(text) + (meta ? `<span class="meta">${esc(meta)}</span>` : '');
+      m.innerHTML = (who === 'eden' ? md(text) : esc(text)) + (meta ? `<span class="meta">${esc(meta)}</span>` : '');
       thread.appendChild(m); thread.scrollTop = thread.scrollHeight; return m;
     };
     const setState = (s, label) => { orb?.setState(s); $('[data-state]', el).textContent = label; };
@@ -566,9 +584,12 @@
       if (live) {
         busy = true; $('.send', form).disabled = true;
         try {
-          const res = await Eden.ask(q, { deep: edenDeep, onEvent: ev => { if (ev.type === 'tool') { const m = document.createElement('div'); m.className = 'msg act'; m.textContent = Eden.labelFor(ev); thread.appendChild(m); thread.scrollTop = thread.scrollHeight; } } });
-          setState('speaking', modeLabel()); orb?.ripple();
-          bubble('eden', res.text);
+          let live_ = null;
+          const res = await Eden.ask(q, { deep: edenDeep,
+            onText: t => { if (!live_) { live_ = bubble('eden', ''); live_.classList.add('typing'); setState('speaking', modeLabel()); orb?.ripple(); } live_.innerHTML = md(t); thread.scrollTop = thread.scrollHeight; },
+            onEvent: ev => { if (ev.type === 'tool') { if (live_) { live_.classList.remove('typing'); live_ = null; } const m = document.createElement('div'); m.className = 'msg act'; m.textContent = Eden.labelFor(ev); thread.appendChild(m); thread.scrollTop = thread.scrollHeight; } } });
+          setState('speaking', modeLabel());
+          const last = res.parts?.length ? res.parts[res.parts.length - 1] : res.text; if (live_) { live_.innerHTML = md(last); live_.classList.remove('typing'); } else bubble('eden', last);
           if (res.actions.length && current?.screen === 'eden') Store.emit('change');
         } catch (e) {
           setState('speaking', modeLabel());
@@ -622,6 +643,7 @@
             <div class="acts"><button class="btn ghost" data-sync>Sync</button><button class="btn ghost" data-signout style="color:var(--danger)">Sign out</button></div>
           </div>
         </div>
+        ${s.bases ? `<div class="setting-group"><h3>Base</h3><div class="seg" data-bases>${Object.entries(s.bases).map(([k, b]) => `<button data-base="${k}" class="${s.activeBase === k ? 'active' : ''}">${esc(b.label || k)}</button>`).join('')}</div><p class="field-note">Switches home, employer, work address and travel times in one go.${s.moveBackDate ? ` Move back to Manchester pencilled for ${esc(s.moveBackDate)}.` : ''}</p></div>` : ''}
         <div class="setting-group"><h3>You</h3>${one(f('name', 'Name'))}${one(f('homeAddress', 'Home'))}</div>
         <div class="setting-group"><h3>Work</h3>
           ${one(f('employer', 'Employer'))}
@@ -676,12 +698,20 @@
       setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     });
     $('[data-reset]', el).addEventListener('click', () => { if (confirm('Clear the cached copy on this device? (Your data in Supabase is untouched.)')) { Store.clearLocal(); toast('Local cache cleared'); Store.sync().then(() => render()); } });
+    el.querySelectorAll('[data-base]').forEach(b => b.addEventListener('click', () => { window.applyBase(b.dataset.base); toast('Base: ' + b.textContent); render(); }));
     $('[data-eden-clear]', el).addEventListener('click', () => { Eden.clearHistory(); toast('EDEN chat history cleared'); });
     $('[data-eden-reset]', el).addEventListener('click', () => { Eden.resetUsage(); toast('Usage counter reset'); render(); });
     $('[data-sync]', el).addEventListener('click', async () => { toast('Syncing…'); const ok = await Store.sync(); toast(ok ? 'Synced' : 'Sync failed'); render(); });
     $('[data-signout]', el).addEventListener('click', async () => { await SB.signOut(); Store.clearLocal(); location.hash = '#/'; boot(); });
     return el;
   }
+  /** Switch the active base (Sheffield summer / Manchester term): copies that base's values into the flat settings. */
+  window.applyBase = function (name) {
+    const s = Store.settings, b = s.bases && s.bases[name]; if (!b) return false;
+    Store.setSetting('activeBase', name);
+    for (const k of ['homeAddress', 'employer', 'workAddress', 'travelMode', 'travelWorkMin', 'travelCampusMin', 'travelTrackMin']) if (b[k] != null) Store.setSetting(k, b[k]);
+    return true;
+  };
   function applyAppearance() {
     const s = Store.settings;
     document.documentElement.style.setProperty('--aurora-intensity', s.auroraIntensity);

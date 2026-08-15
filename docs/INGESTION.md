@@ -4,6 +4,8 @@ Iota's primary data-entry path: Alex tells Claude something in chat → Claude w
 `iota` schema (Supabase project `cvezetucviaemriljgck`, via the Supabase MCP `execute_sql`) → the app
 reflects it on next sync (≤ 5 min, or instantly on open / pull-to-sync in Settings).
 
+**Bases:** `iota.settings` has `activeBase` (`sheffield` until ~25 Sept 2026, then `manchester`) and a `bases` jsonb with each base's home/employer/work/travel values; the flat keys (homeAddress, employer, workAddress, travelMode, travelWorkMin…) always hold the *active* base. Sheffield: 52 Chapman Close, McDonald's Hillsborough, 10 min drive. Manchester: 90 Royce Road, McDonald's Oxford Road, walks 15/30/40.
+
 **Owner uid (Alex):** `236d3551-7600-4ff2-abc5-f46f71100c0d` — every insert must set `owner` explicitly
 (MCP runs as `postgres`, so `auth.uid()` is null). Times are UK local; write them with the offset
 (`+01` BST / `+00` GMT) so Postgres stores the right instant.
