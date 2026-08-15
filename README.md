@@ -5,9 +5,9 @@
 Iota is Alex's personal operating system for university life — one installable web app (PWA) holding the MMU timetable, module notes and deadlines, work shifts and pay, and karting/society life, with **EDEN**, a living particle-orb AI, at the centre of the Ring.
 
 - **Iota** — ninth and smallest letter of the Greek alphabet. Not one iota out of place.
-- **EDEN** — the garden and the tree of knowledge. Calm, dry, competent. Concise like Jarvis, never sycophantic.
+- **EDEN** — the garden and the tree of knowledge. She/her. Calm, dry, competent — the close friend who happens to run your life. Concise like Jarvis, sense of humour, never sycophantic.
 
-## Status — Phase 1: the shell ✅
+## Status — Phase 1 (shell) ✅ · Phase 2 (data spine + Work) ✅
 
 | Piece | State |
 |---|---|
@@ -20,7 +20,10 @@ Iota is Alex's personal operating system for university life — one installable
 | Quick capture (long-press orb) → local classifier files task/event/shift/note | done |
 | Settings (rates, payday, travel buffers, term dates, aurora intensity, reduce motion, API key slot, export/reset) | done |
 | PWA — manifest, icons, service worker shell cache | done |
-| Data | **local only** (localStorage) — Phase 2 moves it to the `iota` schema in Supabase |
+| Data | Supabase `iota` schema (project `cvezetucviaemriljgck`), RLS locked to Alex's uid; cached snapshot + offline write queue on device |
+| Login | Supabase password auth — same account as the karting app |
+| Work | shifts, earnings since last payday, fortnightly payday countdown, work info + rate history |
+| Ingestion | Claude writes rows via the Supabase MCP — see [docs/INGESTION.md](docs/INGESTION.md) |
 
 ## Run locally
 
@@ -32,7 +35,7 @@ npx serve .
 
 ## Deploy
 
-GitHub Pages via `.github/workflows/pages.yml` (same pattern as `mmu-karting`). All URLs are relative, routing is hash-based, so the `/iota/` project-pages path just works.
+Live: https://magicjoynson.github.io/iota/ — GitHub Pages via `.github/workflows/pages.yml` (same pattern as `mmu-karting`). All URLs are relative, routing is hash-based, so the `/iota/` project-pages path just works.
 
 ## Structure
 
@@ -40,7 +43,8 @@ GitHub Pages via `.github/workflows/pages.yml` (same pattern as `mmu-karting`). 
 index.html            shell + capture sheet
 css/app.css           Aurora-glass design system
 js/orb.js             EdenOrb — the particle orb (one component, parameterised)
-js/store.js           Store (localStorage, Supabase-shaped API) + Rules (Layer-1 brain)
+js/supabase.js        tiny Supabase client (password grant, refresh-on-401, iota schema profile)
+js/store.js           Store (Supabase-backed, cached, optimistic, offline outbox) + Rules (Layer-1 brain + EDEN voice)
 js/app.js             router, Ring, sections/hotbar, EDEN chat, settings, capture
 sw.js                 service worker (bump CACHE on deploy)
 manifest.webmanifest  PWA manifest

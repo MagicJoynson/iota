@@ -261,7 +261,6 @@
 
   function renderTabBody(el, sec, tab) {
     const body = $('[data-body]', el);
-    const S = SECTIONS[sec];
     let html = '';
     const now = new Date();
 
@@ -270,6 +269,8 @@
         const td = Store.today().filter(x => x.kind === 'uni' || x.isTask);
         html += `<div class="tab-title">${now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</div>`;
         html += termProgress();
+        const w = Rules.dueWatches(now, 7).filter(x => /timetable/i.test(x.text));
+        if (w.length) html += `<div class="card"><h3>Watching</h3><p class="sub">${esc(w[0].text)} — ${esc(new Date(w[0].expected_by).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }))}</p></div>`;
         if (!td.length) html += empty('🎓', 'Nothing timetabled today', 'Your MMU timetable lands <b>Tuesday 18 Aug</b>. Until then, hold the orb to capture anything uni-shaped.', { label: 'Add something', hint: 'Lecture ' });
         else {
           html += '<div class="timeline">' + td.map(x => {
@@ -278,44 +279,66 @@
           }).join('') + '</div>';
         }
       } else if (tab === 'modules') {
-        html += `<div class="tab-title">Modules</div>` + empty('📚', 'No modules yet', 'Module cards (code, lecturer, room, credits, notes and assessments inside) arrive with the timetable import in Phase 3.');
+        const ms = Store.list('modules');
+        html += `<div class="tab-title">Modules</div>`;
+        html += ms.length ? `<div class="list">${ms.map(m => `<div class="row"><span class="bar" style="background:${esc(m.colour || 'var(--accent)')}"></span><div class="t"><b>${esc(m.code ? m.code + ' · ' : '')}${esc(m.name)}</b><span>${esc([m.lecturer, m.room, m.credits ? m.credits + ' credits' : ''].filter(Boolean).join(' · '))}</span></div></div>`).join('')}</div>`
+                         : empty('📚', 'No modules yet', 'Module cards (code, lecturer, room, credits, notes and assessments inside) arrive with the timetable import in Phase 3.');
       } else if (tab === 'deadlines') {
         const tk = Store.tasks_open().filter(t => t.section === 'uni').sort((a, b) => new Date(a.due || 8e15) - new Date(b.due || 8e15));
+        const as = Store.list('assessments').filter(a => a.status !== 'graded');
         html += `<div class="tab-title">Deadlines & tasks</div>`;
-        html += tk.length ? `<div class="list">${tk.map(t => rowHTML({ ...t, _table: 'tasks' })).join('')}</div>` : empty('⏳', 'No deadlines on file', 'Coursework with weightings, status pipeline and the grade calculator come in Phase 3. Capture anything due now and it will carry over.', { label: 'Add a deadline', hint: 'Essay due ' });
+        const rows = [...as.map(a => rowHTML({ ...a, _table: 'assessments', kind: 'uni', starts_at: a.due_at, location: a.weight_pct ? `${a.weight_pct}% · ${a.status.replace('_', ' ')}` : a.status.replace('_', ' ') }, { deletable: false })), ...tk.map(t => rowHTML({ ...t, _table: 'tasks' }))];
+        html += rows.length ? `<div class="list">${rows.join('')}</div>` : empty('⏳', 'No deadlines on file', 'Coursework with weightings, status pipeline and the grade calculator come in Phase 3. Capture anything due now and it will carry over.', { label: 'Add a deadline', hint: 'Essay due ' });
       } else if (tab === 'notes') {
-        const ns = Store.list('notes').filter(n => n.section === 'uni').reverse();
+        const ns = Store.list('notes').filter(n => n.section === 'uni');
         html += `<div class="tab-title">Notes</div>`;
-        html += ns.length ? `<div class="list">${ns.map(n => rowHTML({ ...n, _table: 'notes', title: n.text, kind: 'uni' })).join('')}</div>` : empty('📝', 'No notes yet', 'Per-module markdown notes with search and revision mode arrive in Phase 3. Quick notes captured now are kept.', { label: 'Jot a note', hint: 'Note: ' });
+        html += ns.length ? `<div class="list">${ns.map(n => rowHTML({ ...n, _table: 'notes', title: n.title || n.md, kind: 'uni', location: n.title ? n.md.slice(0, 80) : '' })).join('')}</div>` : empty('📝', 'No notes yet', 'Per-module markdown notes with search and revision mode arrive in Phase 3. Quick notes captured now are kept.', { label: 'Jot a note', hint: 'Note: ' });
       }
     }
 
     if (sec === 'work') {
-      const shifts = Store.list('shifts').sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
-      const up = shifts.filter(s => new Date(s.ends_at) >= now);
-      const rate = +Store.settings.rateHourly;
+      const s = Store.settings;
+      const shifts = Store.list('shifts').filter(x => x.status !== 'cancelled').sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
+      const up = shifts.filter(x => new Date(x.ends_at) >= now);
+      const rate = +s.rateHourly;
+      const shiftRow = x => rowHTML({ ...x, _table: 'shifts', kind: 'work', title: x.role ? `Shift · ${x.role}` : 'Shift', location: `${Rules.fmtRange(x.starts_at, x.ends_at)}${rate ? ' · ≈ £' + Rules.payEstimate([x]).gross.toFixed(0) : ''}${x.location ? ' · ' + x.location : ''}` });
       if (tab === 'shifts') {
         html += `<div class="tab-title">Upcoming shifts</div>`;
-        html += up.length ? `<div class="list">${up.map(s => rowHTML({ ...s, _table: 'shifts', kind: 'work', title: s.title || 'Shift' })).join('')}</div>` : empty('🕔', 'No shifts yet', 'Tell Claude your rota in chat and it lands here (Phase 2), or hold the orb: <i>“Shift Sat 12–8”</i>.', { label: 'Add a shift', hint: 'Shift ' });
-        const past = shifts.filter(s => new Date(s.ends_at) < now).reverse().slice(0, 5);
-        if (past.length) html += `<div class="tab-title" style="margin-top:18px">Recent</div><div class="list">${past.map(s => rowHTML({ ...s, _table: 'shifts', kind: 'work', title: s.title || 'Shift' })).join('')}</div>`;
+        html += up.length ? `<div class="list">${up.map(shiftRow).join('')}</div>` : empty('🕔', 'No shifts yet', `Tell Claude your rota in chat and it lands here within the minute, or hold the orb: <i>"Shift Sat 12–8"</i>.`, { label: 'Add a shift', hint: 'Shift ' });
+        const past = shifts.filter(x => new Date(x.ends_at) < now).reverse().slice(0, 6);
+        if (past.length) html += `<div class="tab-title" style="margin-top:18px">Recent</div><div class="list">${past.map(shiftRow).join('')}</div>`;
       } else if (tab === 'earnings') {
-        const month = shifts.filter(s => new Date(s.starts_at).getMonth() === now.getMonth() && new Date(s.starts_at).getFullYear() === now.getFullYear());
-        const hrs = month.reduce((a, s) => a + Math.max(0, (new Date(s.ends_at) - new Date(s.starts_at)) / 3600000), 0);
-        const worked = month.filter(s => new Date(s.ends_at) < now).reduce((a, s) => a + (new Date(s.ends_at) - new Date(s.starts_at)) / 3600000, 0);
-        html += `<div class="tab-title">${now.toLocaleDateString('en-GB', { month: 'long' })}</div>`;
+        const last = Rules.lastPayday(now), next = Rules.nextPayday(now);
+        const period = last ? shifts.filter(x => new Date(x.starts_at) >= last && new Date(x.starts_at) < now) : shifts.filter(x => new Date(x.starts_at).getMonth() === now.getMonth() && new Date(x.ends_at) < now);
+        const booked = shifts.filter(x => new Date(x.starts_at) >= now && (!next || new Date(x.starts_at) < next));
+        const pe = Rules.payEstimate(period), be = Rules.payEstimate(booked);
+        html += `<div class="tab-title">${last ? 'Since last payday' : now.toLocaleDateString('en-GB', { month: 'long' })}</div>`;
         html += `<div class="stat-row">
-          <div class="stat card"><div class="k">Shifts</div><div class="v">${month.length}</div></div>
-          <div class="stat card"><div class="k">Hours</div><div class="v">${hrs.toFixed(1)}<small>h</small></div></div>
-          <div class="stat card"><div class="k">Earned so far</div><div class="v">${rate ? '£' + (worked * rate).toFixed(0) : '—'}</div></div>
-          <div class="stat card"><div class="k">Projected</div><div class="v">${rate ? '£' + (hrs * rate).toFixed(0) : '—'}</div></div>
+          <div class="stat card"><div class="k">Shifts worked</div><div class="v">${period.length}</div></div>
+          <div class="stat card"><div class="k">Hours</div><div class="v">${pe.hours.toFixed(1)}<small>h</small></div></div>
+          <div class="stat card"><div class="k">Earned so far</div><div class="v">${rate ? '£' + pe.gross.toFixed(0) : '—'}</div></div>
+          <div class="stat card"><div class="k">Booked to payday</div><div class="v">${rate ? '£' + be.gross.toFixed(0) : '—'}<small>${booked.length ? booked.length + ' shift' + (booked.length === 1 ? '' : 's') : ''}</small></div></div>
         </div>`;
         html += paydayCard(now);
-        if (!rate) html += `<div class="card"><h3>Set your hourly rate</h3><p class="sub">Earnings, projections and the Payday Plan all hang off it. Settings → Work.</p><button class="btn" data-go="#/settings" style="margin-top:12px">Open settings</button></div>`;
+        if (rate) html += `<div class="card"><div class="sub" style="display:flex;justify-content:space-between"><span>Rate</span><b style="color:var(--text)">£${rate.toFixed(2)}/h</b></div><div class="sub" style="display:flex;justify-content:space-between;margin-top:6px"><span>Pay</span><b style="color:var(--text)">${esc(s.payFrequency || '')}${s.payAnchor ? ' · Thursdays' : ''}</b></div><p class="sub" style="margin-top:10px">Gross estimates. Student income under the personal allowance means little or no tax — payslip reconcile arrives with the Payday Plan.</p></div>`;
+        else html += `<div class="card"><h3>Set your hourly rate</h3><p class="sub">Earnings, projections and the Payday Plan all hang off it.</p><button class="btn" data-go="#/settings" style="margin-top:12px">Open settings</button></div>`;
       } else if (tab === 'requests') {
-        html += `<div class="tab-title">Availability & requests</div>` + empty('🗓️', 'Nothing tracked yet', 'Availability, holiday requests and swap notes — clash-aware against lectures — arrive in Phase 2. <b>“Can you do Friday?”</b> gets a yes / no / risky answer from EDEN.');
+        html += `<div class="tab-title">Availability & requests</div>` + empty('🗓️', 'Nothing tracked yet', 'Availability, holiday requests and swap notes — clash-aware against lectures — arrive next. <b>"Can you do Friday?"</b> gets a yes / no / risky answer from EDEN.');
       } else if (tab === 'info') {
-        html += `<div class="tab-title">Work info</div>` + empty('🪪', 'Work card', 'Contacts, uniform/kit reminders, pay-rate history. Add the basics in Settings for now.', null) + `<button class="btn" data-go="#/settings">Open settings</button>`;
+        const rates = Store.list('pay_rates');
+        html += `<div class="tab-title">Work info</div>
+          <div class="card"><h3>${esc(s.employer || 'Employer')}</h3>
+            ${s.workAddress ? `<p class="sub">${esc(s.workAddress)}</p>` : ''}
+            <p class="sub" style="margin-top:6px">${s.travelWorkMin ? `${esc(String(s.travelWorkMin))} min ${esc(s.travelMode || 'walk')} from home` : ''}${s.homeAddress ? ` · ${esc(s.homeAddress)}` : ''}</p>
+          </div>
+          <div class="card"><h3>Pay</h3>
+            <div class="sub" style="display:flex;justify-content:space-between"><span>Rate</span><b style="color:var(--text)">${rate ? '£' + rate.toFixed(2) + '/h' : '—'}</b></div>
+            <div class="sub" style="display:flex;justify-content:space-between;margin-top:6px"><span>Frequency</span><b style="color:var(--text)">${esc(s.payFrequency || '—')}</b></div>
+            ${s.payAnchor ? `<div class="sub" style="display:flex;justify-content:space-between;margin-top:6px"><span>Anchor payday</span><b style="color:var(--text)">${esc(new Date(s.payAnchor + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }))}</b></div>` : ''}
+            ${rates.length ? `<div class="sub" style="margin-top:10px">Rate history</div><div class="list" style="margin-top:6px">${rates.map(r => `<div class="row"><div class="t"><b>£${(+r.hourly).toFixed(2)}/h</b><span>${esc(r.role || '')}${r.role ? ' · ' : ''}from ${esc(new Date(r.effective_from).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }))}</span></div></div>`).join('')}</div>` : ''}
+          </div>
+          <div class="card"><h3>Kit & contacts</h3><p class="sub">Uniform reminders, manager contact and "what to bring" — capture them as notes for now (<i>Note: work — …</i>).</p></div>
+          <button class="btn ghost" data-go="#/settings">Edit in settings</button>`;
       }
     }
 
@@ -326,9 +349,14 @@
         <a class="btn" href="https://magicjoynson.github.io/mmu-karting/" target="_blank" rel="noopener" style="margin-top:12px">Open MMU Karting ↗</a></div>`;
       } else if (tab === 'racing') {
         html += `<div class="tab-title">My Racing</div>` + empty('🏁', 'No sessions logged', 'Lap log, PB detection, the consistency analyser and the Track Playbook arrive in Phase 4. Hold the orb after a session to leave yourself a note in the meantime.', { label: 'Debrief note', hint: 'Note: track — ' });
+        const s = Store.settings;
+        if (s.trackAddress) html += `<div class="card"><h3>Victoria Karting</h3><p class="sub">${esc(s.trackAddress)} · ${esc(String(s.travelTrackMin || ''))} min ${esc(s.travelMode || 'walk')}${s.loadingMin ? ` + ${esc(String(s.loadingMin))} min loading on race days` : ''}</p></div>`;
       } else if (tab === 'societies') {
-        html += `<div class="tab-title">Societies</div>
-        <div class="card"><h3>MMU Karting <span class="pill">flagship</span></h3><p class="sub">Committee · Society hub in the first tab.</p></div>` + empty('✨', 'Other societies', 'Cards for any other society — schedule, renewals, role duties, links. Tell Alex to name them (open question #3).');
+        const socs = Store.list('societies');
+        html += `<div class="tab-title">Societies</div>`;
+        html += socs.length ? socs.map(so => `<div class="card"><h3>${esc(so.name)} <span class="pill" ${so.status === 'prospective' ? 'style="background:rgba(255,255,255,.08);color:var(--text-2)"' : ''}>${esc(so.status)}</span></h3>${so.role ? `<p class="sub">${esc(so.role)}</p>` : ''}${so.notes ? `<p class="sub" style="margin-top:4px">${esc(so.notes)}</p>` : ''}${(so.links || []).map(l => `<a class="chip accent" style="margin-top:10px" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join(' ')}</div>`).join('')
+                           : empty('✨', 'No societies yet', 'Cards for any society — schedule, renewals, role duties, links.');
+        html += `<p class="field-note" style="padding:0 4px">Freshers' Fair 29–30 Sept — we'll update this list after.</p>`;
       } else if (tab === 'events') {
         const ev = Store.upcoming(now, 50).filter(x => x.kind === 'kart');
         html += `<div class="tab-title">Upcoming</div>`;
@@ -354,8 +382,7 @@
       <div style="height:6px;border-radius:6px;background:rgba(255,255,255,.08);margin-top:10px;overflow:hidden"><div style="height:100%;width:${(wk / weeks * 100).toFixed(0)}%;background:var(--accent);border-radius:6px"></div></div></div>`;
   }
   function paydayCard(now) {
-    const pd = +Store.settings.payday; if (!pd) return '';
-    let d = new Date(now.getFullYear(), now.getMonth(), pd); if (d < now) d = new Date(now.getFullYear(), now.getMonth() + 1, pd);
+    const d = Rules.nextPayday(now); if (!d) return '';
     const days = Math.ceil((d - now) / 86400000);
     return `<div class="card"><div class="sub">Payday</div><div class="big-num">${days}<span style="font-size:16px;color:var(--text-2);margin-left:6px">day${days === 1 ? '' : 's'}</span></div><div class="sub" style="margin-top:4px">${d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</div></div>`;
   }
@@ -372,7 +399,7 @@
         <button class="btn icon ghost eden-back" aria-label="Back to the Ring" data-go="#/">${ICONS.back}</button>
         <div class="orb-mid"><canvas></canvas></div>
         <div class="name">EDEN</div>
-        <div class="state" data-state>rules mode · offline</div>
+        <div class="state" data-state>rules mode</div>
       </div>
       <div class="thread" data-thread></div>
       <div class="chips">${CHIPS.map(c => `<button class="chip" data-q="${esc(c[1])}">${esc(c[0])}</button>`).join('')}</div>
@@ -392,11 +419,11 @@
     };
     const setState = (s, label) => { orb?.setState(s); $('[data-state]', el).textContent = label; };
     // opening line
-    setTimeout(() => { bubble('eden', Rules.observation()); orb?.ripple(); }, 250);
+    setTimeout(() => { bubble('eden', Rules.observation()); orb?.ripple(); const b = Store.list('briefings')[0]; if (b && b.date === new Date().toISOString().slice(0, 10)) setTimeout(() => { bubble('eden', b.md, b.kind + ' briefing'); orb?.ripple(); }, 500); const w = Rules.dueWatches(new Date(), 3); if (w.length) setTimeout(() => { bubble('eden', 'Watching: ' + w.map(x => x.text).join(' · ') + '.', 'promise watcher'); }, b ? 900 : 500); }, 250);
 
     ta.addEventListener('focus', () => setState('listening', 'listening'));
     ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = Math.min(120, ta.scrollHeight) + 'px'; });
-    ta.addEventListener('blur', () => setState(Rules.urgency() > .05 ? 'aware' : 'idle', 'rules mode · offline'));
+    ta.addEventListener('blur', () => setState(Rules.urgency() > .05 ? 'aware' : 'idle', 'rules mode'));
     ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
 
     async function ask(q) {
@@ -405,10 +432,10 @@
       setState('thinking', 'thinking');
       await new Promise(r => setTimeout(r, 420 + Math.random() * 300));
       const a = Rules.answer(q);
-      setState('speaking', 'rules mode · offline'); orb?.ripple();
+      setState('speaking', 'rules mode'); orb?.ripple();
       if (a) bubble('eden', a);
       else {
-        const m = bubble('eden', 'That one needs the real brain. Copy a prepared prompt and ask me properly in Claude — or capture it and I\'ll file it.', 'Layer 2/3 land in Phase 5');
+        const m = bubble('eden', 'That one\'s above my offline pay grade. Copy the prompt and ask me properly in Claude — I\'ll be there — or capture it and I\'ll file it.', 'live answers arrive in Phase 5');
         const acts = document.createElement('div'); acts.style.cssText = 'display:flex;gap:8px;margin-top:8px;flex-wrap:wrap';
         acts.innerHTML = `<button class="chip accent" data-act="prompt">Ask me properly →</button><button class="chip" data-act="capture">Capture it</button>`;
         m.appendChild(acts);
@@ -418,7 +445,7 @@
         });
         $('[data-act=capture]', acts).addEventListener('click', () => openCapture(null, q));
       }
-      setTimeout(() => setState(Rules.urgency() > .05 ? 'aware' : 'idle', 'rules mode · offline'), 1400);
+      setTimeout(() => setState(Rules.urgency() > .05 ? 'aware' : 'idle', 'rules mode'), 1400);
     }
     form.addEventListener('submit', e => { e.preventDefault(); const q = ta.value; ta.value = ''; ta.style.height = 'auto'; ask(q); });
     el.querySelectorAll('.chips .chip').forEach(c => c.addEventListener('click', () => { const q = c.dataset.q; if (q === '__capture') openCapture(); else ask(q); }));
@@ -432,22 +459,37 @@
     const el = document.createElement('section');
     el.className = 'screen settings-screen';
     const s = Store.settings;
-    const f = (k, label, type = 'text', extra = '') => `<div><label for="f-${k}">${label}</label><input id="f-${k}" data-k="${k}" type="${type}" value="${esc(s[k])}" ${extra}></div>`;
+    const f = (k, label, type = 'text', extra = '') => `<div><label for="f-${k}">${label}</label><input id="f-${k}" data-k="${k}" type="${type}" value="${esc(s[k] ?? '')}" ${extra}></div>`;
+    const sel = (k, label, opts) => `<div><label for="f-${k}">${label}</label><select id="f-${k}" data-k="${k}">${opts.map(o => `<option value="${o[0]}" ${s[k] === o[0] ? 'selected' : ''}>${o[1]}</option>`).join('')}</select></div>`;
+    const one = a => `<div class="field">${a}</div>`;
     const two = (a, b) => `<div class="field"><div class="row2">${a}${b}</div></div>`;
+    const synced = Store.syncedAt ? new Date(Store.syncedAt).toLocaleString('en-GB', { weekday: 'short', hour: '2-digit', minute: '2-digit' }) : 'never';
     el.innerHTML = `
       <header class="section-head">
         <button class="btn icon ghost back" aria-label="Back" data-go="#/">${ICONS.back}</button>
         <h1><span class="kicker">Iota</span>Settings</h1>
       </header>
       <div class="scroll" style="padding-bottom:40px">
-        <div class="setting-group"><h3>You</h3><div class="field">${f('name', 'Name')}</div></div>
-        <div class="setting-group"><h3>Work</h3>
-          ${two(f('rateHourly', 'Hourly rate (£)', 'number', 'step="0.01" inputmode="decimal"'), f('payday', 'Payday (day of month)', 'number', 'min="1" max="31" inputmode="numeric"'))}
+        <div class="setting-group"><h3>Account</h3>
+          <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+            <div><b>${esc(SB.user?.email || 'Not signed in')}</b><br><span class="sub">Synced ${esc(synced)}${Store.pending ? ` · ${Store.pending} pending` : ''}</span></div>
+            <div style="display:flex;gap:8px"><button class="btn ghost" data-sync>Sync</button><button class="btn ghost" data-signout style="color:var(--danger)">Sign out</button></div>
+          </div>
         </div>
-        <div class="setting-group"><h3>Travel buffers (minutes)</h3>
-          ${two(f('travelCampusMin', 'To campus', 'number'), f('travelWorkMin', 'To work', 'number'))}
-          ${two(f('travelTrackMin', 'To the track', 'number'), f('loadingMin', 'Loading time (race days)', 'number'))}
-          <p class="field-note">EDEN's "leave by" alerts are event start minus these.</p>
+        <div class="setting-group"><h3>You</h3>${one(f('name', 'Name'))}${one(f('homeAddress', 'Home'))}</div>
+        <div class="setting-group"><h3>Work</h3>
+          ${one(f('employer', 'Employer'))}
+          ${one(f('workAddress', 'Work address'))}
+          ${two(f('rateHourly', 'Hourly rate (£)', 'number', 'step="0.01" inputmode="decimal"'), sel('payFrequency', 'Paid', [['fortnightly', 'Fortnightly'], ['weekly', 'Weekly'], ['monthly', 'Monthly']]))}
+          ${two(f('payAnchor', 'A recent payday (weekly/fortnightly)', 'date'), f('payDayOfMonth', 'Day of month (monthly)', 'number', 'min="1" max="31" inputmode="numeric"'))}
+        </div>
+        <div class="setting-group"><h3>Places & travel</h3>
+          ${one(f('campusAddress', 'Campus'))}
+          ${one(f('trackAddress', 'Track'))}
+          ${two(sel('travelMode', 'Usual mode', [['walk', 'Walk'], ['bus', 'Bus'], ['cycle', 'Cycle'], ['drive', 'Drive']]), f('loadingMin', 'Loading time (race days, min)', 'number'))}
+          ${two(f('travelCampusMin', 'To campus (min)', 'number'), f('travelWorkMin', 'To work (min)', 'number'))}
+          ${one(f('travelTrackMin', 'To the track (min)', 'number'))}
+          <p class="field-note">EDEN's "leave by" nudges are event start minus these.</p>
         </div>
         <div class="setting-group"><h3>Term dates</h3>
           ${two(f('termStart', 'Term starts', 'date'), f('termWeeks', 'Weeks', 'number'))}
@@ -457,25 +499,27 @@
           <div class="field"><label style="display:flex;align-items:center;gap:10px;cursor:pointer"><input type="checkbox" data-k="reduceMotion" ${s.reduceMotion ? 'checked' : ''} style="width:20px;height:20px"> Reduce motion (freezes aurora & breathing; orb goes still)</label></div>
         </div>
         <div class="setting-group"><h3>EDEN · Layer 3 (optional)</h3>
-          <div class="field">${f('apiKey', 'Anthropic API key', 'password', 'autocomplete="off" placeholder="sk-ant-… (stays on this device)"')}</div>
-          <p class="field-note">Off by default. Live answers land in Phase 5; the key is stored only in this browser's localStorage.</p>
+          ${one(f('apiKey', 'Anthropic API key', 'password', 'autocomplete="off" placeholder="sk-ant-… (stays on this device)"'))}
+          <p class="field-note">Off by default. Live answers land in Phase 5; the key never leaves this browser's localStorage.</p>
         </div>
         <div class="setting-group"><h3>Data</h3>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
             <button class="btn" data-export>Export JSON</button>
-            <button class="btn ghost" data-reset style="color:var(--danger)">Reset local data</button>
+            <button class="btn ghost" data-reset style="color:var(--danger)">Clear local cache</button>
           </div>
-          <p class="field-note">Phase 1 stores everything locally on this device. Phase 2 moves it to the <code>iota</code> schema in Supabase.</p>
+          <p class="field-note">Everything lives in the <code>iota</code> schema in Supabase, locked to your account. This device keeps a cached copy for offline reads; offline writes queue and sync when you're back.</p>
         </div>
         <div class="setting-group"><h3>About</h3>
-          <div class="card" style="display:flex;gap:14px;align-items:center"><img src="./assets/brand-512.png" alt="" width="64" height="64" style="border-radius:16px"><div><b>Iota</b> · v0.1 shell<br><span class="sub">The smallest thing that runs everything. EDEN at the centre.</span></div></div>
+          <div class="card" style="display:flex;gap:14px;align-items:center"><img src="./assets/brand-512.png" alt="" width="64" height="64" style="border-radius:16px"><div><b>Iota</b> · v0.2<br><span class="sub">The smallest thing that runs everything. EDEN at the centre — she's the friend who happens to run your life.</span></div></div>
         </div>
       </div>`;
     el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
     el.querySelectorAll('[data-k]').forEach(inp => {
       const ev = inp.type === 'range' || inp.type === 'checkbox' ? 'input' : 'change';
       inp.addEventListener(ev, () => {
-        const v = inp.type === 'checkbox' ? inp.checked : inp.value;
+        let v = inp.type === 'checkbox' ? inp.checked : inp.value;
+        if (inp.type === 'number' && v !== '') v = +v;
+        if (inp.type === 'range') v = +v;
         Store.setSetting(inp.dataset.k, v); applyAppearance();
       });
     });
@@ -484,7 +528,9 @@
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `iota-export-${new Date().toISOString().slice(0, 10)}.json`; a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     });
-    $('[data-reset]', el).addEventListener('click', () => { if (confirm('Wipe all local Iota data on this device?')) { Store.reset(); toast('Local data reset'); } });
+    $('[data-reset]', el).addEventListener('click', () => { if (confirm('Clear the cached copy on this device? (Your data in Supabase is untouched.)')) { Store.clearLocal(); toast('Local cache cleared'); Store.sync().then(() => render()); } });
+    $('[data-sync]', el).addEventListener('click', async () => { toast('Syncing…'); const ok = await Store.sync(); toast(ok ? 'Synced' : 'Sync failed'); render(); });
+    $('[data-signout]', el).addEventListener('click', async () => { await SB.signOut(); Store.clearLocal(); location.hash = '#/'; boot(); });
     return el;
   }
   function applyAppearance() {
@@ -525,16 +571,63 @@
   });
 
   // ------------------------------------------------------------
+  // Login
+  // ------------------------------------------------------------
+  function renderLogin() {
+    const el = document.createElement('section');
+    el.className = 'screen login-screen';
+    el.innerHTML = `
+      <div class="login-wrap">
+        <div class="login-orb"><canvas></canvas></div>
+        <div class="brand" style="font-family:var(--font-display);font-weight:300;letter-spacing:.42em;font-size:16px;color:var(--text-2);padding-left:.42em;text-align:center;margin-top:10px">IOTA</div>
+        <form class="glass login-card" autocomplete="on">
+          <h2>Sign in</h2>
+          <p class="sub">Same account as the MMU Karting app.</p>
+          <div class="field"><label for="li-email">Email</label><input id="li-email" name="email" type="email" inputmode="email" autocomplete="username" required></div>
+          <div class="field"><label for="li-pass">Password</label><input id="li-pass" name="password" type="password" autocomplete="current-password" required></div>
+          <div class="login-err" data-err hidden></div>
+          <button class="btn primary" type="submit" style="width:100%">Continue</button>
+        </form>
+      </div>`;
+    mountOrb($('.login-orb canvas', el), { size: 120 });
+    const form = $('form', el), err = $('[data-err]', el);
+    try { const last = localStorage.getItem('iota.lastEmail'); if (last) $('#li-email', el).value = last; } catch (_) {}
+    form.addEventListener('submit', async e => {
+      e.preventDefault(); err.hidden = true;
+      const btn = $('button[type=submit]', form); btn.disabled = true; btn.textContent = 'Signing in…';
+      try {
+        await SB.signIn($('#li-email', el).value.trim(), $('#li-pass', el).value);
+        try { localStorage.setItem('iota.lastEmail', $('#li-email', el).value.trim()); } catch (_) {}
+        await Store.sync();
+        boot();
+      } catch (ex) { err.textContent = ex.message || 'Could not sign in'; err.hidden = false; btn.disabled = false; btn.textContent = 'Continue'; }
+    });
+    return el;
+  }
+
+  // ------------------------------------------------------------
   // Boot
   // ------------------------------------------------------------
-  Store.on(() => { for (const o of orbs) { o.setUrgency(Rules.urgency()); if (o.state === 'idle' || o.state === 'aware') o.setState(Rules.urgency() > .05 ? 'aware' : 'idle'); } });
+  const refreshOrbs = () => { for (const o of orbs) { o.setUrgency(Rules.urgency()); if (o.state === 'idle' || o.state === 'aware') o.setState(Rules.urgency() > .05 ? 'aware' : 'idle'); } };
+  Store.on(type => { refreshOrbs(); if (type === 'sync' && current && current.screen !== 'eden') render(); if (type === 'error' && Store.lastError) toast('Sync problem: ' + Store.lastError); });
   applyAppearance();
-  render();
-  // Splash: hold the brand art for a beat, then reveal the Ring
+
+  function boot() {
+    for (const o of orbs) o.destroy(); orbs.clear();
+    app.innerHTML = ''; current = null;
+    if (!SB.session) { app.appendChild(renderLogin()); return; }
+    render();
+    Store.sync().then(ok => { if (!ok && !Store.syncedAt) toast('Offline — showing cached data'); });
+  }
+  boot();
+  SB.onAuth(s => { if (!s && current !== null) { toast('Signed out — please sign in again'); boot(); } });
+  // Splash: hold the brand art for a beat, then reveal
   setTimeout(() => $('#splash').classList.add('gone'), sessionStorage.getItem('iota.booted') ? 150 : 1100);
   sessionStorage.setItem('iota.booted', '1');
-  // Re-evaluate urgency every minute (drives orb 'aware' + Ring badges)
-  setInterval(() => { for (const o of orbs) { o.setUrgency(Rules.urgency()); if (o.state === 'idle' || o.state === 'aware') o.setState(Rules.urgency() > .05 ? 'aware' : 'idle'); } if (current?.screen === 'ring') render(); }, 60000);
+  // Re-evaluate urgency every minute (drives orb 'aware' + Ring badges); resync every 5 min when visible
+  setInterval(() => { refreshOrbs(); if (current?.screen === 'ring') render(); }, 60000);
+  setInterval(() => { if (!document.hidden && SB.session) Store.sync(); }, 5 * 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && SB.session && Store.syncedAt && Date.now() - new Date(Store.syncedAt) > 60000) Store.sync(); });
   // PWA
   if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('./sw.js').catch(() => {});
 })();
