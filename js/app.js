@@ -58,6 +58,7 @@
     if (!a) return { screen: 'ring' };
     if (a === 'eden') return { screen: 'eden' };
     if (a === 'settings') return { screen: 'settings' };
+    if (a === 'calendar') return { screen: 'calendar', view: b === 'grid' || b === 'list' ? b : null };
     if (SECTIONS[a]) return { screen: 'section', sec: a, tab: SECTIONS[a].tabs.includes(b) ? b : SECTIONS[a].tabs[0] };
     return { screen: 'ring' };
   }
@@ -80,6 +81,7 @@
     if (r.screen === 'ring') el = renderRing();
     else if (r.screen === 'eden') el = renderEden();
     else if (r.screen === 'settings') el = renderSettings();
+    else if (r.screen === 'calendar') { if (r.view) { calState.view = r.view; saveCal(); } el = renderCalendar(); }
     else el = renderSection(r.sec, r.tab);
     el.style.setProperty('--ox', lastTap.x + 'px');
     el.style.setProperty('--oy', lastTap.y + 'px');
@@ -87,7 +89,7 @@
     current = { ...r, el };
     if (r.screen === 'ring') { document.title = 'Iota'; }
     else if (r.screen === 'section') document.title = `${SECTIONS[r.sec].name} · Iota`;
-    else document.title = (r.screen === 'eden' ? 'EDEN' : 'Settings') + ' · Iota';
+    else document.title = (r.screen === 'eden' ? 'EDEN' : r.screen === 'calendar' ? 'Calendar' : 'Settings') + ' · Iota';
   }
 
   // ------------------------------------------------------------
@@ -172,12 +174,6 @@
       </linearGradient>
       <filter id="glow-${k}" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="9"/></filter>`).join('');
 
-    const badges = ARCS.map(a => {
-      const n = next[a.key]; if (!n) return '';
-      const ang = a.key === 'uni' ? 243 : a.key === 'work' ? -63 : 90, [x, y] = pt(RING.rOut + (a.key === 'kart' ? 24 : 30), ang);
-      const label = `${Rules.fmtWhen(n.starts_at)} ${n.title}`;
-      return `<div class="arc-badge" style="left:${x / 4}%;top:${y / 4}%;color:${SECTIONS[a.key].color}">${esc(label.length > 24 ? label.slice(0, 23) + '…' : label)}</div>`;
-    }).join('');
 
     el.innerHTML = `
       <div class="ring-top">
@@ -190,12 +186,11 @@
           ${arcsSvg}
         </svg>
         <button class="orb-home orb-btn" aria-label="Open EDEN (hold to quick-capture)"><canvas></canvas></button>
-        ${badges}
       </div>
       <div class="ring-bottom">
         <div class="greeting">${esc(Rules.greeting())}</div>
-        ${soonest ? `<div class="next-up glass"><span class="dot" style="color:${SECTIONS[soonest.kind]?.color || '#fff'};background:currentColor"></span><span class="lbl">Next up</span><span class="txt">${esc(Rules.fmtWhen(soonest.starts_at))} · ${esc(soonest.title)}</span></div>`
-                 : `<div class="next-up glass"><span class="dot" style="color:var(--text-3);background:currentColor"></span><span class="lbl">Next up</span><span class="txt">Nothing captured yet — hold the orb to add something.</span></div>`}
+        ${soonest ? `<button class="next-up glass" data-go="#/calendar" aria-label="Open calendar"><span class="dot" style="color:${SECTIONS[soonest.kind]?.color || '#fff'};background:currentColor"></span><span class="lbl">Next up</span><span class="txt">${esc(Rules.fmtWhen(soonest.starts_at))} · ${esc(soonest.title)}</span><span class="chev">›</span></button>`
+                 : `<button class="next-up glass" data-go="#/calendar" aria-label="Open calendar"><span class="dot" style="color:var(--text-3);background:currentColor"></span><span class="lbl">Next up</span><span class="txt">Nothing coming up — open the calendar or hold the orb.</span><span class="chev">›</span></button>`}
         <div class="eden-line"><b>EDEN</b><span>${esc(Rules.observation())}</span></div>
       </div>`;
 
@@ -386,6 +381,133 @@
     const d = Rules.nextPayday(now); if (!d) return '';
     const days = Math.ceil((d - now) / 86400000);
     return `<div class="card"><div class="sub">Payday</div><div class="big-num">${days}<span style="font-size:16px;color:var(--text-2);margin-left:6px">day${days === 1 ? '' : 's'}</span></div><div class="sub" style="margin-top:4px">${d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</div></div>`;
+  }
+
+  // ------------------------------------------------------------
+  // Unified calendar (Next Up → here). List or grid; filter by section.
+  // ------------------------------------------------------------
+  const KINDS = [['uni', 'University'], ['work', 'Work'], ['kart', 'Karting'], ['personal', 'Personal']];
+  const KIND_COLOR = k => SECTIONS[k]?.color || '#C7CBE0';
+  const calState = (() => { try { return JSON.parse(localStorage.getItem('iota.cal') || '{}'); } catch (_) { return {}; } })();
+  calState.view = calState.view || 'list';
+  calState.filter = Array.isArray(calState.filter) && calState.filter.length ? calState.filter : KINDS.map(k => k[0]);
+  const saveCal = () => localStorage.setItem('iota.cal', JSON.stringify(calState));
+  const dayKey = d => { const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`; };
+
+  function renderCalendar() {
+    const el = document.createElement('section');
+    el.className = 'screen calendar-screen';
+    const now = new Date();
+    calState.month = calState.month || dayKey(now).slice(0, 7);
+    el.innerHTML = `
+      <header class="section-head">
+        <button class="btn icon ghost back" aria-label="Back to the Ring" data-go="#/">${ICONS.back}</button>
+        <h1><span class="kicker">Everything</span>Calendar</h1>
+        <div class="seg" role="tablist"><button data-view="list" role="tab">List</button><button data-view="grid" role="tab">Grid</button></div>
+      </header>
+      <div class="filters" data-filters>
+        <button class="fkey all" data-kind="*">All</button>
+        ${KINDS.map(([k, n]) => `<button class="fkey" data-kind="${k}" style="--k:${KIND_COLOR(k)}"><span class="dot"></span>${n}</button>`).join('')}
+      </div>
+      <div class="scroll cal-body" data-body style="padding-bottom:40px"></div>`;
+    el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
+    el.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => { calState.view = b.dataset.view; saveCal(); paint(); }));
+    el.querySelectorAll('.fkey').forEach(b => b.addEventListener('click', () => {
+      const k = b.dataset.kind;
+      if (k === '*') calState.filter = KINDS.map(x => x[0]);
+      else if (calState.filter.length === KINDS.length) calState.filter = [k];                    // from "all" → solo this one
+      else if (calState.filter.includes(k)) { calState.filter = calState.filter.filter(x => x !== k); if (!calState.filter.length) calState.filter = KINDS.map(x => x[0]); }
+      else calState.filter.push(k);
+      saveCal(); paint();
+    }));
+    const body = $('[data-body]', el);
+    const items = () => Store.allTimed().filter(x => calState.filter.includes(x.kind || 'personal'));
+
+    function paint() {
+      el.querySelectorAll('.seg button').forEach(b => b.classList.toggle('active', b.dataset.view === calState.view));
+      const all = calState.filter.length === KINDS.length;
+      el.querySelectorAll('.fkey').forEach(b => b.classList.toggle('active', b.dataset.kind === '*' ? all : (!all && calState.filter.includes(b.dataset.kind))));
+      body.innerHTML = calState.view === 'grid' ? gridHTML() : listHTML();
+      wire();
+    }
+
+    function itemRow(x, showTime = true) {
+      const when = x.isTask ? `due ${Rules.fmtRange(x.starts_at)}` : Rules.fmtRange(x.starts_at, x.ends_at);
+      const sub = [x.isTask ? (x._table === 'assessments' ? 'assessment' : 'task') : null, x.location].filter(Boolean).join(' · ');
+      return `<div class="row cal-item" data-table="${x._table}" data-id="${x.id}">
+        <span class="bar" style="background:${KIND_COLOR(x.kind)}"></span>
+        <div class="t"><b>${esc(x.title)}</b>${sub ? `<span>${esc(sub)}</span>` : ''}</div>
+        ${showTime ? `<div class="when">${esc(when)}</div>` : ''}
+      </div>`;
+    }
+    function listHTML() {
+      const from = new Date(now); from.setHours(0, 0, 0, 0);
+      const list = items().filter(x => new Date(x.ends_at || x.starts_at) >= from);
+      if (!list.length) return empty('🗓️', 'Nothing coming up', 'Nothing in the selected sections. Hold the orb to add something, or tell Claude.');
+      const groups = new Map();
+      for (const x of list) { const k = dayKey(x.starts_at); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(x); }
+      let html = '';
+      for (const [k, arr] of groups) {
+        const d = new Date(k + 'T00:00:00');
+        const diff = Math.round((d - from) / 86400000);
+        const label = diff === 0 ? 'Today' : diff === 1 ? 'Tomorrow' : d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+        html += `<div class="day-head ${diff === 0 ? 'today' : ''}"><span>${esc(label)}</span><span class="sub">${diff > 1 ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) === label ? '' : `in ${diff} days` : ''}</span></div><div class="list">${arr.map(x => itemRow(x)).join('')}</div>`;
+      }
+      return html;
+    }
+    function gridHTML() {
+      const [y, m] = calState.month.split('-').map(Number);
+      const first = new Date(y, m - 1, 1), last = new Date(y, m, 0);
+      const startPad = (first.getDay() + 6) % 7; // Monday first
+      const byDay = new Map();
+      for (const x of items()) { const k = dayKey(x.starts_at); if (k.startsWith(calState.month)) { if (!byDay.has(k)) byDay.set(k, []); byDay.get(k).push(x); } }
+      const sel = calState.selDay && calState.selDay.startsWith(calState.month) ? calState.selDay : (dayKey(now).startsWith(calState.month) ? dayKey(now) : null);
+      let cells = '';
+      for (let i = 0; i < startPad; i++) cells += '<div class="cell pad"></div>';
+      for (let d = 1; d <= last.getDate(); d++) {
+        const k = `${calState.month}-${String(d).padStart(2, '0')}`;
+        const arr = byDay.get(k) || [];
+        const kinds = [...new Set(arr.map(x => x.kind || 'personal'))];
+        cells += `<button class="cell ${k === dayKey(now) ? 'today' : ''} ${k === sel ? 'sel' : ''}" data-day="${k}"><span class="n">${d}</span><span class="dots">${kinds.slice(0, 4).map(kd => `<i style="background:${KIND_COLOR(kd)}"></i>`).join('')}</span></button>`;
+      }
+      const selItems = sel ? (byDay.get(sel) || []) : [];
+      const selD = sel ? new Date(sel + 'T00:00:00') : null;
+      return `
+        <div class="cal-nav"><button class="btn icon ghost" data-nav="-1" aria-label="Previous month">${ICONS.back}</button><h2>${first.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}</h2><button class="btn icon ghost" data-nav="1" aria-label="Next month" style="transform:scaleX(-1)">${ICONS.back}</button></div>
+        <div class="dow">${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => `<span>${d}</span>`).join('')}</div>
+        <div class="grid">${cells}</div>
+        ${sel ? `<div class="day-head" style="margin-top:14px"><span>${esc(selD.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }))}</span></div>${selItems.length ? `<div class="list">${selItems.map(x => itemRow(x)).join('')}</div>` : `<p class="field-note" style="padding:6px 4px">Nothing on.</p>`}` : ''}`;
+    }
+    function wire() {
+      body.querySelectorAll('[data-nav]').forEach(b => b.addEventListener('click', () => { const [y, m] = calState.month.split('-').map(Number); const d = new Date(y, m - 1 + (+b.dataset.nav), 1); calState.month = dayKey(d).slice(0, 7); saveCal(); paint(); }));
+      body.querySelectorAll('.cell[data-day]').forEach(b => b.addEventListener('click', () => { calState.selDay = b.dataset.day; saveCal(); paint(); }));
+      body.querySelectorAll('.cal-item').forEach(r => r.addEventListener('click', () => openDetail(r.dataset.table, r.dataset.id)));
+    }
+    function openDetail(table, id) {
+      const x = Store.get(table, id); if (!x) return;
+      const kind = table === 'shifts' ? 'work' : (x.kind || x.section || 'uni');
+      const title = table === 'shifts' ? (x.role ? `Shift · ${x.role}` : 'Shift') : x.title;
+      const start = x.starts_at || x.due || x.due_at, end = x.ends_at;
+      const sheet = document.createElement('div'); sheet.className = 'sheet';
+      sheet.innerHTML = `<div class="sheet-backdrop" data-close></div>
+        <div class="sheet-panel glass">
+          <div class="sheet-grip"></div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span class="dot" style="width:10px;height:10px;border-radius:50%;background:${KIND_COLOR(kind)};box-shadow:0 0 10px ${KIND_COLOR(kind)}"></span><span class="pill" style="background:rgba(255,255,255,.08);color:var(--text-2)">${esc(SECTIONS[kind]?.name || 'Personal')}</span></div>
+          <h2 style="font-size:20px;margin-bottom:6px">${esc(title)}</h2>
+          <p class="sub" style="color:var(--text-2)">${esc(new Date(start).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }))} · ${esc(x.isTask || table === 'tasks' || table === 'assessments' ? 'due ' + Rules.fmtRange(start) : Rules.fmtRange(start, end))}${x.location ? ` · ${esc(x.location)}` : ''}</p>
+          ${table === 'shifts' ? `<p class="sub" style="color:var(--text-2);margin-top:6px">${esc(String(x.break_min || 0))} min unpaid break${+Store.settings.rateHourly ? ` · ≈ £${Rules.payEstimate([x]).gross.toFixed(2)} gross` : ''}</p>` : ''}
+          ${x.notes ? `<p style="margin-top:10px">${esc(x.notes)}</p>` : ''}
+          <div class="sheet-row" style="margin-top:16px">
+            <span class="hint">${esc(x.source === 'claude' ? 'Added via Claude' : x.source || '')}</span>
+            <div style="display:flex;gap:8px">${table !== 'assessments' ? `<button class="btn ghost" data-del style="color:var(--danger)">Delete</button>` : ''}<button class="btn" data-close>Close</button></div>
+          </div>
+        </div>`;
+      document.body.appendChild(sheet);
+      sheet.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => sheet.remove()));
+      sheet.querySelector('[data-del]')?.addEventListener('click', () => { Store.remove(table, id); sheet.remove(); toast('Removed'); paint(); });
+    }
+    paint();
+    return el;
   }
 
   // ------------------------------------------------------------
