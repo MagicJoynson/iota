@@ -551,7 +551,7 @@
     // Replay recent live history so the thread has continuity, else the rules opener
     const hist = live ? Eden.history.slice(-8) : [];
     if (hist.length) { for (const m of hist) bubble(m.role === 'user' ? 'me' : 'eden', m.content); }
-    setTimeout(() => { if (!hist.length) { bubble('eden', Rules.observation()); orb?.ripple(); } const b = Store.list('briefings')[0]; if (b && b.date === new Date().toISOString().slice(0, 10)) setTimeout(() => { bubble('eden', b.md, b.kind + ' briefing'); orb?.ripple(); }, 500); const w = Rules.dueWatches(new Date(), 3); if (w.length && !hist.length) setTimeout(() => { bubble('eden', 'Watching: ' + w.map(x => x.text).join(' · ') + '.', 'promise watcher'); }, b ? 900 : 500); }, 250);
+    setTimeout(() => { if (!hist.length) { bubble('eden', Rules.observation()); orb?.ripple(); } const b = Rules.todaysBriefing('morning'); if (b) setTimeout(() => { bubble('eden', b.md, b.kind + ' briefing'); orb?.ripple(); }, 500); const w = Rules.dueWatches(new Date(), 3); if (w.length && !hist.length) setTimeout(() => { bubble('eden', 'Watching: ' + w.map(x => x.text).join(' · ') + '.', 'promise watcher'); }, b ? 900 : 500); }, 250);
 
     ta.addEventListener('focus', () => setState('listening', 'listening'));
     ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = Math.min(120, ta.scrollHeight) + 'px'; });

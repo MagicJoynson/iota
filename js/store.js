@@ -230,8 +230,16 @@
     },
 
     /** EDEN's one-liner for the Ring. */
+    /** Today's scheduled briefing (Layer 2), if one has landed. */
+    todaysBriefing(kind = 'morning', now = new Date()) {
+      const d = now.toLocaleDateString('en-CA'); // YYYY-MM-DD local
+      return Store.list('briefings').find(b => b.date === d && b.kind === kind) || null;
+    },
     observation(now = new Date()) {
       const up = Store.upcoming(now, 50), today = Store.today(), openTasks = Store.tasks_open();
+      const soonest0 = up[0]; const mins0 = soonest0 ? (new Date(soonest0.starts_at) - now) / 60000 : 1e9;
+      const brief = Rules.todaysBriefing('morning', now);
+      if (brief && !(mins0 > 0 && mins0 <= 120)) { const first = brief.md.split(/(?<=[.!?])s+/)[0]; return first.length > 140 ? first.slice(0, 137) + '…' : first; }
       const clash = Rules.firstClash(up);
       if (clash) return pick([`${clash.a.title} overlaps ${clash.b.title}. Physics says pick one.`, `Heads up — ${clash.a.title} and ${clash.b.title} are on top of each other.`]);
       const soon = up[0];
