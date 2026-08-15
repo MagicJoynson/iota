@@ -25,8 +25,7 @@
     let c = null; try { c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); } catch (_) {}
     const base = { settings: { ...DEFAULT_SETTINGS }, syncedAt: null };
     for (const t of TABLES) base[t] = [];
-    if (!c) return base;
-    const out = { ...base, ...c, settings: { ...DEFAULT_SETTINGS, ...(c.settings || {}) } };
+    const out = c ? { ...base, ...c, settings: { ...DEFAULT_SETTINGS, ...(c.settings || {}) } } : base;
     try { out.settings.apiKey = localStorage.getItem('iota.apiKey') || ''; } catch (_) {}
     return out;
   }

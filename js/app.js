@@ -514,20 +514,24 @@
   // EDEN chat
   // ------------------------------------------------------------
   const CHIPS = [['Today', 'What\'s on today?'], ['This week', 'How does this week look?'], ['Deadlines', 'Any deadlines?'], ['Add something', '__capture'], ['How\'s my money looking?', 'How\'s my money looking?']];
+  let edenDeep = sessionStorage.getItem('iota.eden.deep') === '1';
   function renderEden() {
     const el = document.createElement('section');
     el.className = 'screen eden-screen';
+    const live = Eden.available;
+    const modeLabel = () => live ? (edenDeep ? 'thinking harder · opus 5' : 'live · sonnet 5') : 'rules mode';
     el.innerHTML = `
       <div class="eden-head">
         <button class="btn icon ghost eden-back" aria-label="Back to the Ring" data-go="#/">${ICONS.back}</button>
+        ${live ? `<button class="chip eden-deep ${edenDeep ? 'accent' : ''}" data-deep aria-pressed="${edenDeep}">Think harder</button>` : ''}
         <div class="orb-mid"><canvas></canvas></div>
         <div class="name">EDEN</div>
-        <div class="state" data-state>rules mode</div>
+        <div class="state" data-state>${esc(modeLabel())}</div>
       </div>
       <div class="thread" data-thread></div>
       <div class="chips">${CHIPS.map(c => `<button class="chip" data-q="${esc(c[1])}">${esc(c[0])}</button>`).join('')}</div>
       <form class="composer glass" data-composer>
-        <textarea rows="1" placeholder="Ask EDEN…" aria-label="Message EDEN"></textarea>
+        <textarea rows="1" placeholder="${live ? 'Talk to EDEN…' : 'Ask EDEN…'}" aria-label="Message EDEN"></textarea>
         <button class="send" type="submit" aria-label="Send">${ICONS.send}</button>
       </form>`;
     const canvas = $('.orb-mid canvas', el);
@@ -541,34 +545,53 @@
       thread.appendChild(m); thread.scrollTop = thread.scrollHeight; return m;
     };
     const setState = (s, label) => { orb?.setState(s); $('[data-state]', el).textContent = label; };
-    // opening line
-    setTimeout(() => { bubble('eden', Rules.observation()); orb?.ripple(); const b = Store.list('briefings')[0]; if (b && b.date === new Date().toISOString().slice(0, 10)) setTimeout(() => { bubble('eden', b.md, b.kind + ' briefing'); orb?.ripple(); }, 500); const w = Rules.dueWatches(new Date(), 3); if (w.length) setTimeout(() => { bubble('eden', 'Watching: ' + w.map(x => x.text).join(' · ') + '.', 'promise watcher'); }, b ? 900 : 500); }, 250);
+    const idle = () => setState(Rules.urgency() > .05 ? 'aware' : 'idle', modeLabel());
+    $('[data-deep]', el)?.addEventListener('click', e => { edenDeep = !edenDeep; sessionStorage.setItem('iota.eden.deep', edenDeep ? '1' : '0'); e.currentTarget.classList.toggle('accent', edenDeep); e.currentTarget.setAttribute('aria-pressed', edenDeep); idle(); });
+
+    // Replay recent live history so the thread has continuity, else the rules opener
+    const hist = live ? Eden.history.slice(-8) : [];
+    if (hist.length) { for (const m of hist) bubble(m.role === 'user' ? 'me' : 'eden', m.content); }
+    setTimeout(() => { if (!hist.length) { bubble('eden', Rules.observation()); orb?.ripple(); } const b = Store.list('briefings')[0]; if (b && b.date === new Date().toISOString().slice(0, 10)) setTimeout(() => { bubble('eden', b.md, b.kind + ' briefing'); orb?.ripple(); }, 500); const w = Rules.dueWatches(new Date(), 3); if (w.length && !hist.length) setTimeout(() => { bubble('eden', 'Watching: ' + w.map(x => x.text).join(' · ') + '.', 'promise watcher'); }, b ? 900 : 500); }, 250);
 
     ta.addEventListener('focus', () => setState('listening', 'listening'));
     ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = Math.min(120, ta.scrollHeight) + 'px'; });
-    ta.addEventListener('blur', () => setState(Rules.urgency() > .05 ? 'aware' : 'idle', 'rules mode'));
+    ta.addEventListener('blur', () => idle());
     ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
 
+    let busy = false;
     async function ask(q) {
-      if (!q.trim()) return;
+      if (!q.trim() || busy) return;
       bubble('me', q);
-      setState('thinking', 'thinking');
+      setState('thinking', live ? (edenDeep ? 'thinking hard…' : 'thinking…') : 'thinking');
+      if (live) {
+        busy = true; $('.send', form).disabled = true;
+        try {
+          const res = await Eden.ask(q, { deep: edenDeep, onEvent: ev => { if (ev.type === 'tool') { const m = document.createElement('div'); m.className = 'msg act'; m.textContent = Eden.labelFor(ev); thread.appendChild(m); thread.scrollTop = thread.scrollHeight; } } });
+          setState('speaking', modeLabel()); orb?.ripple();
+          bubble('eden', res.text);
+          if (res.actions.length && current?.screen === 'eden') Store.emit('change');
+        } catch (e) {
+          setState('speaking', modeLabel());
+          const msg = e.status === 401 ? 'That API key was rejected — check it in Settings.' : /credit|billing/i.test(e.message || '') ? 'Anthropic says the account has no credit — top up in the Console and I\'m back.' : e.status === 429 ? 'Rate-limited for a moment. Try again in a few seconds.' : e.status === 400 && /model/i.test(e.message || '') ? 'Model not available on that key yet — try again shortly.' : `Live mode hiccup (${e.message || 'network'}). Falling back to rules.`;
+          bubble('eden', msg, 'error');
+          const a = Rules.answer(q); if (a) bubble('eden', a, 'rules mode');
+        } finally { busy = false; $('.send', form).disabled = false; }
+        setTimeout(idle, 1400);
+        return;
+      }
       await new Promise(r => setTimeout(r, 420 + Math.random() * 300));
       const a = Rules.answer(q);
       setState('speaking', 'rules mode'); orb?.ripple();
       if (a) bubble('eden', a);
       else {
-        const m = bubble('eden', 'That one\'s above my offline pay grade. Copy the prompt and ask me properly in Claude — I\'ll be there — or capture it and I\'ll file it.', 'live answers arrive in Phase 5');
+        const m = bubble('eden', 'That one\'s above my offline pay grade. Add an API key in Settings and I answer these live — or capture it and I\'ll file it.', 'live mode is off');
         const acts = document.createElement('div'); acts.style.cssText = 'display:flex;gap:8px;margin-top:8px;flex-wrap:wrap';
-        acts.innerHTML = `<button class="chip accent" data-act="prompt">Ask me properly →</button><button class="chip" data-act="capture">Capture it</button>`;
+        acts.innerHTML = `<button class="chip accent" data-act="settings">Turn on live mode</button><button class="chip" data-act="capture">Capture it</button>`;
         m.appendChild(acts);
-        $('[data-act=prompt]', acts).addEventListener('click', async () => {
-          const prompt = `You are EDEN, the assistant inside Alex's Iota app. Context: ${Store.upcoming().slice(0, 8).map(x => `${x.title} @ ${new Date(x.starts_at).toLocaleString('en-GB')}`).join('; ') || 'nothing scheduled'}. Open tasks: ${Store.tasks_open().map(t => t.title).join('; ') || 'none'}.\n\nAlex asks: ${q}`;
-          try { await navigator.clipboard.writeText(prompt); toast('Prompt copied — paste it into Claude'); } catch (_) { toast('Could not copy'); }
-        });
+        $('[data-act=settings]', acts).addEventListener('click', () => go('#/settings'));
         $('[data-act=capture]', acts).addEventListener('click', () => openCapture(null, q));
       }
-      setTimeout(() => setState(Rules.urgency() > .05 ? 'aware' : 'idle', 'rules mode'), 1400);
+      setTimeout(idle, 1400);
     }
     form.addEventListener('submit', e => { e.preventDefault(); const q = ta.value; ta.value = ''; ta.style.height = 'auto'; ask(q); });
     el.querySelectorAll('.chips .chip').forEach(c => c.addEventListener('click', () => { const q = c.dataset.q; if (q === '__capture') openCapture(); else ask(q); }));
@@ -623,7 +646,8 @@
         </div>
         <div class="setting-group"><h3>EDEN · Layer 3 (optional)</h3>
           ${one(f('apiKey', 'Anthropic API key', 'password', 'autocomplete="off" placeholder="sk-ant-… (stays on this device)"'))}
-          <p class="field-note">Off by default. Live answers land in Phase 5; the key never leaves this browser's localStorage.</p>
+          <p class="field-note">With a key, EDEN answers live (Sonnet 5; "Think harder" uses Opus 5) and can add/move/delete things for you. The key never leaves this browser's localStorage. Get one at console.anthropic.com → API Keys.</p>
+          <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div><b>Live usage</b><br><span class="sub">${Eden.usage.calls} calls · ${(Eden.usage.in + Eden.usage.cin + Eden.usage.cw).toLocaleString()} in · ${Eden.usage.out.toLocaleString()} out · ≈ ${Eden.usage.usd.toFixed(3)} (~£${(Eden.usage.usd * 0.78).toFixed(2)})</span></div><div style="display:flex;gap:6px"><button class="btn ghost" data-eden-clear>Clear chat</button><button class="btn ghost" data-eden-reset>Reset</button></div></div>
         </div>
         <div class="setting-group"><h3>Data</h3>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -652,6 +676,8 @@
       setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     });
     $('[data-reset]', el).addEventListener('click', () => { if (confirm('Clear the cached copy on this device? (Your data in Supabase is untouched.)')) { Store.clearLocal(); toast('Local cache cleared'); Store.sync().then(() => render()); } });
+    $('[data-eden-clear]', el).addEventListener('click', () => { Eden.clearHistory(); toast('EDEN chat history cleared'); });
+    $('[data-eden-reset]', el).addEventListener('click', () => { Eden.resetUsage(); toast('Usage counter reset'); render(); });
     $('[data-sync]', el).addEventListener('click', async () => { toast('Syncing…'); const ok = await Store.sync(); toast(ok ? 'Synced' : 'Sync failed'); render(); });
     $('[data-signout]', el).addEventListener('click', async () => { await SB.signOut(); Store.clearLocal(); location.hash = '#/'; boot(); });
     return el;
