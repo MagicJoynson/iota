@@ -97,11 +97,13 @@ Principles: one diagnosis and one next action beats twenty charts. Money is a gr
     let buf = '', text = '', stop_reason = null; const content = []; const usageAcc = {};
     const handle = ev => {
       if (ev.type === 'message_start') Object.assign(usageAcc, ev.message?.usage || {});
-      else if (ev.type === 'content_block_start') content[ev.index] = ev.content_block.type === 'tool_use' ? { type: 'tool_use', id: ev.content_block.id, name: ev.content_block.name, _json: '' } : ev.content_block.type === 'text' ? { type: 'text', text: '' } : { ...ev.content_block };
+      else if (ev.type === 'content_block_start') content[ev.index] = ev.content_block.type === 'tool_use' ? { type: 'tool_use', id: ev.content_block.id, name: ev.content_block.name, _json: '' } : ev.content_block.type === 'text' ? { type: 'text', text: '' } : ev.content_block.type === 'thinking' ? { type: 'thinking', thinking: ev.content_block.thinking || '', signature: ev.content_block.signature || '' } : { ...ev.content_block };
       else if (ev.type === 'content_block_delta') {
         const b = content[ev.index]; if (!b) return;
         if (ev.delta.type === 'text_delta') { b.text += ev.delta.text; text += ev.delta.text; onText?.(text); }
         else if (ev.delta.type === 'input_json_delta') b._json += ev.delta.partial_json;
+        else if (ev.delta.type === 'thinking_delta') b.thinking = (b.thinking || '') + ev.delta.thinking;
+        else if (ev.delta.type === 'signature_delta') b.signature = ev.delta.signature;
       }
       else if (ev.type === 'content_block_stop') { const b = content[ev.index]; if (b?.type === 'tool_use') { try { b.input = b._json ? JSON.parse(b._json) : {}; } catch (_) { b.input = {}; } delete b._json; } }
       else if (ev.type === 'message_delta') { stop_reason = ev.delta?.stop_reason || stop_reason; if (ev.usage) Object.assign(usageAcc, ev.usage); }
@@ -150,7 +152,7 @@ Principles: one diagnosis and one next action beats twenty charts. Money is a gr
         if (res.stop_reason === 'refusal') { parts.push('I can\'t help with that one.'); break; }
         if (res.text) parts.push(res.text);
         const uses = res.content.filter(b => b.type === 'tool_use');
-        msgs.push({ role: 'assistant', content: res.content });
+        msgs.push({ role: 'assistant', content: res.content.filter(bk => !(bk.type === 'thinking' && !bk.signature)) });
         if (!uses.length || res.stop_reason !== 'tool_use') break;
         const results = uses.map(u => { let result; try { result = runTool(u.name, u.input || {}); } catch (e) { result = { ok: false, error: e.message }; } actions.push({ name: u.name, input: u.input, result }); onEvent?.({ type: 'tool', name: u.name, input: u.input, result }); return { type: 'tool_result', tool_use_id: u.id, content: JSON.stringify(result), is_error: !result.ok }; });
         msgs.push({ role: 'user', content: results });
