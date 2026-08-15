@@ -322,19 +322,28 @@
         const past = shifts.filter(x => new Date(x.ends_at) < now).reverse().slice(0, 6);
         if (past.length) html += `<div class="tab-title" style="margin-top:18px">Recent</div><div class="list">${past.map(shiftRow).join('')}</div>`;
       } else if (tab === 'earnings') {
-        const last = Rules.lastPayday(now), next = Rules.nextPayday(now);
-        const period = last ? shifts.filter(x => new Date(x.starts_at) >= last && new Date(x.starts_at) < now) : shifts.filter(x => new Date(x.starts_at).getMonth() === now.getMonth() && new Date(x.ends_at) < now);
-        const booked = shifts.filter(x => new Date(x.starts_at) >= now && (!next || new Date(x.starts_at) < next));
-        const pe = Rules.payEstimate(period), be = Rules.payEstimate(booked);
-        html += `<div class="tab-title">${last ? 'Since last payday' : now.toLocaleDateString('en-GB', { month: 'long' })}</div>`;
-        html += `<div class="stat-row">
-          <div class="stat card"><div class="k">Shifts worked</div><div class="v">${period.length}</div></div>
-          <div class="stat card"><div class="k">Hours</div><div class="v">${pe.hours.toFixed(1)}<small>h</small></div></div>
-          <div class="stat card"><div class="k">Earned so far</div><div class="v">${rate ? '£' + pe.gross.toFixed(0) : '—'}</div></div>
-          <div class="stat card"><div class="k">Booked to payday</div><div class="v">${rate ? '£' + be.gross.toFixed(0) : '—'}<small>${booked.length ? booked.length + ' shift' + (booked.length === 1 ? '' : 's') : ''}</small></div></div>
-        </div>`;
-        html += paydayCard(now);
-        if (rate) html += `<div class="card"><div class="sub" style="display:flex;justify-content:space-between"><span>Rate</span><b style="color:var(--text)">£${rate.toFixed(2)}/h</b></div><div class="sub" style="display:flex;justify-content:space-between;margin-top:6px"><span>Pay</span><b style="color:var(--text)">${esc(s.payFrequency || '')}${s.payAnchor ? ' · Thursdays' : ''}</b></div><p class="sub" style="margin-top:10px">Gross estimates. Student income under the personal allowance means little or no tax — payslip reconcile arrives with the Payday Plan.</p></div>`;
+        const pp = Rules.payPeriods(now);
+        const fmtD = x => x.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+        const fmtS = x => x.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        if (pp) {
+          const cur = shifts.filter(x => Rules.inPeriod(x, pp.current)), done = cur.filter(x => new Date(x.ends_at) <= now), todo = cur.filter(x => new Date(x.ends_at) > now);
+          const nxt = shifts.filter(x => Rules.inPeriod(x, pp.following));
+          const d = Rules.payEstimate(done), all = Rules.payEstimate(cur), n = Rules.payEstimate(nxt);
+          html += `<div class="tab-title">Paid ${esc(fmtD(pp.current.payday))} · ${esc(fmtS(pp.current.start))} – ${esc(fmtS(pp.current.end))}</div>`;
+          html += `<div class="stat-row">
+            <div class="stat card"><div class="k">Shifts</div><div class="v">${cur.length}<small>${todo.length ? todo.length + ' to go' : (cur.length ? 'all worked' : '')}</small></div></div>
+            <div class="stat card"><div class="k">Hours worked</div><div class="v">${d.hours.toFixed(1)}<small>of ${all.hours.toFixed(1)} h</small></div></div>
+            <div class="stat card"><div class="k">Earned so far</div><div class="v">${rate ? '£' + d.gross.toFixed(0) : '—'}</div></div>
+            <div class="stat card"><div class="k">This payslip</div><div class="v">${rate ? '£' + all.gross.toFixed(0) : '—'}<small>gross</small></div></div>
+          </div>`;
+          html += paydayCard(now);
+          if (nxt.length) html += `<div class="card"><div class="sub" style="display:flex;justify-content:space-between"><span>Then ${esc(fmtD(pp.following.payday))}</span><b style="color:var(--text)">${nxt.length} shift${nxt.length === 1 ? '' : 's'} booked · ${rate ? '≈ £' + n.gross.toFixed(0) : n.hours.toFixed(1) + ' h'}</b></div><p class="sub" style="margin-top:6px">${esc(fmtS(pp.following.start))} – ${esc(fmtS(pp.following.end))}</p></div>`;
+        } else {
+          const month = shifts.filter(x => new Date(x.starts_at).getMonth() === now.getMonth() && new Date(x.ends_at) < now);
+          const pe = Rules.payEstimate(month);
+          html += `<div class="tab-title">${now.toLocaleDateString('en-GB', { month: 'long' })}</div><div class="stat-row"><div class="stat card"><div class="k">Shifts worked</div><div class="v">${month.length}</div></div><div class="stat card"><div class="k">Hours</div><div class="v">${pe.hours.toFixed(1)}<small>h</small></div></div></div>`;
+        }
+        if (rate) html += `<div class="card"><div class="sub" style="display:flex;justify-content:space-between"><span>Rate</span><b style="color:var(--text)">£${rate.toFixed(2)}/h</b></div><div class="sub" style="display:flex;justify-content:space-between;margin-top:6px"><span>Pay</span><b style="color:var(--text)">${esc(s.payFrequency || '')}${s.payAnchor ? ' · Thursdays' : ''}</b></div><p class="sub" style="margin-top:10px">Each Thursday payslip covers the fortnight ending the Sunday before it. Gross estimates (hours minus unpaid breaks × rate); student income under the personal allowance means little or no tax — payslip reconcile arrives with the Payday Plan.</p></div>`;
         else html += `<div class="card"><h3>Set your hourly rate</h3><p class="sub">Earnings, projections and the Payday Plan all hang off it.</p><button class="btn" data-go="#/settings" style="margin-top:12px">Open settings</button></div>`;
       } else if (tab === 'requests') {
         html += `<div class="tab-title">Availability & requests</div>` + empty('🗓️', 'Nothing tracked yet', 'Availability, holiday requests and swap notes — clash-aware against lectures — arrive next. <b>"Can you do Friday?"</b> gets a yes / no / risky answer from EDEN.');

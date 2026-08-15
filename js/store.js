@@ -13,7 +13,7 @@
   const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }));
 
   const DEFAULT_SETTINGS = {
-    name: 'Alex', employer: '', rateHourly: '', payFrequency: 'fortnightly', payAnchor: '', payDayOfMonth: '',
+    name: 'Alex', employer: '', rateHourly: '', payFrequency: 'fortnightly', payAnchor: '', payDayOfMonth: '', payPeriodLagDays: 4,
     travelMode: 'walk', travelCampusMin: 15, travelWorkMin: 30, travelTrackMin: 40, loadingMin: 15,
     homeAddress: '', campusAddress: '', workAddress: '', trackAddress: '',
     termStart: '', termWeeks: 12, apiKey: '', auroraIntensity: 1, reduceMotion: false,
@@ -223,6 +223,21 @@
       const r = Store.settings.breakRule || { overHours: 6, longBreakMin: 45, shortBreakMin: 30 };
       return hours > (+r.overHours || 6) ? (+r.longBreakMin || 45) : (+r.shortBreakMin || 30);
     },
+    /** The pay period that lands on a given payday: 14 days ending (lag) days before payday, in arrears. */
+    payPeriodFor(payday) {
+      const s = Store.settings, lag = s.payPeriodLagDays == null ? 4 : +s.payPeriodLagDays;
+      const end = new Date(payday); end.setDate(end.getDate() - lag); end.setHours(23, 59, 59, 999);
+      const start = new Date(end); start.setDate(start.getDate() - (s.payFrequency === 'weekly' ? 6 : 13)); start.setHours(0, 0, 0, 0);
+      return { payday: new Date(payday), start, end };
+    },
+    /** Current pay period = the one paid on the next payday; plus the one after (for shifts already booked beyond it). */
+    payPeriods(now = new Date()) {
+      const next = Rules.nextPayday(now); if (!next) return null;
+      const cur = Rules.payPeriodFor(next);
+      const after = new Date(next); after.setDate(after.getDate() + (Store.settings.payFrequency === 'weekly' ? 7 : 14));
+      return { current: cur, following: Rules.payPeriodFor(after) };
+    },
+    inPeriod(shift, p) { const t = new Date(shift.starts_at); return t >= p.start && t <= p.end; },
     payEstimate(shifts) {
       const rate = +Store.settings.rateHourly || 0;
       const hrs = shifts.reduce((a, s) => a + Rules.hours(s.starts_at, s.ends_at) - (s.break_min || 0) / 60, 0);
@@ -293,14 +308,16 @@
         return 'Deadlines: ' + tk.slice(0, 5).map(x => `${x.title} — ${Rules.fmtWhen(x.due, now)}`).join(' · ');
       }
       if (/money|earn|pay|£|wage/.test(t)) {
-        const rate = +Store.settings.rateHourly, last = Rules.lastPayday(now), next = Rules.nextPayday(now);
-        const shifts = Store.list('shifts').filter(s => s.status !== 'cancelled');
-        const period = last ? shifts.filter(s => new Date(s.starts_at) >= last && new Date(s.starts_at) < now) : [];
-        const upcoming = shifts.filter(s => new Date(s.starts_at) >= now && (!next || new Date(s.starts_at) < next));
-        const pe = Rules.payEstimate(period), ue = Rules.payEstimate(upcoming);
+        const rate = +Store.settings.rateHourly, pp = Rules.payPeriods(now);
         if (!rate) return 'Add an hourly rate in Settings and I\'ll do the money.';
-        const days = next ? Math.ceil((next - now) / 86400000) : null;
-        return `Since last payday: ${period.length} shift${period.length === 1 ? '' : 's'}, ${pe.hours.toFixed(1)} h ≈ £${pe.gross.toFixed(0)} gross.${upcoming.length ? ` ${upcoming.length} more booked before payday (≈ £${ue.gross.toFixed(0)}).` : ''}${days != null ? ` Payday in ${days} day${days === 1 ? '' : 's'}.` : ''}`;
+        if (!pp) return 'No payday configured yet.';
+        const shifts = Store.list('shifts').filter(x => x.status !== 'cancelled');
+        const cur = shifts.filter(x => Rules.inPeriod(x, pp.current)), done = cur.filter(x => new Date(x.ends_at) <= now), todo = cur.filter(x => new Date(x.ends_at) > now);
+        const nxt = shifts.filter(x => Rules.inPeriod(x, pp.following));
+        const d = Rules.payEstimate(done), all = Rules.payEstimate(cur), n = Rules.payEstimate(nxt);
+        const days = Math.ceil((pp.current.payday - now) / 86400000);
+        const fmtD = x => x.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        return `Payday in ${days} day${days === 1 ? '' : 's'} (${fmtD(pp.current.payday)}) covers ${fmtD(pp.current.start)}–${fmtD(pp.current.end)}: ${done.length} worked (${d.hours.toFixed(1)} h ≈ £${d.gross.toFixed(0)})${todo.length ? `, ${todo.length} still to work — ≈ £${all.gross.toFixed(0)} gross in total` : ' — ≈ £' + all.gross.toFixed(0) + ' gross'}.${nxt.length ? ` After that: ${nxt.length} booked for the ${fmtD(pp.following.payday)} pay (≈ £${n.gross.toFixed(0)}).` : ''}`;
       }
       if (/payday/.test(t)) { const n = Rules.nextPayday(now); return n ? `Payday is ${n.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })} — ${Math.ceil((n - now) / 86400000)} days.` : 'No payday configured yet.'; }
       if (/who are you|what are you|\beden\b/.test(t)) return 'EDEN. Your friend who happens to run your life. Rules mode for now — plug me into Claude and I get properly clever.';
