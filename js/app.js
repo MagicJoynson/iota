@@ -28,10 +28,20 @@
   }
 
   const SECTIONS = {
-    uni:  { name: 'University', color: '#8B7CFF', rgb: '139,124,255', tabs: ['today', 'modules', 'deadlines', 'notes'], tabNames: { today: 'Today', modules: 'Modules', deadlines: 'Deadlines', notes: 'Notes' } },
+    uni:  { name: 'University', color: '#8B7CFF', rgb: '139,124,255', tabs: ['today', 'modules', 'deadlines', 'societies'], tabNames: { today: 'Today', modules: 'Modules', deadlines: 'Deadlines', societies: 'Societies' } },
     work: { name: 'Work', color: '#2DD4BF', rgb: '45,212,191', tabs: ['shifts', 'earnings', 'requests', 'info'], tabNames: { shifts: 'Shifts', earnings: 'Earnings', requests: 'Time off', info: 'Info' } },
-    kart: { name: 'Karting & Societies', short: 'Karting', color: '#FF8A4C', rgb: '255,138,76', tabs: ['mmu', 'racing', 'societies', 'events'], tabNames: { mmu: 'MMU Karting', racing: 'My Racing', societies: 'Societies', events: 'Events' } },
+    personal: { name: 'Personal', color: '#FF8A4C', rgb: '255,138,76', tabs: ['week', 'money', 'admin', 'targets'], tabNames: { week: 'Week', money: 'Money', admin: 'Admin', targets: 'Targets' } },
   };
+  // v2: University tabs Today · Modules · Deadlines · Societies; the old Karting arc became Personal (Week · Money · Admin · Targets).
+  // Society accents are their own hues (never the arc hues); events of kind 'kart' belong to the MMU Karting society (inside University).
+  const KART_FALLBACK = '#4DA3FF';
+  const isKartSoc = so => /kart/i.test(so.name || '');
+  const kartSociety = () => Store.list('societies').find(isKartSoc) || null;
+  const socColor = so => so?.colour || (so && isKartSoc(so) ? KART_FALLBACK : '#C7CBE0');
+  /** Colour for an item kind: arc hue, or the karting society's accent for kind 'kart'. */
+  function kindColor(k) { if (k === 'kart') return socColor(kartSociety()) || KART_FALLBACK; return SECTIONS[k]?.color || '#C7CBE0'; }
+  function kindName(k) { if (k === 'kart') return kartSociety()?.name || 'Karting'; return SECTIONS[k]?.name || 'Personal'; }
+  const hexRgb = h => { const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(h || ''); return m ? `${parseInt(m[1], 16)},${parseInt(m[2], 16)},${parseInt(m[3], 16)}` : '199,203,224'; };
 
   const ICONS = {
     today: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
@@ -46,6 +56,11 @@
     racing: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 20V4h11l-2 4 2 4H5"/></svg>',
     societies: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M15 14c3 0 5.5 2 5.5 5"/></svg>',
     events: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.4 6.8 19.2l1-5.9L3.5 9.2l5.9-.8z"/></svg>',
+    week: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4M7 14h3M12 14h5M7 18h5"/></svg>',
+    money: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18M7 15h3"/></svg>',
+    admin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 11h18"/></svg>',
+    targets: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>',
+    search: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
     back: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
     ring: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M4.5 9.5A8 8 0 0 1 11 4.06M13 4.06A8 8 0 0 1 19.5 9.5M18.5 17.5A8 8 0 0 1 5.5 17.5"/></svg>',
     send: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
@@ -76,7 +91,11 @@
     if (!a) return { screen: 'ring' };
     if (a === 'eden') return { screen: 'eden' };
     if (a === 'settings') return { screen: 'settings' };
-    if (a === 'calendar') return { screen: 'calendar', view: b === 'grid' || b === 'list' ? b : null };
+    // v2 redirects: the unified calendar lives in Personal › Week; the old Karting arc lives in University › Societies.
+    if (a === 'calendar') { if (b === 'grid' || b === 'list') { calState.view = b; saveCal(); } return { screen: 'redirect', to: '#/personal/week' }; }
+    if (a === 'kart') return { screen: 'redirect', to: '#/uni/societies' };
+    if (a === 'society' && b) return { screen: 'society', id: b };
+    if (a === 'module' && b) return { screen: 'module', id: b };
     if (SECTIONS[a]) return { screen: 'section', sec: a, tab: SECTIONS[a].tabs.includes(b) ? b : SECTIONS[a].tabs[0] };
     return { screen: 'ring' };
   }
@@ -84,6 +103,7 @@
   let current = null; // {screen, sec, tab, el}
   function render() {
     const r = parseRoute();
+    if (r.screen === 'redirect') { history.replaceState(null, '', r.to); render(); return; }
     const sameSection = current && current.screen === 'section' && r.screen === 'section' && current.sec === r.sec;
     // Section tab switches re-render the tab body only (no full transition)
     if (sameSection) { current.tab = r.tab; renderTabBody(current.el, r.sec, r.tab); updateHotbar(current.el, r.sec, r.tab); return; }
@@ -93,13 +113,15 @@
     const old = current && current.el;
     if (old) { old.classList.add('leaving'); setTimeout(() => old.remove(), 260); }
 
-    document.body.dataset.section = r.screen === 'section' ? r.sec : '';
+    document.body.dataset.section = r.screen === 'section' ? r.sec : (r.screen === 'society' || r.screen === 'module') ? 'uni' : '';
     document.body.dataset.screen = r.screen;
+    document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-rgb');
     let el;
     if (r.screen === 'ring') el = renderRing();
     else if (r.screen === 'eden') el = renderEden();
     else if (r.screen === 'settings') el = renderSettings();
-    else if (r.screen === 'calendar') { if (r.view) { calState.view = r.view; saveCal(); } el = renderCalendar(); }
+    else if (r.screen === 'society') el = renderSociety(r.id);
+    else if (r.screen === 'module') el = renderModule(r.id);
     else el = renderSection(r.sec, r.tab);
     el.style.setProperty('--ox', lastTap.x + 'px');
     el.style.setProperty('--oy', lastTap.y + 'px');
@@ -107,8 +129,12 @@
     current = { ...r, el };
     if (r.screen === 'ring') { document.title = 'Iota'; }
     else if (r.screen === 'section') document.title = `${SECTIONS[r.sec].name} · Iota`;
-    else document.title = (r.screen === 'eden' ? 'EDEN' : r.screen === 'calendar' ? 'Calendar' : 'Settings') + ' · Iota';
+    else if (r.screen === 'society') document.title = `${Store.get('societies', r.id)?.name || 'Society'} · Iota`;
+    else if (r.screen === 'module') document.title = `${Store.get('modules', r.id)?.name || 'Module'} · Iota`;
+    else document.title = (r.screen === 'eden' ? 'EDEN' : 'Settings') + ' · Iota';
   }
+  /** Tint the current screen with a society/module accent (body-level so hotbar, pills, kicker all follow). */
+  function tint(hex) { if (!hex) return; document.body.style.setProperty('--accent', hex); document.body.style.setProperty('--accent-rgb', hexRgb(hex)); }
 
   // ------------------------------------------------------------
   // Orb helpers
@@ -142,7 +168,7 @@
   const ARCS = [
     { key: 'uni',  from: 155, to: 265 },   // top-left, sweeping clockwise from bottom-left up to top
     { key: 'work', from: -85, to: 25 },    // top-right
-    { key: 'kart', from: 35,  to: 145 },   // bottom
+    { key: 'personal', from: 35,  to: 145 },   // bottom
   ];
   const pt = (r, deg) => { const a = deg * Math.PI / 180; return [RING.cx + r * Math.cos(a), RING.cy + r * Math.sin(a)]; };
   function annulus(a1, a2, rIn, rOut) {
@@ -159,17 +185,14 @@
   function renderRing() {
     const el = document.createElement('section');
     el.className = 'screen ring-screen';
-    const s = Store.settings;
-    const next = { uni: Store.nextFor('uni'), work: Store.nextFor('work'), kart: Store.nextFor('kart') };
     const soonest = Store.upcoming()[0];
-    const nextKey = soonest ? soonest.kind : null;
+    const nextKey = soonest ? (soonest.kind === 'kart' ? 'uni' : soonest.kind) : null;
 
     const arcsSvg = ARCS.map((a, i) => {
       const S = SECTIONS[a.key];
-      const mid = (a.from + a.to) / 2;
       const midR = (RING.rIn + RING.rOut) / 2;
-      const labelPath = arcPath(a.from + 4, a.to - 4, midR - 4.5, a.key === 'kart');
-      const label = a.key === 'kart' ? 'KARTING & SOCIETIES' : S.name.toUpperCase();
+      const labelPath = arcPath(a.from + 4, a.to - 4, midR - 4.5, a.key === 'personal');
+      const label = S.name.toUpperCase();
       return `
       <g class="arc ${nextKey === a.key ? 'next' : ''} breathe d${i}" data-sec="${a.key}" role="link" tabindex="0" aria-label="${esc(S.name)}">
         <path class="arc-glow" d="${annulus(a.from, a.to, RING.rIn, RING.rOut)}" fill="none" stroke="${S.color}" stroke-width="10" filter="url(#glow-${a.key})"/>
@@ -207,8 +230,8 @@
       </div>
       <div class="ring-bottom">
         <div class="greeting">${esc(Rules.greeting())}</div>
-        ${soonest ? `<button class="next-up glass" data-go="#/calendar" aria-label="Open calendar"><span class="dot" style="color:${SECTIONS[soonest.kind]?.color || '#fff'};background:currentColor"></span><span class="lbl">Next up</span><span class="txt">${esc(Rules.fmtWhen(soonest.starts_at))} · ${esc(soonest.title)}</span><span class="chev">›</span></button>`
-                 : `<button class="next-up glass" data-go="#/calendar" aria-label="Open calendar"><span class="dot" style="color:var(--text-3);background:currentColor"></span><span class="lbl">Next up</span><span class="txt">Nothing coming up — open the calendar or hold the orb.</span><span class="chev">›</span></button>`}
+        ${soonest ? `<button class="next-up glass" data-go="#/personal/week" aria-label="Open your week"><span class="dot" style="color:${kindColor(soonest.kind)};background:currentColor"></span><span class="lbl">Next up</span><span class="txt">${esc(Rules.fmtWhen(soonest.starts_at))} · ${esc(soonest.title)}</span><span class="chev">›</span></button>`
+                 : `<button class="next-up glass" data-go="#/personal/week" aria-label="Open your week"><span class="dot" style="color:var(--text-3);background:currentColor"></span><span class="lbl">Next up</span><span class="txt">Nothing coming up — open your week or hold the orb.</span><span class="chev">›</span></button>`}
         <div class="eden-line"><b>EDEN</b><span>${esc(Rules.observation())}</span></div>
       </div>`;
 
@@ -263,7 +286,7 @@
     const when = x.starts_at ? Rules.fmtWhen(x.starts_at) : (x.due ? Rules.fmtWhen(x.due) : '');
     const sub = x.location || (x.ends_at && x.starts_at ? `${new Date(x.starts_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}–${new Date(x.ends_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}` : (x.section ? x.section : ''));
     return `<div class="row" data-table="${x._table || opts.table}" data-id="${x.id}">
-      <span class="bar" style="background:${SECTIONS[x.kind || x.section]?.color || 'var(--text-3)'}"></span>
+      <span class="bar" style="background:${x.kind || x.section ? kindColor(x.kind || x.section) : 'var(--text-3)'}"></span>
       <div class="t"><b>${esc(x.title || x.text || '')}</b>${sub ? `<span>${esc(sub)}</span>` : ''}</div>
       ${when ? `<div class="when">${esc(when)}</div>` : ''}
       ${opts.deletable !== false ? `<button class="del" aria-label="Delete">${ICONS.trash}</button>` : ''}
@@ -294,19 +317,32 @@
         }
       } else if (tab === 'modules') {
         const ms = Store.list('modules');
+        const notes = Store.list('notes').filter(n => n.section === 'uni');
+        const orphan = notes.filter(n => !n.module_id || !ms.some(m => m.id === n.module_id));
         html += `<div class="tab-title">Modules</div>`;
-        html += ms.length ? `<div class="list">${ms.map(m => `<div class="row"><span class="bar" style="background:${esc(m.colour || 'var(--accent)')}"></span><div class="t"><b>${esc(m.code ? m.code + ' · ' : '')}${esc(m.name)}</b><span>${esc([m.lecturer, m.room, m.credits ? m.credits + ' credits' : ''].filter(Boolean).join(' · '))}</span></div></div>`).join('')}</div>`
-                         : empty('📚', 'No modules yet', 'Module cards (code, lecturer, room, credits, notes and assessments inside) arrive with the timetable import in Phase 3.');
+        html += `<label class="search glass"><span>${ICONS.search}</span><input type="search" data-note-search placeholder="Search notes across every module" autocomplete="off"></label><div data-note-results></div>`;
+        html += ms.length ? `<div class="list">${ms.map(m => {
+          const n = notes.filter(x => x.module_id === m.id).length, a = Store.list('assessments').filter(x => x.module_id === m.id && x.status !== 'graded').length;
+          return `<button class="row link" data-go="#/module/${m.id}"><span class="bar" style="background:${esc(m.colour || 'var(--accent)')}"></span><div class="t"><b>${esc(m.code ? m.code + ' · ' : '')}${esc(m.name)}</b><span>${esc([m.lecturer, m.credits ? m.credits + ' credits' : '', n ? n + ' note' + (n === 1 ? '' : 's') : '', a ? a + ' open assessment' + (a === 1 ? '' : 's') : ''].filter(Boolean).join(' · ') || 'Tap to open the hub')}</span></div><span class="chev">›</span></button>`;
+        }).join('')}</div>`
+                         : empty('📚', 'No modules yet', 'Each module gets its own hub — info, sessions, assessments and notes in one place. They arrive with the timetable on <b>Tuesday 18 Aug</b>; tell EDEN a module and she creates it.', { label: 'Jot a note meanwhile', hint: 'Note: ' });
+        if (orphan.length) html += `<div class="tab-title" style="margin-top:18px">Unfiled notes</div><div class="list">${orphan.map(n => rowHTML({ ...n, _table: 'notes', title: n.title || n.md, kind: 'uni', location: n.title ? n.md.slice(0, 80) : '' })).join('')}</div><p class="field-note" style="padding:8px 4px 0">Notes without a module. Once modules exist, open a hub and file them there.</p>`;
+      } else if (tab === 'societies') {
+        const socs = Store.list('societies');
+        html += `<div class="tab-title">Societies</div>`;
+        html += socs.length ? `<div class="list">${socs.map(so => {
+          const col = socColor(so);
+          const nx = isKartSoc(so) ? Store.nextFor('kart') : null;
+          const role = so.status === 'committee' ? (so.role || 'Committee') : so.status;
+          return `<button class="row link soc" data-go="#/society/${so.id}" style="--k:${col}"><span class="dot"></span><div class="t"><b>${esc(so.name)}</b><span>${nx ? `Next: ${esc(Rules.fmtWhen(nx.starts_at))} · ${esc(nx.title)}` : esc(so.notes || '')}</span></div><span class="pill" style="background:color-mix(in srgb, ${col} 18%, transparent);color:${col}">${esc(role)}</span><span class="chev">›</span></button>`;
+        }).join('')}</div>` : empty('✨', 'No societies yet', 'Each society becomes a card that opens into its own mini-hub — events, membership, role duties, links, notes.');
+        html += `<p class="field-note" style="padding:10px 4px 0">Freshers' Fair 29–30 Sept — football and badminton get looked at then. Society events show in your Week in each society's colour.</p>`;
       } else if (tab === 'deadlines') {
         const tk = Store.tasks_open().filter(t => t.section === 'uni').sort((a, b) => new Date(a.due || 8e15) - new Date(b.due || 8e15));
         const as = Store.list('assessments').filter(a => a.status !== 'graded');
         html += `<div class="tab-title">Deadlines & tasks</div>`;
         const rows = [...as.map(a => rowHTML({ ...a, _table: 'assessments', kind: 'uni', starts_at: a.due_at, location: a.weight_pct ? `${a.weight_pct}% · ${a.status.replace('_', ' ')}` : a.status.replace('_', ' ') }, { deletable: false })), ...tk.map(t => rowHTML({ ...t, _table: 'tasks' }))];
         html += rows.length ? `<div class="list">${rows.join('')}</div>` : empty('⏳', 'No deadlines on file', 'Coursework with weightings, status pipeline and the grade calculator come in Phase 3. Capture anything due now and it will carry over.', { label: 'Add a deadline', hint: 'Essay due ' });
-      } else if (tab === 'notes') {
-        const ns = Store.list('notes').filter(n => n.section === 'uni');
-        html += `<div class="tab-title">Notes</div>`;
-        html += ns.length ? `<div class="list">${ns.map(n => rowHTML({ ...n, _table: 'notes', title: n.title || n.md, kind: 'uni', location: n.title ? n.md.slice(0, 80) : '' })).join('')}</div>` : empty('📝', 'No notes yet', 'Per-module markdown notes with search and revision mode arrive in Phase 3. Quick notes captured now are kept.', { label: 'Jot a note', hint: 'Note: ' });
       }
     }
 
@@ -359,7 +395,7 @@
           const range = t.starts_on === t.ends_on ? fmtD(t.starts_on) : `${fmtD(t.starts_on)} – ${fmtD(t.ends_on)}`;
           const askBy = t.ask_by ? ` · ask by ${new Date(t.ask_by + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : '';
           return `<div class="row timeoff" data-id="${t.id}">
-            <span class="bar" style="background:${SECTIONS[t.reason]?.color || 'var(--text-3)'}"></span>
+            <span class="bar" style="background:${['uni', 'work', 'kart', 'personal'].includes(t.reason) ? kindColor(t.reason) : 'var(--text-3)'}"></span>
             <div class="t"><b>${esc(t.title)}</b><span>${esc(range)}${t.status === 'needed' ? esc(askBy) : ''}${clashes.length ? `<span style="color:var(--danger)">${clashes.length} shift${clashes.length === 1 ? '' : 's'} clash — currently rota'd</span>` : ''}</span></div>
             <button class="pill status" data-status="${t.id}" style="background:color-mix(in srgb, ${st[1]} 18%, transparent);color:${st[1]}">${esc(st[0])}</button>
             <button class="del" aria-label="Delete">${ICONS.trash}</button>
@@ -383,30 +419,33 @@
       }
     }
 
-    if (sec === 'kart') {
-      if (tab === 'mmu') {
-        html += `<div class="tab-title">MMU Karting Society</div>
-        <div class="card"><h3>Society hub</h3><p class="sub">Dashboard, events, membership tiers, committee contacts and the committee-only finance view — ported natively into Iota in Phase 4, reading the same Supabase tables. Until then, the live app is one tap away.</p>
-        <a class="btn" href="https://magicjoynson.github.io/mmu-karting/" target="_blank" rel="noopener" style="margin-top:12px">Open MMU Karting ↗</a></div>`;
-      } else if (tab === 'racing') {
-        html += `<div class="tab-title">My Racing</div>` + empty('🏁', 'No sessions logged', 'Lap log, PB detection, the consistency analyser and the Track Playbook arrive in Phase 4. Hold the orb after a session to leave yourself a note in the meantime.', { label: 'Debrief note', hint: 'Note: track — ' });
-        const s = Store.settings;
-        if (s.trackAddress) html += `<div class="card"><h3>Victoria Karting</h3><p class="sub">${esc(s.trackAddress)} · ${esc(String(s.travelTrackMin || ''))} min ${esc(s.travelMode || 'walk')}${s.loadingMin ? ` + ${esc(String(s.loadingMin))} min loading on race days` : ''}</p></div>`;
-      } else if (tab === 'societies') {
-        const socs = Store.list('societies');
-        html += `<div class="tab-title">Societies</div>`;
-        html += socs.length ? socs.map(so => `<div class="card"><h3>${esc(so.name)} <span class="pill" ${so.status === 'prospective' ? 'style="background:rgba(255,255,255,.08);color:var(--text-2)"' : ''}>${esc(so.status)}</span></h3>${so.role ? `<p class="sub">${esc(so.role)}</p>` : ''}${so.notes ? `<p class="sub" style="margin-top:4px">${esc(so.notes)}</p>` : ''}${(so.links || []).map(l => `<a class="chip accent" style="margin-top:10px" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join(' ')}</div>`).join('')
-                           : empty('✨', 'No societies yet', 'Cards for any society — schedule, renewals, role duties, links.');
-        html += `<p class="field-note" style="padding:0 4px">Freshers' Fair 29–30 Sept — we'll update this list after.</p>`;
-      } else if (tab === 'events') {
-        const ev = Store.upcoming(now, 50).filter(x => x.kind === 'kart');
-        html += `<div class="tab-title">Upcoming</div>`;
-        html += ev.length ? `<div class="list">${ev.map(x => rowHTML(x)).join('')}</div>` : empty('🏎️', 'No karting events captured', 'Society events sync from the karting tables in Phase 4. Personal ones — practice, BUKC rounds — can be captured now.', { label: 'Add an event', hint: 'Karting ' });
+    if (sec === 'personal') {
+      if (tab === 'week') {
+        html += rightNowCard(now) + capacityStrip(now) + `<div data-calendar></div>`;
+      } else if (tab === 'money') {
+        html += moneyTab(now);
+      } else if (tab === 'admin') {
+        html += adminTab(now);
+      } else if (tab === 'targets') {
+        html += targetsTab(now);
       }
     }
 
     body.innerHTML = html;
+    if (sec === 'personal' && tab === 'week') { const calEl = $('[data-calendar]', body); mountCalendar(calEl); body.querySelectorAll('.cap-day').forEach(b => b.addEventListener('click', () => { calEl.showDay(b.dataset.day); calEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); })); }
+    const search = $('[data-note-search]', body);
+    if (search) {
+      const out = $('[data-note-results]', body), ms = Store.list('modules');
+      search.addEventListener('input', () => {
+        const q = search.value.trim().toLowerCase();
+        if (!q) { out.innerHTML = ''; return; }
+        const hits = Store.list('notes').filter(n => (n.title || '').toLowerCase().includes(q) || (n.md || '').toLowerCase().includes(q)).slice(0, 12);
+        out.innerHTML = hits.length ? `<div class="list" style="margin-bottom:14px">${hits.map(n => { const m = ms.find(x => x.id === n.module_id); return `<button class="row link" data-go="${m ? '#/module/' + m.id : '#/uni/modules'}"><span class="bar" style="background:${esc(m?.colour || 'var(--accent)')}"></span><div class="t"><b>${esc(n.title || n.md.slice(0, 60))}</b><span>${esc(m ? (m.code || m.name) + ' · ' : '')}${esc(n.md.slice(0, 90))}</span></div></button>`; }).join('')}</div>` : `<p class="field-note" style="padding:0 4px 12px">No notes match “${esc(search.value.trim())}”.</p>`;
+        out.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
+      });
+    }
     body.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
+    body.querySelectorAll('[data-watch-done]').forEach(b => b.addEventListener('click', () => { Store.update('watches', b.dataset.watchDone, { status: 'resolved' }); toast('Resolved'); renderTabBody(el, sec, tab); }));
     body.querySelectorAll('[data-capture-hint]').forEach(b => b.addEventListener('click', () => b.dataset.captureHint === '__timeoff' ? openTimeOff(() => renderTabBody(el, sec, tab)) : openCapture(sec, b.dataset.captureHint)));
     body.querySelectorAll('.row .del').forEach(b => b.addEventListener('click', e => {
       const row = e.currentTarget.closest('.row');
@@ -482,30 +521,24 @@
   // Unified calendar (Next Up → here). List or grid; filter by section.
   // ------------------------------------------------------------
   const KINDS = [['uni', 'University'], ['work', 'Work'], ['kart', 'Karting'], ['personal', 'Personal']];
-  const KIND_COLOR = k => SECTIONS[k]?.color || '#C7CBE0';
+  const KIND_COLOR = k => kindColor(k);
   const calState = (() => { try { return JSON.parse(localStorage.getItem('iota.cal') || '{}'); } catch (_) { return {}; } })();
   calState.view = calState.view || 'list';
   calState.filter = Array.isArray(calState.filter) && calState.filter.length ? calState.filter : KINDS.map(k => k[0]);
   const saveCal = () => localStorage.setItem('iota.cal', JSON.stringify(calState));
   const dayKey = d => { const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`; };
 
-  function renderCalendar() {
-    const el = document.createElement('section');
-    el.className = 'screen calendar-screen';
+  /** The unified calendar, mounted inside a host element (Personal › Week). */
+  function mountCalendar(el) {
     const now = new Date();
     calState.month = calState.month || dayKey(now).slice(0, 7);
     el.innerHTML = `
-      <header class="section-head">
-        <button class="btn icon ghost back" aria-label="Back to the Ring" data-go="#/">${ICONS.back}</button>
-        <h1><span class="kicker">Everything</span>Calendar</h1>
-        <div class="seg" role="tablist"><button data-view="list" role="tab">List</button><button data-view="grid" role="tab">Grid</button></div>
-      </header>
-      <div class="filters" data-filters>
+      <div class="cal-head"><div class="tab-title" style="margin:0">Everything</div><div class="seg" role="tablist"><button data-view="list" role="tab">List</button><button data-view="grid" role="tab">Grid</button></div></div>
+      <div class="filters" data-filters style="padding-left:0;padding-right:0">
         <button class="fkey all" data-kind="*">All</button>
         ${KINDS.map(([k, n]) => `<button class="fkey" data-kind="${k}" style="--k:${KIND_COLOR(k)}"><span class="dot"></span>${n}</button>`).join('')}
       </div>
-      <div class="scroll cal-body" data-body style="padding-bottom:40px"></div>`;
-    el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
+      <div class="cal-body" data-body></div>`;
     el.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => { calState.view = b.dataset.view; saveCal(); paint(); }));
     el.querySelectorAll('.fkey').forEach(b => b.addEventListener('click', () => {
       const k = b.dataset.kind;
@@ -587,7 +620,7 @@
       sheet.innerHTML = `<div class="sheet-backdrop" data-close></div>
         <div class="sheet-panel glass">
           <div class="sheet-grip"></div>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span class="dot" style="width:10px;height:10px;border-radius:50%;background:${KIND_COLOR(kind)};box-shadow:0 0 10px ${KIND_COLOR(kind)}"></span><span class="pill" style="background:rgba(255,255,255,.08);color:var(--text-2)">${esc(SECTIONS[kind]?.name || 'Personal')}</span></div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span class="dot" style="width:10px;height:10px;border-radius:50%;background:${KIND_COLOR(kind)};box-shadow:0 0 10px ${KIND_COLOR(kind)}"></span><span class="pill" style="background:rgba(255,255,255,.08);color:var(--text-2)">${esc(kindName(kind))}</span></div>
           <h2 style="font-size:20px;margin-bottom:6px">${esc(title)}</h2>
           <p class="sub" style="color:var(--text-2)">${esc(new Date(start).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }))} · ${esc(x.isTask || table === 'tasks' || table === 'assessments' ? 'due ' + Rules.fmtRange(start) : Rules.fmtRange(start, end))}${x.location ? ` · ${esc(x.location)}` : ''}</p>
           ${table === 'shifts' ? `<p class="sub" style="color:var(--text-2);margin-top:6px">${esc(String(x.break_min || 0))} min unpaid break${+Store.settings.rateHourly ? ` · ≈ £${Rules.payEstimate([x]).gross.toFixed(2)} gross` : ''}</p>` : ''}
@@ -602,7 +635,199 @@
       sheet.querySelector('[data-del]')?.addEventListener('click', () => { Store.remove(table, id); sheet.remove(); toast('Removed'); paint(); });
     }
     paint();
+    el.showDay = k => { calState.view = 'grid'; calState.month = k.slice(0, 7); calState.selDay = k; saveCal(); paint(); };
     return el;
+  }
+
+  // ------------------------------------------------------------
+  // Personal arc — Week helpers, Money / Admin / Targets (v1 shells with real numbers where they exist)
+  // ------------------------------------------------------------
+  /** Hours committed per day (events + shifts) for the next N days. */
+  function dayLoads(now, days = 14) {
+    const out = []; const items = Store.allTimed().filter(x => !x.isTask && x.ends_at);
+    for (let i = 0; i < days; i++) {
+      const d = new Date(now); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + i); const e = new Date(d); e.setDate(e.getDate() + 1);
+      let hrs = 0; const what = [];
+      for (const x of items) { const a = Math.max(new Date(x.starts_at), d), b = Math.min(new Date(x.ends_at), e); if (b > a) { hrs += (b - a) / 3600000; what.push(x); } }
+      const due = Store.allTimed().filter(x => x.isTask && dayKey(x.starts_at) === dayKey(d)).length;
+      out.push({ key: dayKey(d), date: d, hours: hrs, due, what });
+    }
+    return out;
+  }
+  function capacityStrip(now) {
+    const loads = dayLoads(now, 14);
+    if (!loads.some(l => l.hours || l.due)) return '';
+    return `<div class="card capacity"><div class="sub" style="display:flex;justify-content:space-between"><b style="color:var(--text)">Next 14 days</b><span>hours committed</span></div>
+      <div class="cap-grid">${loads.map(l => { const lvl = l.hours >= 9 ? 4 : l.hours >= 6 ? 3 : l.hours >= 3 ? 2 : l.hours > 0 ? 1 : 0; return `<button class="cap-day lvl${lvl} ${l.key === dayKey(now) ? 'today' : ''}" data-day="${l.key}" aria-label="${esc(l.date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }))}: ${l.hours.toFixed(1)} hours"><span class="d">${'MTWTFSS'[(l.date.getDay() + 6) % 7]}</span><span class="n">${l.date.getDate()}</span><span class="h">${l.hours ? l.hours.toFixed(0) + 'h' : (l.due ? '•' : '')}</span></button>`; }).join('')}</div>
+      <p class="field-note" style="padding:8px 0 0">Tap a heavy day to see what's stacking. Free-slot tinting from the energy layer comes later.</p></div>`;
+  }
+  function rightNowCard(now) {
+    const up = Store.upcoming(now, 5).filter(x => !x.isTask);
+    const live = up.find(x => new Date(x.starts_at) <= now && new Date(x.ends_at || x.starts_at) > now);
+    const nx = up.find(x => new Date(x.starts_at) > now);
+    const tasks = Store.tasks_open().sort((a, b) => new Date(a.due || 8e15) - new Date(b.due || 8e15));
+    let head, sub;
+    if (live) { head = `${esc(live.title)} — now`; sub = `Until ${Rules.fmtRange(live.ends_at)}.` + (nx ? ` Then ${esc(nx.title)} ${esc(Rules.fmtWhen(nx.starts_at, now))}.` : ''); }
+    else if (nx) {
+      const mins = Math.round((new Date(nx.starts_at) - now) / 60000), buf = Rules.leaveBufferFor(nx), free = mins - buf;
+      const h = Math.floor(free / 60), m = free % 60;
+      head = free <= 0 ? `Time to move for ${esc(nx.title)}` : `${h ? h + 'h ' : ''}${m}m free`;
+      sub = free <= 0 ? `${buf} min ${esc(Store.settings.travelMode || 'walk')} — you should be leaving.` : `${esc(nx.title)} ${esc(Rules.fmtWhen(nx.starts_at, now))}${buf && free <= 180 ? `, leave in ${free} min` : ''}.` + (tasks[0] ? ` Could do: <b>${esc(tasks[0].title)}</b>.` : ' Nothing on the list.');
+    } else { head = 'Nothing timed ahead'; sub = tasks.length ? `${tasks.length} open task${tasks.length === 1 ? '' : 's'} — top: <b>${esc(tasks[0].title)}</b>.` : 'Genuinely free. Rare.'; }
+    return `<div class="card rightnow"><div class="sub">Right now</div><h3>${head}</h3><p class="sub" style="margin-top:4px">${sub}</p></div>`;
+  }
+  function moneyTab(now) {
+    const s = Store.settings, rate = +s.rateHourly || 0, pp = Rules.payPeriods(now);
+    let html = `<div class="tab-title">Money</div>`;
+    if (pp && rate) {
+      const shifts = Store.list('shifts').filter(x => x.status !== 'cancelled');
+      const cur = Rules.payEstimate(shifts.filter(x => Rules.inPeriod(x, pp.current))), nxt = Rules.payEstimate(shifts.filter(x => Rules.inPeriod(x, pp.following)));
+      const days = Math.ceil((pp.current.payday - now) / 86400000);
+      html += `<div class="card money-hero"><div class="sub">Incoming</div><div class="big-num">£${cur.gross.toFixed(0)}<span style="font-size:14px;color:var(--text-2);margin-left:8px">gross · ${esc(pp.current.payday.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }))} · ${days} day${days === 1 ? '' : 's'}</span></div><p class="sub" style="margin-top:6px">Then ≈ £${nxt.gross.toFixed(0)} on ${esc(pp.following.payday.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }))}. Estimates from Work — “safe to spend” lands when payslips, bills and pots are in.</p></div>`;
+    } else html += `<div class="card"><h3>No pay set up</h3><p class="sub">Add your rate and a payday in Settings and the money view starts working.</p><button class="btn" data-go="#/settings" style="margin-top:12px">Open settings</button></div>`;
+    html += `<div class="card"><h3>Payslips</h3><p class="sub">Vault of real payslips, reconciled against the shift estimates. Photograph or paste one to EDEN and she files it — arriving in the next Money pass.</p></div>
+      <div class="card"><h3>Bills & subscriptions</h3><p class="sub">Rent, phone, Spotify, insurance — £/month and the persuasive £/year. Coming with payslips.</p></div>
+      <div class="card"><h3>Pots & Payday Plan</h3><p class="sub">Split each payday and student-loan drop into named pots. Coming with payslips.</p></div>
+      <div class="card"><h3>Student finance</h3><p class="sub">SFE drop dates get their own countdown. Tell EDEN the dates when the letter arrives.</p></div>`;
+    return html;
+  }
+  function adminTab(now) {
+    let html = `<div class="tab-title">Life admin</div>`;
+    const ws = Store.list('watches').filter(w => w.status !== 'resolved').sort((a, b) => new Date(a.expected_by || 8e15) - new Date(b.expected_by || 8e15));
+    html += `<div class="card"><h3>Watching</h3><p class="sub">Promises EDEN is keeping an eye on. Tap the tick when it's happened.</p>${ws.length ? `<div class="list" style="margin-top:10px">${ws.map(w => { const late = w.expected_by && new Date(w.expected_by + 'T23:59:59') < now; return `<div class="row"><span class="bar" style="background:${late ? 'var(--danger)' : 'var(--accent)'}"></span><div class="t"><b style="white-space:normal">${esc(w.text)}</b><span>${w.expected_by ? (late ? 'overdue — expected ' : 'expected ') + esc(new Date(w.expected_by + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })) : 'no date'}</span></div><button class="pill status" data-watch-done="${w.id}" style="background:rgba(110,231,183,.16);color:var(--ok)">Done</button></div>`; }).join('')}</div>` : `<p class="field-note" style="padding:8px 0 0">Nothing being watched. Tell EDEN “watch for…” and it lands here.</p>`}</div>`;
+    const rn = Store.list('renewals').sort((a, b) => new Date(a.expires_on || 8e15) - new Date(b.expires_on || 8e15));
+    html += `<div class="card"><h3>Expiry & renewals</h3><p class="sub">Railcard, passport, licence, insurance, memberships.</p>${rn.length ? `<div class="list" style="margin-top:10px">${rn.map(r => { const d = r.expires_on ? new Date(r.expires_on + 'T00:00:00') : null; const days = d ? Math.ceil((d - now) / 86400000) : null; return `<div class="row"><span class="bar" style="background:${days != null && days <= 30 ? 'var(--warn)' : 'var(--accent)'}"></span><div class="t"><b>${esc(r.name)}</b><span>${d ? esc(d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })) + (days != null ? ` · ${days < 0 ? 'expired' : days + ' days'}` : '') : ''}${r.notes ? ' · ' + esc(r.notes) : ''}</span></div></div>`; }).join('')}</div>` : `<p class="field-note" style="padding:8px 0 0">None on file yet — tell EDEN “my railcard expires 3 March” and it appears here with a lead-time nudge.</p>`}</div>`;
+    const pn = Store.list('notes').filter(n => n.section === 'personal');
+    if (pn.length) html += `<div class="card"><h3>Personal notes</h3><div class="list" style="margin-top:10px">${pn.slice(0, 10).map(n => rowHTML({ ...n, _table: 'notes', title: n.title || n.md, kind: 'personal', location: n.title ? n.md.slice(0, 80) : '' })).join('')}</div></div>`;
+    html += `<div class="card"><h3>Documents, contacts, decisions</h3><p class="sub">Document vault (tenancy, contract, payslips), key contacts with tap-to-call, decision memory and the milestone archive — next Admin pass.</p></div>`;
+    return html;
+  }
+  function targetsTab(now) {
+    let html = `<div class="tab-title">Targets</div>`;
+    const from = new Date(now); from.setDate(from.getDate() - 30);
+    const items = Store.allTimed().filter(x => !x.isTask && x.ends_at && new Date(x.starts_at) >= from && new Date(x.starts_at) <= now);
+    const hrs = { uni: 0, work: 0, personal: 0 };
+    for (const x of items) { const k = x.kind === 'kart' ? 'uni' : (x.kind in hrs ? x.kind : 'personal'); hrs[k] += Rules.hours(x.starts_at, x.ends_at); }
+    const tot = hrs.uni + hrs.work + hrs.personal;
+    html += `<div class="card"><div class="sub" style="display:flex;justify-content:space-between"><b style="color:var(--text)">Life balance</b><span>last 30 days · ${tot.toFixed(0)} h</span></div>
+      ${tot ? `<div class="balance">${['uni', 'work', 'personal'].map(k => `<div class="brow"><span class="k">${esc(SECTIONS[k].name)}</span><div class="track"><div style="width:${(hrs[k] / tot * 100).toFixed(0)}%;background:${SECTIONS[k].color}"></div></div><span class="v">${hrs[k].toFixed(0)} h</span></div>`).join('')}</div><p class="field-note" style="padding:8px 0 0">Society hours count as University. Untimed study doesn't show yet — the focus timer will fix that.</p>` : `<p class="field-note" style="padding:8px 0 0">Nothing timed in the last month.</p>`}</div>`;
+    html += `<div class="card"><h3>Weekly targets</h3><p class="sub">A small set you choose — “3 focus blocks”, “£0 takeaway” — reviewed by the Sunday briefing. Coming with the Sunday review.</p></div>
+      <div class="card"><h3>Semester goals</h3><p class="sub">Grade targets per module (feeds the calculator), a savings target, and an hours cap on work in assessment weeks — EDEN warns when you're over. Coming with the module hubs.</p></div>`;
+    return html;
+  }
+
+  // ------------------------------------------------------------
+  // Society mini-hub (University › Societies › tap). Society-tinted, own back control.
+  // ------------------------------------------------------------
+  const socTabState = {};
+  function renderSociety(id) {
+    const so = Store.get('societies', id);
+    const el = document.createElement('section');
+    el.className = 'screen section-screen society-screen';
+    if (!so) { el.innerHTML = `<header class="section-head"><button class="btn icon ghost back" data-go="#/uni/societies">${ICONS.back}</button><h1>Society</h1></header><div class="scroll">${empty('✨', 'Not found', 'That society isn\'t in your list any more.')}</div>`; el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go))); return el; }
+    const col = socColor(so); tint(col);
+    const kart = isKartSoc(so);
+    const tabs = kart ? [['club', 'Club'], ['racing', 'My Racing'], ['events', 'Events']] : [['about', 'About'], ['events', 'Events']];
+    socTabState[id] = socTabState[id] || tabs[0][0];
+    el.innerHTML = `
+      <header class="section-head">
+        <button class="btn icon ghost back" aria-label="Back to societies" data-go="#/uni/societies">${ICONS.back}</button>
+        <h1><span class="kicker">Society · ${esc(so.status === 'committee' ? (so.role || 'Committee') : so.status)}</span>${esc(so.name)}</h1>
+        <button class="btn icon ghost" aria-label="Quick add" data-capture>${ICONS.plus}</button>
+      </header>
+      <div class="seg soc-seg" role="tablist">${tabs.map(t => `<button data-stab="${t[0]}" role="tab">${esc(t[1])}</button>`).join('')}</div>
+      <div class="scroll" data-body style="padding-bottom:40px"></div>`;
+    el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
+    $('[data-capture]', el).addEventListener('click', () => openCapture('kart', kart ? 'Karting ' : so.name + ' '));
+    const body = $('[data-body]', el), now = new Date(), s = Store.settings;
+    const paint = () => {
+      const t = socTabState[id];
+      el.querySelectorAll('[data-stab]').forEach(b => b.classList.toggle('active', b.dataset.stab === t));
+      let html = '';
+      if (t === 'club') {
+        html += `<div class="card"><h3>Society hub</h3><p class="sub">Dashboard, events, membership tiers, committee contacts and the committee-only finance view — ported natively here next, reading the same Supabase tables. Until then the live app is one tap away.</p>
+          <a class="btn" href="https://magicjoynson.github.io/mmu-karting/" target="_blank" rel="noopener" style="margin-top:12px">Open MMU Karting ↗</a></div>`;
+        html += `<div class="card"><h3>Season</h3><p class="sub">BUKC rounds, practice days and socials show under Events and in your Week in this colour. Kart spend (fuel, tyres, entries) is tracked in Personal › Money tagged <i>karting</i>, and rolls up here once Money lands.</p></div>`;
+        if (so.notes) html += `<div class="card"><p class="sub">${esc(so.notes)}</p></div>`;
+      } else if (t === 'racing') {
+        html += empty('🏁', 'No sessions logged', 'Lap log, PB detection, the consistency analyser, Track Playbook and readiness pack all live here. Hold the orb after a session to leave yourself a debrief note in the meantime.', { label: 'Debrief note', hint: 'Note: track — ' });
+        if (s.trackAddress) html += `<div class="card"><h3>Victoria Karting</h3><p class="sub">${esc(s.trackAddress)} · ${esc(String(s.travelTrackMin || ''))} min ${esc(s.travelMode || 'walk')}${s.loadingMin ? ` + ${esc(String(s.loadingMin))} min loading on race days` : ''}</p></div>`;
+        const tn = Store.list('notes').filter(n => n.section === 'kart');
+        if (tn.length) html += `<div class="tab-title" style="margin-top:14px">Track notes</div><div class="list">${tn.map(n => rowHTML({ ...n, _table: 'notes', title: n.title || n.md, kind: 'kart', location: n.title ? n.md.slice(0, 80) : '' })).join('')}</div>`;
+      } else if (t === 'about') {
+        html += `<div class="card"><h3>${esc(so.status === 'prospective' ? 'Prospective' : so.status === 'committee' ? 'Committee' : 'Member')}</h3>${so.role ? `<p class="sub">${esc(so.role)}</p>` : ''}${so.notes ? `<p class="sub" style="margin-top:4px">${esc(so.notes)}</p>` : ''}${so.renewal_date ? `<p class="sub" style="margin-top:6px">Membership renews ${esc(new Date(so.renewal_date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }))}</p>` : ''}</div>`;
+        html += `<div class="card"><h3>Hub</h3><p class="sub">Events, membership and renewal, role duties, links and notes — and, for committee roles, the receipt-to-claim drafter. Fills in once you've joined.</p></div>`;
+      } else if (t === 'events') {
+        const ev = kart ? Store.upcoming(now, 50).filter(x => x.kind === 'kart') : [];
+        html += ev.length ? `<div class="list">${ev.map(x => rowHTML(x)).join('')}</div>` : empty('🗓️', 'No upcoming events', kart ? 'Society events sync from the karting tables in the native port. Practice, BUKC rounds and socials can be captured now.' : 'Nothing captured for this society yet.', { label: 'Add an event', hint: kart ? 'Karting ' : so.name + ' ' });
+      }
+      const links = (so.links || []);
+      if (links.length && t !== 'racing') html += `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">${links.map(l => `<a class="chip accent" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('')}</div>`;
+      body.innerHTML = html;
+      body.querySelectorAll('[data-capture-hint]').forEach(b => b.addEventListener('click', () => openCapture('kart', b.dataset.captureHint)));
+      body.querySelectorAll('.row .del').forEach(b => b.addEventListener('click', e => { const row = e.currentTarget.closest('.row'); Store.remove(row.dataset.table, row.dataset.id); toast('Removed'); paint(); }));
+    };
+    el.querySelectorAll('[data-stab]').forEach(b => b.addEventListener('click', () => { socTabState[id] = b.dataset.stab; paint(); }));
+    paint();
+    return el;
+  }
+
+  // ------------------------------------------------------------
+  // Module hub (University › Modules › tap): Info · Sessions · Assessments · Notes in one place.
+  // ------------------------------------------------------------
+  function renderModule(id) {
+    const m = Store.get('modules', id);
+    const el = document.createElement('section');
+    el.className = 'screen section-screen module-screen';
+    if (!m) { el.innerHTML = `<header class="section-head"><button class="btn icon ghost back" data-go="#/uni/modules">${ICONS.back}</button><h1>Module</h1></header><div class="scroll">${empty('📚', 'Not found', 'That module isn\'t on file any more.')}</div>`; el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go))); return el; }
+    if (m.colour) tint(m.colour);
+    const now = new Date();
+    el.innerHTML = `
+      <header class="section-head">
+        <button class="btn icon ghost back" aria-label="Back to modules" data-go="#/uni/modules">${ICONS.back}</button>
+        <h1><span class="kicker">${esc(m.code || 'Module')}</span>${esc(m.name)}</h1>
+        <button class="btn icon ghost" aria-label="Add a note" data-note>${ICONS.plus}</button>
+      </header>
+      <div class="scroll" data-body style="padding-bottom:40px"></div>`;
+    el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
+    const body = $('[data-body]', el);
+    const paint = () => {
+      const sessions = Store.list('events').filter(e => e.module_id === id && e.status !== 'cancelled').sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at));
+      const upS = sessions.filter(e => new Date(e.ends_at || e.starts_at) >= now), pastS = sessions.filter(e => new Date(e.ends_at || e.starts_at) < now);
+      const missed = pastS.filter(e => e.status === 'missed').length;
+      const as = Store.list('assessments').filter(a => a.module_id === id).sort((a, b) => new Date(a.due_at || 8e15) - new Date(b.due_at || 8e15));
+      const graded = as.filter(a => a.status === 'graded' && a.mark != null && a.weight_pct);
+      const wSum = graded.reduce((x, a) => x + +a.weight_pct, 0);
+      const avg = wSum ? graded.reduce((x, a) => x + +a.mark * +a.weight_pct, 0) / wSum : null;
+      const notes = Store.list('notes').filter(n => n.module_id === id);
+      const links = m.links || [];
+      let html = `<div class="card"><h3>Info</h3><div class="kv">${[['Lecturer', m.lecturer], ['Room', m.room], ['Credits', m.credits]].filter(x => x[1]).map(x => `<div><span>${x[0]}</span><b>${esc(String(x[1]))}</b></div>`).join('') || '<p class="sub">Lecturer, room, credits and links fill in from the timetable or from EDEN.</p>'}</div>${links.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${links.map(l => `<a class="chip accent" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('')}</div>` : ''}</div>`;
+      html += `<div class="card"><div class="sub" style="display:flex;justify-content:space-between"><h3>Sessions</h3><span>${sessions.length ? `${pastS.length} done${missed ? ` · ${missed} missed` : ''} · ${upS.length} to come` : 'none yet'}</span></div>${upS.length ? `<div class="list" style="margin-top:10px">${upS.slice(0, 6).map(e => rowHTML({ ...e, _table: 'events' }, { deletable: false })).join('')}</div>` : `<p class="field-note" style="padding:8px 0 0">Timetable slots for this module show here with attendance and catch-up debt.</p>`}</div>`;
+      html += `<div class="card"><div class="sub" style="display:flex;justify-content:space-between"><h3>Assessments</h3><span>${avg != null ? `avg ${avg.toFixed(0)}% of ${wSum}% marked` : (as.length ? `${as.length} on file` : 'none yet')}</span></div>${as.length ? `<div class="list" style="margin-top:10px">${as.map(a => `<div class="row"><span class="bar" style="background:${a.status === 'graded' ? 'var(--ok)' : a.status === 'submitted' ? 'var(--text-3)' : 'var(--accent)'}"></span><div class="t"><b>${esc(a.title)}</b><span>${a.weight_pct ? a.weight_pct + '% · ' : ''}${esc(String(a.status).replace('_', ' '))}${a.mark != null ? ` · ${a.mark}%` : ''}</span></div>${a.due_at ? `<div class="when">${esc(Rules.fmtWhen(a.due_at))}</div>` : ''}</div>`).join('')}</div>` : `<p class="field-note" style="padding:8px 0 0">Weightings, status pipeline, workback milestones and marks → the 2:1/First calculator.</p>`}</div>`;
+      html += `<div class="card"><div class="sub" style="display:flex;justify-content:space-between"><h3>Notes</h3><button class="chip accent" data-note>${ICONS.plus} New</button></div>${notes.length ? `<div class="list" style="margin-top:10px">${notes.map(n => rowHTML({ ...n, _table: 'notes', title: n.title || n.md, kind: 'uni', location: [n.week ? 'wk ' + n.week : '', n.title ? n.md.slice(0, 80) : ''].filter(Boolean).join(' · ') })).join('')}</div>` : `<p class="field-note" style="padding:8px 0 0">Per-week markdown notes for this module. Photo attachments, revision mode and flashcards come later.</p>`}</div>`;
+      body.innerHTML = html;
+      body.querySelectorAll('.row .del').forEach(b => b.addEventListener('click', e => { const row = e.currentTarget.closest('.row'); Store.remove(row.dataset.table, row.dataset.id); toast('Removed'); paint(); }));
+      el.querySelectorAll('[data-note]').forEach(b => { b.onclick = () => openNote(m, paint); });
+    };
+    paint();
+    return el;
+  }
+  /** Note sheet scoped to a module. */
+  function openNote(m, onDone) {
+    const sheet = document.createElement('div'); sheet.className = 'sheet';
+    sheet.innerHTML = `<div class="sheet-backdrop" data-close></div>
+      <form class="sheet-panel glass" autocomplete="off">
+        <div class="sheet-grip"></div>
+        <div class="sheet-title">Note · ${esc(m.code || m.name)}</div>
+        <div class="field"><div class="row2"><div><label>Title</label><input name="title" placeholder="e.g. Lecture 3 — pricing"></div><div><label>Week</label><input name="week" type="number" min="1" max="52" inputmode="numeric"></div></div></div>
+        <div class="field"><label>Note</label><textarea name="md" rows="5" required placeholder="Markdown is fine."></textarea></div>
+        <div class="sheet-row"><span class="hint">Saved to this module.</span><button class="btn primary" type="submit">Save</button></div>
+      </form>`;
+    document.body.appendChild(sheet);
+    const f = sheet.querySelector('form');
+    sheet.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => sheet.remove()));
+    f.addEventListener('submit', e => { e.preventDefault(); const d = Object.fromEntries(new FormData(f).entries()); if (!d.md.trim()) return; Store.insert('notes', { section: 'uni', module_id: m.id, title: d.title.trim() || null, week: d.week ? +d.week : null, md: d.md.trim(), tags: [] }); sheet.remove(); toast('Note saved'); onDone?.(); });
+    setTimeout(() => f.title.focus(), 60);
   }
 
   // ------------------------------------------------------------
@@ -758,7 +983,7 @@
           <p class="field-note">Everything lives in the <code>iota</code> schema in Supabase, locked to your account. This device keeps a cached copy for offline reads; offline writes queue and sync when you're back.</p>
         </div>
         <div class="setting-group"><h3>About</h3>
-          <div class="card" style="display:flex;gap:14px;align-items:center"><img src="./assets/brand-512.png" alt="" width="64" height="64" style="border-radius:16px"><div><b>Iota</b> · v0.2<br><span class="sub">The smallest thing that runs everything. EDEN at the centre — she's the friend who happens to run your life.</span></div></div>
+          <div class="card" style="display:flex;gap:14px;align-items:center"><img src="./assets/brand-512.png" alt="" width="64" height="64" style="border-radius:16px"><div><b>Iota</b> · v0.7<br><span class="sub">The smallest thing that runs everything. EDEN at the centre — she's the friend who happens to run your life.</span></div></div>
         </div>
       </div>`;
     el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
@@ -839,7 +1064,7 @@
     const t = capInput.value.trim(); if (!t) { capHint.textContent = 'EDEN will file it as a task, event, shift or note.'; return; }
     const c = Rules.classify(t);
     const when = c.row.starts_at || c.row.due;
-    capHint.textContent = `→ ${c.label}${when ? ' · ' + Rules.fmtWhen(when) : ''}${c.row.kind || c.row.section ? ' · ' + (SECTIONS[c.row.kind || c.row.section]?.name || 'personal') : ''}`;
+    capHint.textContent = `→ ${c.label}${when ? ' · ' + Rules.fmtWhen(when) : ''}${c.row.kind || c.row.section ? ' · ' + kindName(c.row.kind || c.row.section) : ''}`;
   });
   capInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); capForm.requestSubmit(); } if (e.key === 'Escape') closeCapture(); });
   capForm.addEventListener('submit', e => {

@@ -22,18 +22,22 @@
     ],
     pay_rates: [{ id: 'r1', employer: "McDonald's (Oxford Road)", role: 'Crew member', hourly: 12.64, effective_from: '2026-08-01' }],
     events: [
-      { id: 'e1', kind: 'uni', title: 'Lecture — Marketing Principles', starts_at: iso(2, 9), ends_at: iso(2, 11), location: 'BS 3.12', status: 'planned', source: 'claude' },
+      { id: 'e1', kind: 'uni', title: 'Lecture — Marketing Principles', module_id: 'm1', starts_at: iso(2, 9), ends_at: iso(2, 11), location: 'BS 3.12', status: 'planned', source: 'claude' },
       { id: 'e2', kind: 'kart', title: "Freshers' Fair — day 1", starts_at: '2026-09-29T09:00:00+00:00', ends_at: '2026-09-29T15:00:00+00:00', location: 'MMU campus', status: 'planned', source: 'claude' },
     ],
     societies: [
-      { id: 'so1', name: 'MMU Karting', status: 'committee', role: 'Committee', links: [{ label: 'Society app', url: 'https://magicjoynson.github.io/mmu-karting/' }], notes: 'Flagship', sort: 0 },
-      { id: 'so2', name: 'Football', status: 'prospective', links: [], notes: "Try to join a team — check at Freshers' Fair", sort: 1 },
-      { id: 'so3', name: 'Badminton', status: 'prospective', links: [], notes: 'Maybe', sort: 2 },
+      { id: 'so1', name: 'MMU Karting', status: 'committee', role: 'Committee', colour: '#4DA3FF', links: [{ label: 'Society app', url: 'https://magicjoynson.github.io/mmu-karting/' }], notes: 'Flagship', sort: 0 },
+      { id: 'so2', name: 'Football', status: 'prospective', colour: '#4ADE80', links: [], notes: "Try to join a team — check at Freshers' Fair", sort: 1 },
+      { id: 'so3', name: 'Badminton', status: 'prospective', colour: '#FACC15', links: [], notes: 'Maybe', sort: 2 },
     ],
     watches: [{ id: 'w1', text: 'MMU timetable arrives — import into Iota', expected_by: '2026-08-18', status: 'open' }],
     tasks: [{ id: 't1', title: 'Sort student finance letter', section: 'personal', due: iso(4, 12), status: 'open' }],
     time_off: [{ id: 'to1', title: 'BUKC Round 1', starts_on: iso(9, 9).slice(0, 10), ends_on: iso(10, 9).slice(0, 10), ask_by: iso(2, 9).slice(0, 10), reason: 'kart', status: 'needed' }, { id: 'to2', title: 'Home for the weekend', starts_on: iso(20, 9).slice(0, 10), ends_on: iso(21, 9).slice(0, 10), ask_by: null, reason: 'personal', status: 'asked' }],
-    notes: [], briefings: [], modules: [], assessments: [], captures: [],
+    modules: [{ id: 'm1', code: 'BUS101', name: 'Marketing Principles', colour: '#F472B6', lecturer: 'Dr Example', room: 'BS 3.12', credits: 20, links: [] }],
+    notes: [{ id: 'n1', section: 'uni', module_id: 'm1', week: 1, title: 'Lecture 1 — the 4 Ps', md: 'Product, price, place, promotion. Reading: ch. 1–2.', tags: [], created_at: iso(-1, 10) }, { id: 'n2', section: 'uni', module_id: null, title: null, md: 'Ask about the group project split', tags: [], created_at: iso(-2, 10) }],
+    assessments: [{ id: 'a1', module_id: 'm1', title: 'Marketing report', weight_pct: 40, due_at: iso(20, 16), status: 'not_started' }],
+    renewals: [{ id: 'rn1', name: '16–25 Railcard', expires_on: '2027-03-01', notes: null }],
+    briefings: [], captures: [],
   };
   window.__previewWrites = [];
   SB.rest = async (method, path, opts) => { if (method === 'GET') return fx[path.split('?')[0]] || []; window.__previewWrites.push({ method, path, body: opts && opts.body }); return null; };
