@@ -93,8 +93,27 @@
       const j = await authPost('/auth/v1/token?grant_type=password', { email: session.user.email, password: pw });
       saveSession(j); return true;
     },
-    /** Forgot password: email a recovery code (the "Reset password" email template must include {{ .Token }}). */
-    async requestReset(email) { return authPost('/auth/v1/recover', { email }); },
+    /** Forgot password: emails a recovery link back to this app (or a code, if the template ever includes {{ .Token }}).
+     *  The redirect must be in Supabase → Authentication → URL Configuration → Redirect URLs. */
+    async requestReset(email) {
+      const back = location.origin + location.pathname;
+      return authPost('/auth/v1/recover?redirect_to=' + encodeURIComponent(back), { email });
+    },
+    /** If the page was opened from a recovery link (#access_token=…&type=recovery), turn it into a session.
+     *  Returns 'recovery' | 'error:<msg>' | null, and cleans the hash either way. */
+    async consumeRecoveryHash() {
+      const h = location.hash || '';
+      if (!/access_token=|error=/.test(h)) return null;
+      const p = new URLSearchParams(h.replace(/^#\/?/, ''));
+      history.replaceState(null, '', location.pathname + location.search + '#/');
+      if (p.get('error')) return 'error:' + (p.get('error_description') || p.get('error_code') || p.get('error')).replace(/\+/g, ' ');
+      const access_token = p.get('access_token'), refresh_token = p.get('refresh_token');
+      if (!access_token) return null;
+      let user = null;
+      try { const r = await fetch(URL + '/auth/v1/user', { headers: { apikey: KEY, Authorization: 'Bearer ' + access_token } }); user = r.ok ? await r.json() : null; } catch (_) {}
+      saveSession({ access_token, refresh_token, token_type: 'bearer', expires_in: +p.get('expires_in') || 3600, expires_at: Math.floor(Date.now() / 1000) + (+p.get('expires_in') || 3600), user });
+      return p.get('type') === 'recovery' ? 'recovery' : 'signin';
+    },
     /** Exchange the emailed code for a session, then the caller sets a new password. */
     async verifyResetCode(email, token) {
       const j = await authPost('/auth/v1/verify', { type: 'recovery', email, token });

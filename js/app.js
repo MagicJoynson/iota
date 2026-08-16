@@ -1137,15 +1137,17 @@
         </form>
         <form class="glass login-card" data-reset hidden autocomplete="off">
           <h2>Reset password</h2>
-          <p class="sub" data-reset-step1>We'll email a 6-digit code to your account address.</p>
+          <p class="sub" data-reset-step1>We'll email you a reset link. Open it on this phone and you'll be asked for a new password.</p>
           <div class="field" data-reset-step1><label for="rs-email">Email</label><input id="rs-email" name="email" type="email" inputmode="email" autocomplete="username" required></div>
           <div data-reset-step2 hidden>
-            <p class="sub">Code sent — check your inbox (and junk). It's valid for about an hour.</p>
-            <div class="field"><label for="rs-code">Code from the email</label><input id="rs-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,8}" placeholder="123456"></div>
-            <div class="field"><div class="row2"><div><label for="rs-pw1">New password</label><input id="rs-pw1" name="pw1" type="password" autocomplete="new-password" minlength="8"></div><div><label for="rs-pw2">Again</label><input id="rs-pw2" name="pw2" type="password" autocomplete="new-password" minlength="8"></div></div></div>
+            <p class="sub"><b>Email sent</b> — check your inbox (and junk) and tap <i>Reset password</i>. It brings you straight back here to choose a new one. The link is valid for about an hour.</p>
+            <details style="margin-top:12px"><summary class="sub" style="cursor:pointer">Got a code instead of a link?</summary>
+              <div class="field" style="margin-top:8px"><label for="rs-code">Code from the email</label><input id="rs-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,8}" placeholder="123456"></div>
+              <div class="field"><div class="row2"><div><label for="rs-pw1">New password</label><input id="rs-pw1" name="pw1" type="password" autocomplete="new-password" minlength="8"></div><div><label for="rs-pw2">Again</label><input id="rs-pw2" name="pw2" type="password" autocomplete="new-password" minlength="8"></div></div></div>
+            </details>
           </div>
           <div class="login-err" data-reset-err hidden></div>
-          <button class="btn primary" type="submit" style="width:100%" data-reset-go>Send code</button>
+          <button class="btn primary" type="submit" style="width:100%" data-reset-go>Email me a reset link</button>
           <button class="link-btn" type="button" data-reset-back>Back to sign in</button>
         </form>
       </div>`;
@@ -1177,13 +1179,13 @@
         try {
           await SB.requestReset(email);
           resetStage = 2; el.querySelectorAll('[data-reset-step1]').forEach(x => x.hidden = true); $('[data-reset-step2]', el).hidden = false;
-          rgo.textContent = 'Set new password'; setTimeout(() => $('#rs-code', el).focus(), 60);
-        } catch (ex) { rerr.textContent = ex.message || 'Could not send the code'; rerr.hidden = false; rgo.textContent = 'Send code'; }
+          rgo.textContent = 'I used the code — set new password'; rgo.classList.remove('primary');
+        } catch (ex) { rerr.textContent = /rate|seconds/i.test(ex.message || '') ? 'Too soon — wait a minute before asking for another email.' : (ex.message || 'Could not send the email'); rerr.hidden = false; rgo.textContent = 'Email me a reset link'; }
         finally { rgo.disabled = false; }
         return;
       }
       const code = $('#rs-code', el).value.trim(), a = $('#rs-pw1', el).value, b = $('#rs-pw2', el).value;
-      if (!/^\d{6,8}$/.test(code)) { rerr.textContent = 'Enter the code from the email.'; rerr.hidden = false; return; }
+      if (!/^\d{6,8}$/.test(code)) { $('[data-reset-step2] details', el).open = true; rerr.textContent = 'Tap the link in the email — or, if it gave you a code, enter it here.'; rerr.hidden = false; return; }
       if (a.length < 8) { rerr.textContent = 'New password needs at least 8 characters.'; rerr.hidden = false; return; }
       if (a !== b) { rerr.textContent = 'Those two don\'t match.'; rerr.hidden = false; return; }
       rgo.disabled = true; rgo.textContent = 'Checking code…';
@@ -1196,6 +1198,38 @@
         await Store.sync(); boot();
       } catch (ex) { rerr.textContent = /expired|invalid|token/i.test(ex.message || '') ? 'That code didn\'t work — check it, or go back and send a new one.' : (ex.message || 'Could not reset'); rerr.hidden = false; rgo.disabled = false; rgo.textContent = 'Set new password'; }
     });
+    return el;
+  }
+
+  /** Landed here from the reset-link email: session exists (recovery), now choose a new password. */
+  function renderNewPassword() {
+    const el = document.createElement('section');
+    el.className = 'screen login-screen';
+    el.innerHTML = `
+      <div class="login-wrap">
+        <div class="login-orb"><canvas></canvas></div>
+        <form class="glass login-card" autocomplete="off">
+          <h2>Choose a new password</h2>
+          <p class="sub">${esc(SB.user?.email || 'Your account')} — verified from the email link.</p>
+          <div class="field"><label for="np1">New password</label><input id="np1" name="pw1" type="password" autocomplete="new-password" minlength="8" required></div>
+          <div class="field"><label for="np2">Again</label><input id="np2" name="pw2" type="password" autocomplete="new-password" minlength="8" required></div>
+          <div class="login-err" data-err hidden></div>
+          <button class="btn primary" type="submit" style="width:100%">Save and continue</button>
+          <p class="field-note" style="padding:10px 0 0;text-align:center">If Iota is installed on your Home Screen, this may have opened in Safari — that's fine: set the password here, then open Iota and sign in with it.</p>
+        </form>
+      </div>`;
+    mountOrb($('.login-orb canvas', el), { size: 120 });
+    const form = $('form', el), err = $('[data-err]', el);
+    form.addEventListener('submit', async e => {
+      e.preventDefault(); err.hidden = true;
+      const a = form.pw1.value, b = form.pw2.value;
+      if (a.length < 8) { err.textContent = 'At least 8 characters.'; err.hidden = false; return; }
+      if (a !== b) { err.textContent = 'Those two don\'t match.'; err.hidden = false; return; }
+      const btn = $('button[type=submit]', form); btn.disabled = true; btn.textContent = 'Saving…';
+      try { await SB.changePassword(a); toast('Password saved — you\'re signed in'); await Store.sync(); boot(); }
+      catch (ex) { err.textContent = /expired|invalid|jwt/i.test(ex.message || '') ? 'That link has expired — go back and request a new one.' : (ex.message || 'Could not save'); err.hidden = false; btn.disabled = false; btn.textContent = 'Save and continue'; }
+    });
+    setTimeout(() => form.pw1.focus(), 80);
     return el;
   }
 
@@ -1213,7 +1247,13 @@
     render();
     Store.sync().then(ok => { if (!ok && !Store.syncedAt) toast('Offline — showing cached data'); });
   }
-  boot();
+  // Opened from a password-reset email link? Turn the token into a session and ask for a new password before anything else.
+  if (/access_token=|error=/.test(location.hash)) {
+    SB.consumeRecoveryHash().then(kind => {
+      if (kind === 'recovery') { for (const o of orbs) o.destroy(); orbs.clear(); app.innerHTML = ''; current = null; app.appendChild(renderNewPassword()); }
+      else { if (kind && kind.startsWith('error:')) toast(kind.slice(6).replace(/^Email link is invalid or has expired$/i, 'That reset link has expired — request a new one')); boot(); }
+    });
+  } else boot();
   SB.onAuth(s => { if (!s && current !== null) { toast('Signed out — please sign in again'); boot(); } });
   // Splash: EDEN wakes up (thinking → idle), then the Ring fades in beneath her
   const splashOrb = new EdenOrb($('#splashOrb'), { size: 260, state: 'thinking' }); splashOrb.start();
