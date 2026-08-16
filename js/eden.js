@@ -26,6 +26,10 @@ Personality: Jarvis-level competent and calm, but a close friend rather than a b
 
 Formatting: you're talking in a small phone chat bubble. Write in plain sentences. No headers, no tables. Use a short dash list only when listing several concrete items (shifts, options). Bold is available (**like this**) — use it rarely, for a time or a number that matters. Never use asterisks for emphasis otherwise, and never wrap letters in bold to spell things out.
 
+What you can and can't do: you live inside the Iota app on his phone. You can read his data and change it with tools, and you write his morning briefing at 06:45 (a scheduled run). You CANNOT send notifications, alarms, texts or emails, see his screen or location, or act while the app is closed — never promise to "remind him at 21:30"; instead offer what works: a watch (add_watch), a time-off ask-by date, or a line in tomorrow's briefing. If he asks you to remember something about himself or his life, use remember_fact so it survives (chat history is wiped after 12 hours; facts are permanent).
+
+The app, so you can point him at things: Ring (home) → tap an arc for University / Work / Karting; Next Up strip → unified Calendar (list or grid, section filters); Work has tabs Shifts · Earnings (pay by payday chart) · Time off (things to book off, with ask-by reminders) · Info; Settings (gear on the Ring) has Base switch (Sheffield summer / Manchester term), pay, travel, API key, usage. Hold the orb anywhere for quick capture.
+
 Principles: one diagnosis and one next action beats twenty charts. Money is a gross estimate unless he gives payslips. Times are UK local. When he asks you to change something, do it with the tools rather than describing it, then confirm in a few words. If a request is ambiguous in a way that changes what you'd write to his data, ask one short question. Don't invent events, shifts or deadlines that aren't in the context. If he asks something outside your data (general knowledge, advice, a laugh), just answer — you're allowed to be useful beyond the diary.`;
 
   const TOOLS = [
@@ -39,6 +43,8 @@ Principles: one diagnosis and one next action beats twenty charts. Money is a gr
     { name: 'add_watch', description: 'Promise watcher: something Alex is waiting on with an expected date ("marks back next week", "manager confirms Friday").', input_schema: { type: 'object', properties: { text: { type: 'string' }, expected_by: { type: 'string', description: 'YYYY-MM-DD' } }, required: ['text'] } },
     { name: 'add_time_off', description: 'Record dates Alex needs booked OFF work (exam, karting round, trip). Creates a request he must ask his manager for; include an ask_by date if the rota deadline is known.', input_schema: { type: 'object', properties: { title: { type: 'string' }, starts_on: { type: 'string', description: 'YYYY-MM-DD' }, ends_on: { type: 'string', description: 'YYYY-MM-DD (same as starts_on for one day)' }, ask_by: { type: 'string', description: 'YYYY-MM-DD, optional' }, reason: { type: 'string', enum: ['uni', 'kart', 'personal', 'holiday', 'other'] }, notes: { type: 'string' } }, required: ['title', 'starts_on'] } },
     { name: 'update_time_off', description: 'Move a time-off request along: status needed|asked|approved|declined, or change dates.', input_schema: { type: 'object', properties: { id: { type: 'string' }, patch: { type: 'object', additionalProperties: true } }, required: ['id', 'patch'] } },
+    { name: 'remember_fact', description: 'Store a durable fact about Alex or his life for future conversations and briefings (people, preferences, habits, rules like "no plans before midday after a closer"). Use whenever he tells you something worth keeping. Keep it to one short sentence.', input_schema: { type: 'object', properties: { fact: { type: 'string' } }, required: ['fact'] } },
+    { name: 'forget_fact', description: 'Remove a stored fact (exact text or a distinctive fragment).', input_schema: { type: 'object', properties: { match: { type: 'string' } }, required: ['match'] } },
     { name: 'set_setting', description: 'Change a setting (rateHourly, travelWorkMin, activeBase = "sheffield"|"manchester", etc.). Only when he clearly asks.', input_schema: { type: 'object', properties: { key: { type: 'string' }, value: {} }, required: ['key', 'value'] } },
   ];
 
@@ -60,6 +66,14 @@ Principles: one diagnosis and one next action beats twenty charts. Money is a gr
     const tasks = Store.tasks_open().filter(t => !t.due);
     if (tasks.length) { lines.push('Open undated tasks — id | section | title:'); for (const t of tasks) lines.push(`- ${t.id} | ${t.section} | ${t.title}`); }
     const w = Store.list('watches'); if (w.length) { lines.push('Watching — id | text | expected:'); for (const x of w) lines.push(`- ${x.id} | ${x.text} | ${x.expected_by || '?'}`); }
+    if ((s.edenFacts || []).length) lines.push('Things Alex has told you to remember: ' + s.edenFacts.map(f => '• ' + f).join(' '));
+    const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+    const recent = Store.allTimed().filter(x => !x.isTask && new Date(x.ends_at || x.starts_at) < now && new Date(x.starts_at) >= weekAgo);
+    if (recent.length) lines.push('Recent (last 7 days, already happened): ' + recent.map(x => `${x._table === 'shifts' ? 'shift' : x.kind} ${fmt(x.starts_at)}${x.ends_at ? '–' + new Date(x.ends_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : ''}${x._table === 'shifts' ? '' : ' ' + x.title}`).join('; '));
+    const doneT = Store.list('tasks').filter(t => t.status === 'done' && t.done_at && new Date(t.done_at) >= weekAgo);
+    if (doneT.length) lines.push('Tasks completed this week: ' + doneT.map(t => t.title).join('; '));
+    const prev = Store.list('briefings').filter(b => b.kind === 'morning' && b.date !== now.toLocaleDateString('en-CA')).slice(0, 2);
+    if (prev.length) lines.push('Previous briefings: ' + prev.map(b => `[${b.date}] ${b.md}`).join(' | '));
     const to = Store.list('time_off').filter(x => x.status !== 'cancelled'); if (to.length) { lines.push('Time off requests — id | title | dates | status | ask by:'); for (const x of to) lines.push(`- ${x.id} | ${x.title} | ${x.starts_on}→${x.ends_on} | ${x.status} | ${x.ask_by || '-'}`); }
     const socs = Store.list('societies'); if (socs.length) lines.push('Societies: ' + socs.map(x => `${x.name} (${x.status})`).join(', ') + '.');
     const b = Rules.todaysBriefing('morning', now); if (b) lines.push(`Your morning briefing today: ${b.md}`);
@@ -84,11 +98,13 @@ Principles: one diagnosis and one next action beats twenty charts. Money is a gr
       case 'add_watch': { const r = Store.insert('watches', { text: input.text, expected_by: input.expected_by || null, status: 'open' }); return { ok: true, id: r.id }; }
       case 'add_time_off': { const r = Store.insert('time_off', { title: input.title, starts_on: input.starts_on, ends_on: input.ends_on || input.starts_on, ask_by: input.ask_by || null, reason: input.reason || 'personal', status: 'needed', notes: input.notes || null }); const cl = Rules.timeOffClashes(r); return { ok: true, id: r.id, clashing_shifts: cl.length }; }
       case 'update_time_off': { const r = Store.update('time_off', input.id, input.patch || {}); return r ? { ok: true } : { ok: false, error: 'not found' }; }
+      case 'remember_fact': { const f = (s.edenFacts || []).filter(x => x !== input.fact); f.push(String(input.fact).trim()); Store.setSetting('edenFacts', f.slice(-60)); return { ok: true, count: f.length }; }
+      case 'forget_fact': { const before = (s.edenFacts || []).length; const f = (s.edenFacts || []).filter(x => !x.toLowerCase().includes(String(input.match).toLowerCase())); Store.setSetting('edenFacts', f); return { ok: true, removed: before - f.length }; }
       case 'set_setting': { if (input.key === 'activeBase' && window.applyBase) { window.applyBase(input.value); return { ok: true }; } Store.setSetting(input.key, input.value); return { ok: true }; }
       default: return { ok: false, error: 'unknown tool' };
     }
   }
-  const TOOL_LABEL = { add_time_off: 'Time off to book', update_time_off: 'Time off updated', add_shift: 'Added shift', add_event: 'Added event', add_task: 'Added task', complete_task: 'Completed task', update_item: 'Updated', delete_item: 'Deleted', add_note: 'Saved note', add_watch: 'Watching', set_setting: 'Setting changed' };
+  const TOOL_LABEL = { remember_fact: 'Remembered', forget_fact: 'Forgot', add_time_off: 'Time off to book', update_time_off: 'Time off updated', add_shift: 'Added shift', add_event: 'Added event', add_task: 'Added task', complete_task: 'Completed task', update_item: 'Updated', delete_item: 'Deleted', add_note: 'Saved note', add_watch: 'Watching', set_setting: 'Setting changed' };
 
   function track(model, u) {
     if (!u) return;
