@@ -83,8 +83,22 @@
     onAuth(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     signIn, signOut, refresh, rest,
     async changePassword(pw) {
+      await ensureFresh();
       const r = await fetch(URL + '/auth/v1/user', { method: 'PUT', headers: { apikey: KEY, Authorization: 'Bearer ' + session.access_token, 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }) });
       const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.msg || j.message || 'Could not change password'); return j;
+    },
+    /** Re-authenticate with the current password (fresh password grant). Throws if wrong. */
+    async verifyPassword(pw) {
+      if (!session?.user?.email) throw new Error('Not signed in');
+      const j = await authPost('/auth/v1/token?grant_type=password', { email: session.user.email, password: pw });
+      saveSession(j); return true;
+    },
+    /** Forgot password: email a recovery code (the "Reset password" email template must include {{ .Token }}). */
+    async requestReset(email) { return authPost('/auth/v1/recover', { email }); },
+    /** Exchange the emailed code for a session, then the caller sets a new password. */
+    async verifyResetCode(email, token) {
+      const j = await authPost('/auth/v1/verify', { type: 'recovery', email, token });
+      saveSession(j); return j;
     },
   };
 })();

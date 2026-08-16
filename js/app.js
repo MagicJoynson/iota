@@ -961,8 +961,9 @@
           </div>
           <details class="pw-change"><summary class="sub">Change password</summary>
             <form data-pwform autocomplete="off" style="margin-top:8px">
+              <div class="field"><label for="pw0">Current password</label><input id="pw0" name="pw0" type="password" autocomplete="current-password" required></div>
               <div class="field"><div class="row2"><div><label for="pw1">New password</label><input id="pw1" name="pw1" type="password" autocomplete="new-password" minlength="8" required></div><div><label for="pw2">Again</label><input id="pw2" name="pw2" type="password" autocomplete="new-password" minlength="8" required></div></div></div>
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="field-note" style="padding:0" data-pwmsg>At least 8 characters. Same login as the karting app.</span><button class="btn" type="submit">Update</button></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="field-note" style="padding:0" data-pwmsg>At least 8 characters. Same login as the karting app. Forgotten it? Sign out and use “Forgot password”.</span><button class="btn" type="submit">Update</button></div>
             </form>
           </details>
         </div>
@@ -1028,11 +1029,17 @@
     $('[data-signout]', el).addEventListener('click', async () => { await SB.signOut(); Store.clearLocal(); location.hash = '#/'; boot(); });
     const pwf = $('[data-pwform]', el), pwmsg = $('[data-pwmsg]', el);
     pwf.addEventListener('submit', async e => {
-      e.preventDefault(); const a = pwf.pw1.value, b = pwf.pw2.value;
+      e.preventDefault(); const cur = pwf.pw0.value, a = pwf.pw1.value, b = pwf.pw2.value;
+      if (!cur) { pwmsg.textContent = 'Enter your current password first.'; return; }
       if (a.length < 8) { pwmsg.textContent = 'Needs at least 8 characters.'; return; }
       if (a !== b) { pwmsg.textContent = 'Those two don\'t match.'; return; }
-      const btn = $('button[type=submit]', pwf); btn.disabled = true; pwmsg.textContent = 'Updating…';
-      try { await SB.changePassword(a); pwf.reset(); pwmsg.textContent = 'Password changed. It applies to the karting app too.'; toast('Password changed'); }
+      if (a === cur) { pwmsg.textContent = 'That\'s the same as the current one.'; return; }
+      const btn = $('button[type=submit]', pwf); btn.disabled = true; pwmsg.textContent = 'Checking…';
+      try {
+        try { await SB.verifyPassword(cur); } catch (_) { throw new Error('Current password is wrong.'); }
+        pwmsg.textContent = 'Updating…';
+        await SB.changePassword(a); pwf.reset(); pwmsg.textContent = 'Password changed. It applies to the karting app too.'; toast('Password changed');
+      }
       catch (ex) { pwmsg.textContent = ex.message || 'Could not change password.'; }
       finally { btn.disabled = false; }
     });
@@ -1126,10 +1133,24 @@
           <div class="field"><label for="li-pass">Password</label><input id="li-pass" name="password" type="password" autocomplete="current-password" required></div>
           <div class="login-err" data-err hidden></div>
           <button class="btn primary" type="submit" style="width:100%">Continue</button>
+          <button class="link-btn" type="button" data-forgot>Forgot password?</button>
+        </form>
+        <form class="glass login-card" data-reset hidden autocomplete="off">
+          <h2>Reset password</h2>
+          <p class="sub" data-reset-step1>We'll email a 6-digit code to your account address.</p>
+          <div class="field" data-reset-step1><label for="rs-email">Email</label><input id="rs-email" name="email" type="email" inputmode="email" autocomplete="username" required></div>
+          <div data-reset-step2 hidden>
+            <p class="sub">Code sent — check your inbox (and junk). It's valid for about an hour.</p>
+            <div class="field"><label for="rs-code">Code from the email</label><input id="rs-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,8}" placeholder="123456"></div>
+            <div class="field"><div class="row2"><div><label for="rs-pw1">New password</label><input id="rs-pw1" name="pw1" type="password" autocomplete="new-password" minlength="8"></div><div><label for="rs-pw2">Again</label><input id="rs-pw2" name="pw2" type="password" autocomplete="new-password" minlength="8"></div></div></div>
+          </div>
+          <div class="login-err" data-reset-err hidden></div>
+          <button class="btn primary" type="submit" style="width:100%" data-reset-go>Send code</button>
+          <button class="link-btn" type="button" data-reset-back>Back to sign in</button>
         </form>
       </div>`;
     mountOrb($('.login-orb canvas', el), { size: 120 });
-    const form = $('form', el), err = $('[data-err]', el);
+    const form = $('form:not([data-reset])', el), err = $('[data-err]', el);
     try { const last = localStorage.getItem('iota.lastEmail'); if (last) $('#li-email', el).value = last; } catch (_) {}
     form.addEventListener('submit', async e => {
       e.preventDefault(); err.hidden = true;
@@ -1140,6 +1161,40 @@
         await Store.sync();
         boot();
       } catch (ex) { err.textContent = ex.message || 'Could not sign in'; err.hidden = false; btn.disabled = false; btn.textContent = 'Continue'; }
+    });
+    // Forgot password: email → 6-digit code → new password (Supabase recover + verify type=recovery)
+    const rform = $('[data-reset]', el), rerr = $('[data-reset-err]', el), rgo = $('[data-reset-go]', el);
+    let resetStage = 1;
+    const showReset = on => { form.hidden = on; rform.hidden = !on; if (on) { $('#rs-email', el).value = $('#li-email', el).value; setTimeout(() => $('#rs-email', el).focus(), 60); } };
+    $('[data-forgot]', el).addEventListener('click', () => showReset(true));
+    $('[data-reset-back]', el).addEventListener('click', () => showReset(false));
+    rform.addEventListener('submit', async e => {
+      e.preventDefault(); rerr.hidden = true;
+      const email = $('#rs-email', el).value.trim();
+      if (resetStage === 1) {
+        if (!email) return;
+        rgo.disabled = true; rgo.textContent = 'Sending…';
+        try {
+          await SB.requestReset(email);
+          resetStage = 2; el.querySelectorAll('[data-reset-step1]').forEach(x => x.hidden = true); $('[data-reset-step2]', el).hidden = false;
+          rgo.textContent = 'Set new password'; setTimeout(() => $('#rs-code', el).focus(), 60);
+        } catch (ex) { rerr.textContent = ex.message || 'Could not send the code'; rerr.hidden = false; rgo.textContent = 'Send code'; }
+        finally { rgo.disabled = false; }
+        return;
+      }
+      const code = $('#rs-code', el).value.trim(), a = $('#rs-pw1', el).value, b = $('#rs-pw2', el).value;
+      if (!/^\d{6,8}$/.test(code)) { rerr.textContent = 'Enter the code from the email.'; rerr.hidden = false; return; }
+      if (a.length < 8) { rerr.textContent = 'New password needs at least 8 characters.'; rerr.hidden = false; return; }
+      if (a !== b) { rerr.textContent = 'Those two don\'t match.'; rerr.hidden = false; return; }
+      rgo.disabled = true; rgo.textContent = 'Checking code…';
+      try {
+        await SB.verifyResetCode(email, code);
+        rgo.textContent = 'Saving…';
+        await SB.changePassword(a);
+        try { localStorage.setItem('iota.lastEmail', email); } catch (_) {}
+        toast('Password reset — you\'re signed in');
+        await Store.sync(); boot();
+      } catch (ex) { rerr.textContent = /expired|invalid|token/i.test(ex.message || '') ? 'That code didn\'t work — check it, or go back and send a new one.' : (ex.message || 'Could not reset'); rerr.hidden = false; rgo.disabled = false; rgo.textContent = 'Set new password'; }
     });
     return el;
   }

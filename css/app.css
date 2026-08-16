@@ -522,3 +522,5 @@ button.next-up:active { transform: scale(.985); background: var(--glass-2); }
   .scroll { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
   #splash canvas { width: min(40vh, 200px); height: min(40vh, 200px); }
 }
+.link-btn { display: block; width: 100%; text-align: center; margin-top: 12px; color: var(--text-2); font-size: 13px; text-decoration: underline; text-underline-offset: 3px; min-height: 36px; }
+.link-btn:active { color: var(--text); }
