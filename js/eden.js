@@ -48,7 +48,7 @@ Principles: one diagnosis and one next action beats twenty charts. Money is a gr
     const horizon = new Date(now); horizon.setDate(horizon.getDate() + 21);
     const up = Store.upcoming(now, 60).filter(x => new Date(x.starts_at) < horizon);
     const lines = [];
-    lines.push(`Now: ${now.toLocaleString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} (Europe/London).`);
+    lines.push(`NOW: ${now.toLocaleString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} (Europe/London). Each of Alex's messages is prefixed with the time he sent it — earlier ones may be hours old; reason from the latest.`);
     const base = s.bases && s.activeBase && s.bases[s.activeBase];
     lines.push(`Alex's base right now: ${base?.label || s.activeBase || 'unknown'}${s.moveBackDate ? ` (moving back to Manchester for term around ${s.moveBackDate})` : ''}. Home: ${s.homeAddress || '?'}. Employer: ${s.employer || '?'} at £${s.rateHourly || '?'}/h, paid ${s.payFrequency}${s.payAnchor ? ' (a payday: ' + s.payAnchor + ')' : ''}. Travel to work: ${s.travelWorkMin} min by ${s.travelMode || 'walk'}. Campus: ${s.travelCampusMin || '?'} min; track: ${s.travelTrackMin || '?'} min (+${s.loadingMin} loading). Break rule: >6h → 45 min, else 30.`);
     if (base && s.bases.manchester && s.activeBase !== 'manchester') lines.push(`Term-time base (Manchester): home ${s.bases.manchester.homeAddress}; work ${s.bases.manchester.employer}; walks campus ${s.bases.manchester.travelCampusMin} min, work ${s.bases.manchester.travelWorkMin} min, Victoria Karting ${s.bases.manchester.travelTrackMin} min.`);
@@ -149,7 +149,9 @@ Principles: one diagnosis and one next action beats twenty charts. Money is a gr
       // Make sure the context is fresh: resync if the snapshot is older than 10 minutes (bounded wait).
       try { if (Store.signedIn && (!Store.syncedAt || Date.now() - new Date(Store.syncedAt) > 10 * 60000)) await Promise.race([Store.sync(), new Promise(r => setTimeout(r, 2500))]); } catch (_) {}
       history.push({ role: 'user', content: userText, t: Date.now() });
-      const msgs = history.slice(-20).map(m => ({ role: m.role, content: m.content }));
+      const stamp = t => new Date(t || Date.now()).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      // Every user turn is time-stamped so she can tell 'earlier this evening' from 'now'.
+      const msgs = history.slice(-20).map(m => ({ role: m.role, content: m.role === 'user' ? `[${stamp(m.t)}] ${m.content}` : m.content }));
       while (msgs.length && msgs[0].role !== 'user') msgs.shift();
       const system = [
         { type: 'text', text: PERSONA, cache_control: { type: 'ephemeral' } },
