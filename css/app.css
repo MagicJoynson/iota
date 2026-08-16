@@ -508,3 +508,17 @@ button.next-up:active { transform: scale(.985); background: var(--glass-2); }
 .pw-change summary::-webkit-details-marker { display: none; }
 .pw-change summary::before { content: "›"; display: inline-block; margin-right: 6px; transition: transform var(--dur) var(--ease); }
 .pw-change[open] summary::before { transform: rotate(90deg); }
+
+/* ---------- Landscape phone: iOS won't let a web app lock orientation, so at least keep the Ring tidy ---------- */
+@media (orientation: landscape) and (max-height: 520px) {
+  #app { left: 0; transform: none; width: auto; }
+  .ring-screen { flex-direction: row; justify-content: center; align-items: center; gap: 28px; padding: 0 24px; }
+  .ring-top { top: 8px; }
+  .ring-wrap { width: min(72vh, 360px); margin-top: 0; flex: none; }
+  .ring-bottom { position: static; flex: 0 1 46%; max-width: 46%; min-width: 0; }
+  .greeting { font-size: 19px; }
+  .section-head { padding-top: 6px; }
+  .section-head, .scroll, .eden-head, .thread, .chips, .composer, .filters, .soc-seg { width: 100%; max-width: 640px; margin-left: auto; margin-right: auto; }
+  .scroll { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+  #splash canvas { width: min(40vh, 200px); height: min(40vh, 200px); }
+}

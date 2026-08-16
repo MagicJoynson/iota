@@ -1172,4 +1172,7 @@
   document.addEventListener('visibilitychange', () => { if (!document.hidden && SB.session && Store.syncedAt && Date.now() - new Date(Store.syncedAt) > 60000) Store.sync(); });
   // PWA
   if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('./sw.js').catch(() => {});
+  // Portrait lock where the platform allows it (Android/desktop installed PWA). iOS ignores this and the manifest
+  // `orientation` — the only real lock there is the phone's own Rotation Lock; CSS keeps landscape tidy instead.
+  try { screen.orientation?.lock?.('portrait').catch(() => {}); } catch (_) {}
 })();
