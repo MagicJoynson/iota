@@ -688,8 +688,21 @@
     html += `<div class="card"><h3>Payslips</h3><p class="sub">Vault of real payslips, reconciled against the shift estimates. Photograph or paste one to EDEN and she files it — arriving in the next Money pass.</p></div>
       <div class="card"><h3>Bills & subscriptions</h3><p class="sub">Rent, phone, Spotify, insurance — £/month and the persuasive £/year. Coming with payslips.</p></div>
       <div class="card"><h3>Pots & Payday Plan</h3><p class="sub">Split each payday and student-loan drop into named pots. Coming with payslips.</p></div>
-      <div class="card"><h3>Student finance</h3><p class="sub">SFE drop dates get their own countdown. Tell EDEN the dates when the letter arrives.</p></div>`;
+      ${studentFinanceCard(now)}`;
     return html;
+  }
+  function studentFinanceCard(now) {
+    const sf = Store.settings.studentFinance;
+    if (!sf || !Array.isArray(sf.drops) || !sf.drops.length) return `<div class="card"><h3>Student loan</h3><p class="sub">Tell EDEN when your maintenance-loan payments land and they get their own countdown here.</p></div>`;
+    const fmtD = d => new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    const gbp = n => '£' + (+n).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const next = sf.drops.find(d => new Date(d.date + 'T23:59:59') >= now);
+    const days = next ? Math.ceil((new Date(next.date + 'T00:00:00') - now) / 86400000) : null;
+    const STATUS = { awaiting_confirmation: ['Awaiting confirmation', 'var(--warn)'], scheduled: ['Scheduled', 'var(--accent)'], paid: ['Paid', 'var(--ok)'], blocked: ['Blocked', 'var(--danger)'] };
+    return `<div class="card"><div class="sub" style="display:flex;justify-content:space-between"><h3>Student loan</h3><span>${esc(sf.kind || 'maintenance loan')}${sf.year ? ' · ' + esc(sf.year) : ''}</span></div>
+      ${next ? `<div class="big-num" style="margin-top:6px">${days}<span style="font-size:14px;color:var(--text-2);margin-left:8px">day${days === 1 ? '' : 's'} to ${gbp(next.amount)}</span></div><p class="sub" style="margin-top:4px">${esc(fmtD(next.date))}${next.status === 'awaiting_confirmation' ? ' — pays once MMU confirms you\'re registered' : ''}</p>` : `<p class="sub">All drops for the year have landed.</p>`}
+      <div class="list" style="margin-top:12px">${sf.drops.map(d => { const st = STATUS[d.status] || [d.status || '', 'var(--text-3)']; const past = new Date(d.date + 'T23:59:59') < now; return `<div class="row"><span class="bar" style="background:${past ? 'var(--text-3)' : st[1]}"></span><div class="t"><b>${gbp(d.amount)}</b><span>${esc(fmtD(d.date))}</span></div><span class="pill" style="background:color-mix(in srgb, ${st[1]} 18%, transparent);color:${st[1]}">${esc(st[0])}</span></div>`; }).join('')}</div>
+      <p class="field-note" style="padding:8px 0 0">${sf.total ? `${gbp(sf.total)} for the year from ${esc(sf.provider || 'Student Finance')}. ` : ''}These dwarf paydays — the Payday Plan splits each one into pots when Money lands.</p></div>`;
   }
   function adminTab(now) {
     let html = `<div class="tab-title">Life admin</div>`;
@@ -946,6 +959,12 @@
             <div class="who"><b>${esc(SB.user?.email || 'Not signed in')}</b><br><span class="sub">Synced ${esc(synced)}${Store.pending ? ` · ${Store.pending} pending` : ''}</span></div>
             <div class="acts"><button class="btn ghost" data-sync>Sync</button><button class="btn ghost" data-signout style="color:var(--danger)">Sign out</button></div>
           </div>
+          <details class="pw-change"><summary class="sub">Change password</summary>
+            <form data-pwform autocomplete="off" style="margin-top:8px">
+              <div class="field"><div class="row2"><div><label for="pw1">New password</label><input id="pw1" name="pw1" type="password" autocomplete="new-password" minlength="8" required></div><div><label for="pw2">Again</label><input id="pw2" name="pw2" type="password" autocomplete="new-password" minlength="8" required></div></div></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="field-note" style="padding:0" data-pwmsg>At least 8 characters. Same login as the karting app.</span><button class="btn" type="submit">Update</button></div>
+            </form>
+          </details>
         </div>
         ${s.bases ? `<div class="setting-group"><h3>Base</h3><div class="seg" data-bases>${Object.entries(s.bases).map(([k, b]) => `<button data-base="${k}" class="${s.activeBase === k ? 'active' : ''}">${esc(b.label || k)}</button>`).join('')}</div><p class="field-note">Switches home, employer, work address and travel times in one go.${s.moveBackDate ? ` Move back to Manchester pencilled for ${esc(s.moveBackDate)}.` : ''}</p></div>` : ''}
         <div class="setting-group"><h3>You</h3>${one(f('name', 'Name'))}${one(f('homeAddress', 'Home'))}</div>
@@ -1007,6 +1026,16 @@
     $('[data-eden-reset]', el).addEventListener('click', () => { Eden.resetUsage(); toast('Usage counter reset'); render(); });
     $('[data-sync]', el).addEventListener('click', async () => { toast('Syncing…'); const ok = await Store.sync(); toast(ok ? 'Synced' : 'Sync failed'); render(); });
     $('[data-signout]', el).addEventListener('click', async () => { await SB.signOut(); Store.clearLocal(); location.hash = '#/'; boot(); });
+    const pwf = $('[data-pwform]', el), pwmsg = $('[data-pwmsg]', el);
+    pwf.addEventListener('submit', async e => {
+      e.preventDefault(); const a = pwf.pw1.value, b = pwf.pw2.value;
+      if (a.length < 8) { pwmsg.textContent = 'Needs at least 8 characters.'; return; }
+      if (a !== b) { pwmsg.textContent = 'Those two don\'t match.'; return; }
+      const btn = $('button[type=submit]', pwf); btn.disabled = true; pwmsg.textContent = 'Updating…';
+      try { await SB.changePassword(a); pwf.reset(); pwmsg.textContent = 'Password changed. It applies to the karting app too.'; toast('Password changed'); }
+      catch (ex) { pwmsg.textContent = ex.message || 'Could not change password.'; }
+      finally { btn.disabled = false; }
+    });
     return el;
   }
   /** Switch the active base (Sheffield summer / Manchester term): copies that base's values into the flat settings. */
