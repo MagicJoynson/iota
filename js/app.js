@@ -270,7 +270,7 @@
         ${S.tabs.slice(2).map(t => tabBtn(sec, t)).join('')}
       </nav>`;
     el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
-    $('[data-capture]', el).addEventListener('click', () => openCapture(sec));
+    $('[data-capture]', el).addEventListener('click', () => { if (sec === 'uni' && current?.tab === 'modules') openModuleSheet(() => renderTabBody(el, sec, 'modules')); else openCapture(sec); });
     el.querySelectorAll('.hotbar .tab').forEach(b => b.addEventListener('click', () => go(`#/${sec}/${b.dataset.tab}`)));
     const mini = $('.socket .mini', el);
     mountOrb($('canvas', mini), { size: 46, calm: 1 });
@@ -323,9 +323,9 @@
         html += `<label class="search glass"><span>${ICONS.search}</span><input type="search" data-note-search placeholder="Search notes across every module" autocomplete="off"></label><div data-note-results></div>`;
         html += ms.length ? `<div class="list">${ms.map(m => {
           const n = notes.filter(x => x.module_id === m.id).length, a = Store.list('assessments').filter(x => x.module_id === m.id && x.status !== 'graded').length;
-          return `<button class="row link" data-go="#/module/${m.id}"><span class="bar" style="background:${esc(m.colour || 'var(--accent)')}"></span><div class="t"><b>${esc(m.code ? m.code + ' · ' : '')}${esc(m.name)}</b><span>${esc([m.lecturer, m.credits ? m.credits + ' credits' : '', n ? n + ' note' + (n === 1 ? '' : 's') : '', a ? a + ' open assessment' + (a === 1 ? '' : 's') : ''].filter(Boolean).join(' · ') || 'Tap to open the hub')}</span></div><span class="chev">›</span></button>`;
-        }).join('')}</div>`
-                         : empty('📚', 'No modules yet', 'Each module gets its own hub — info, sessions, assessments and notes in one place. They arrive with the timetable on <b>Tuesday 18 Aug</b>; tell EDEN a module and she creates it.', { label: 'Jot a note meanwhile', hint: 'Note: ' });
+          return `<button class="row link" data-go="#/module/${m.id}"><span class="bar" style="background:${esc(m.colour || 'var(--accent)')}"></span><div class="t"><b>${esc(m.code ? m.code + ' · ' : '')}${esc(m.name)}</b><span>${esc([m.kind === 'personal' ? 'Personal project' : m.lecturer, m.credits ? m.credits + ' credits' : '', n ? n + ' note' + (n === 1 ? '' : 's') : '', a ? a + ' open assessment' + (a === 1 ? '' : 's') : ''].filter(Boolean).join(' · ') || 'Tap to open the hub')}</span></div>${m.kind === 'personal' ? `<span class="pill" style="background:color-mix(in srgb, ${esc(m.colour || '#C7CBE0')} 18%, transparent);color:${esc(m.colour || 'var(--text-2)')}">Personal</span>` : ''}<span class="chev">›</span></button>`;
+        }).join('')}</div><button class="btn ghost" data-new-module style="margin-top:12px">${ICONS.plus} New module</button>`
+                         : empty('📚', 'No modules yet', 'Each module gets its own hub — info, sessions, assessments and notes in one place. Course modules arrive with the timetable on <b>Tuesday 18 Aug</b>; personal projects (a language, a skill) can be added now.', { label: 'New module', hint: '__module' });
         if (orphan.length) html += `<div class="tab-title" style="margin-top:18px">Unfiled notes</div><div class="list">${orphan.map(n => rowHTML({ ...n, _table: 'notes', title: n.title || n.md, kind: 'uni', location: n.title ? n.md.slice(0, 80) : '' })).join('')}</div><p class="field-note" style="padding:8px 4px 0">Notes without a module. Once modules exist, open a hub and file them there.</p>`;
       } else if (tab === 'societies') {
         const socs = Store.list('societies');
@@ -446,7 +446,8 @@
     }
     body.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
     body.querySelectorAll('[data-watch-done]').forEach(b => b.addEventListener('click', () => { Store.update('watches', b.dataset.watchDone, { status: 'resolved' }); toast('Resolved'); renderTabBody(el, sec, tab); }));
-    body.querySelectorAll('[data-capture-hint]').forEach(b => b.addEventListener('click', () => b.dataset.captureHint === '__timeoff' ? openTimeOff(() => renderTabBody(el, sec, tab)) : openCapture(sec, b.dataset.captureHint)));
+    body.querySelectorAll('[data-capture-hint]').forEach(b => b.addEventListener('click', () => b.dataset.captureHint === '__timeoff' ? openTimeOff(() => renderTabBody(el, sec, tab)) : b.dataset.captureHint === '__module' ? openModuleSheet(() => renderTabBody(el, sec, tab)) : openCapture(sec, b.dataset.captureHint)));
+    body.querySelectorAll('[data-new-module]').forEach(b => b.addEventListener('click', () => openModuleSheet(() => renderTabBody(el, sec, tab))));
     body.querySelectorAll('.row .del').forEach(b => b.addEventListener('click', e => {
       const row = e.currentTarget.closest('.row');
       if (row.classList.contains('timeoff')) { Store.update('time_off', row.dataset.id, { status: 'cancelled' }); toast('Removed'); renderTabBody(el, sec, tab); return; }
@@ -798,7 +799,7 @@
     el.innerHTML = `
       <header class="section-head">
         <button class="btn icon ghost back" aria-label="Back to modules" data-go="#/uni/modules">${ICONS.back}</button>
-        <h1><span class="kicker">${esc(m.code || 'Module')}</span>${esc(m.name)}</h1>
+        <h1><span class="kicker">${esc(m.kind === 'personal' ? (m.code ? m.code + ' · personal project' : 'Personal project') : (m.code || 'Module'))}</span>${esc(m.name)}</h1>
         <button class="btn icon ghost" aria-label="Add a note" data-note>${ICONS.plus}</button>
       </header>
       <div class="scroll" data-body style="padding-bottom:40px"></div>`;
@@ -814,7 +815,7 @@
       const avg = wSum ? graded.reduce((x, a) => x + +a.mark * +a.weight_pct, 0) / wSum : null;
       const notes = Store.list('notes').filter(n => n.module_id === id);
       const links = m.links || [];
-      let html = `<div class="card"><h3>Info</h3><div class="kv">${[['Lecturer', m.lecturer], ['Room', m.room], ['Credits', m.credits]].filter(x => x[1]).map(x => `<div><span>${x[0]}</span><b>${esc(String(x[1]))}</b></div>`).join('') || '<p class="sub">Lecturer, room, credits and links fill in from the timetable or from EDEN.</p>'}</div>${links.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${links.map(l => `<a class="chip accent" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('')}</div>` : ''}</div>`;
+      let html = `<div class="card"><h3>${m.kind === 'personal' ? 'About' : 'Info'}</h3>${m.notes ? `<p class="sub" style="margin-bottom:6px">${esc(m.notes)}</p>` : ''}<div class="kv">${[['Lecturer', m.lecturer], ['Room', m.room], ['Credits', m.credits]].filter(x => x[1]).map(x => `<div><span>${x[0]}</span><b>${esc(String(x[1]))}</b></div>`).join('') || (m.kind === 'personal' ? '' : '<p class="sub">Lecturer, room, credits and links fill in from the timetable or from EDEN.</p>')}</div>${links.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${links.map(l => `<a class="chip accent" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('')}</div>` : ''}</div>`;
       html += `<div class="card"><div class="sub" style="display:flex;justify-content:space-between"><h3>Sessions</h3><span>${sessions.length ? `${pastS.length} done${missed ? ` · ${missed} missed` : ''} · ${upS.length} to come` : 'none yet'}</span></div>${upS.length ? `<div class="list" style="margin-top:10px">${upS.slice(0, 6).map(e => rowHTML({ ...e, _table: 'events' }, { deletable: false })).join('')}</div>` : `<p class="field-note" style="padding:8px 0 0">Timetable slots for this module show here with attendance and catch-up debt.</p>`}</div>`;
       html += `<div class="card"><div class="sub" style="display:flex;justify-content:space-between"><h3>Assessments</h3><span>${avg != null ? `avg ${avg.toFixed(0)}% of ${wSum}% marked` : (as.length ? `${as.length} on file` : 'none yet')}</span></div>${as.length ? `<div class="list" style="margin-top:10px">${as.map(a => `<div class="row"><span class="bar" style="background:${a.status === 'graded' ? 'var(--ok)' : a.status === 'submitted' ? 'var(--text-3)' : 'var(--accent)'}"></span><div class="t"><b>${esc(a.title)}</b><span>${a.weight_pct ? a.weight_pct + '% · ' : ''}${esc(String(a.status).replace('_', ' '))}${a.mark != null ? ` · ${a.mark}%` : ''}</span></div>${a.due_at ? `<div class="when">${esc(Rules.fmtWhen(a.due_at))}</div>` : ''}</div>`).join('')}</div>` : `<p class="field-note" style="padding:8px 0 0">Weightings, status pipeline, workback milestones and marks → the 2:1/First calculator.</p>`}</div>`;
       html += `<div class="card"><div class="sub" style="display:flex;justify-content:space-between"><h3>Notes</h3><button class="chip accent" data-note>${ICONS.plus} New</button></div>${notes.length ? `<div class="list" style="margin-top:10px">${notes.map(n => rowHTML({ ...n, _table: 'notes', title: n.title || n.md, kind: 'uni', location: [n.week ? 'wk ' + n.week : '', n.title ? n.md.slice(0, 80) : ''].filter(Boolean).join(' · ') })).join('')}</div>` : `<p class="field-note" style="padding:8px 0 0">Per-week markdown notes for this module. Photo attachments, revision mode and flashcards come later.</p>`}</div>`;
@@ -824,6 +825,32 @@
     };
     paint();
     return el;
+  }
+  /** New-module sheet: course module (from the timetable) or a personal project (language, skill). */
+  const MODULE_HUES = ['#F472B6', '#38BDF8', '#A3E635', '#FBBF24', '#C084FC', '#34D399', '#FB7185', '#60A5FA'];
+  function nextModuleHue() { const used = new Set(Store.list('modules').map(m => (m.colour || '').toUpperCase())); return MODULE_HUES.find(h => !used.has(h)) || MODULE_HUES[Store.list('modules').length % MODULE_HUES.length]; }
+  function openModuleSheet(onDone) {
+    const sheet = document.createElement('div'); sheet.className = 'sheet';
+    sheet.innerHTML = `<div class="sheet-backdrop" data-close></div>
+      <form class="sheet-panel glass" autocomplete="off">
+        <div class="sheet-grip"></div>
+        <div class="sheet-title">New module</div>
+        <div class="field"><div class="seg" style="width:100%;display:flex" data-kind><button type="button" data-k="course" style="flex:1">Course module</button><button type="button" data-k="personal" class="active" style="flex:1">Personal project</button></div></div>
+        <div class="field"><div class="row2"><div><label>Name</label><input name="name" required placeholder="e.g. Japanese"></div><div><label>Code (optional)</label><input name="code" placeholder="e.g. JPN"></div></div></div>
+        <div class="field" data-course hidden><div class="row2"><div><label>Lecturer</label><input name="lecturer"></div><div><label>Credits</label><input name="credits" type="number" inputmode="numeric" min="0" max="120"></div></div></div>
+        <div class="field"><label>What's it for?</label><input name="notes" placeholder="e.g. year abroad in Japan, September 2027"></div>
+        <div class="sheet-row"><span class="hint">Gets its own hub: notes, sessions, goals.</span><button class="btn primary" type="submit">Create</button></div>
+      </form>`;
+    document.body.appendChild(sheet);
+    const f = sheet.querySelector('form'); let kind = 'personal';
+    sheet.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => { kind = b.dataset.k; sheet.querySelectorAll('[data-k]').forEach(x => x.classList.toggle('active', x === b)); f.querySelector('[data-course]').hidden = kind !== 'course'; }));
+    sheet.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => sheet.remove()));
+    f.addEventListener('submit', e => {
+      e.preventDefault(); const d = Object.fromEntries(new FormData(f).entries()); if (!d.name.trim()) return;
+      const m = Store.insert('modules', { name: d.name.trim(), code: d.code.trim() || null, kind, colour: nextModuleHue(), lecturer: kind === 'course' ? (d.lecturer.trim() || null) : null, credits: kind === 'course' && d.credits ? +d.credits : null, notes: d.notes.trim() || null, links: [] });
+      sheet.remove(); toast(`${m.name} created`); onDone?.(); go('#/module/' + m.id);
+    });
+    setTimeout(() => f.name.focus(), 60);
   }
   /** Note sheet scoped to a module. */
   function openNote(m, onDone) {
@@ -1091,13 +1118,13 @@
   const cap = $('#capture'), capForm = $('#captureForm'), capInput = $('#captureInput'), capHint = $('#captureHint');
   let capSection = null;
   function openCapture(section = null, prefill = '') {
-    capSection = section; cap.hidden = false; capInput.value = prefill; capHint.textContent = 'EDEN will file it as a task, event, shift or note.';
+    capSection = section; cap.hidden = false; capInput.value = prefill; capHint.textContent = 'Filed instantly as a task, event, shift or note. For anything else, talk to EDEN.';
     setTimeout(() => { capInput.focus(); capInput.setSelectionRange(capInput.value.length, capInput.value.length); }, 60);
   }
   function closeCapture() { cap.hidden = true; capInput.blur(); }
   cap.addEventListener('click', e => { if (e.target.hasAttribute('data-close')) closeCapture(); });
   capInput.addEventListener('input', () => {
-    const t = capInput.value.trim(); if (!t) { capHint.textContent = 'EDEN will file it as a task, event, shift or note.'; return; }
+    const t = capInput.value.trim(); if (!t) { capHint.textContent = 'Filed instantly as a task, event, shift or note. For anything else, talk to EDEN.'; return; }
     const c = Rules.classify(t);
     const when = c.row.starts_at || c.row.due;
     capHint.textContent = `→ ${c.label}${when ? ' · ' + Rules.fmtWhen(when) : ''}${c.row.kind || c.row.section ? ' · ' + kindName(c.row.kind || c.row.section) : ''}`;
