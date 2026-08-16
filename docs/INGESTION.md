@@ -40,7 +40,9 @@ Assessments with weightings go in `iota.assessments` (module_id, title, weight_p
 - `iota.watches (owner, text, expected_by)` — promise watcher; resolve with `status='resolved', resolved_note=…`
 - `iota.decisions (owner, what, why)` — decision memory
 - `iota.renewals (owner, name, expires_on)` — expiry vault
-- `iota.societies` — status ∈ member|committee|prospective|lapsed (Football & Badminton are `prospective`; revisit after Freshers' Fair 29–30 Sept 2026)
+- `iota.societies` — status ∈ member|committee|prospective|lapsed (Football & Badminton are `prospective`; revisit after Freshers' Fair 29–30 Sept 2026). `colour` (hex) tints the society's mini-hub — never an arc hue (violet #8B7CFF / teal #2DD4BF / orange #FF8A4C). Taken: MMU Karting #4DA3FF, Football #4ADE80, Badminton #FACC15; next picks rose #FB7185, sky #38BDF8, lime #A3E635.
+- `iota.renewals (owner, name, expires_on, notes)` and open `iota.watches` now surface in Personal › Admin; `iota.notes` with `module_id` show inside that module's hub (University › Modules), `section='personal'` notes under Admin, `section='kart'` notes under the karting hub's My Racing.
+- Events of `kind='kart'` belong to the MMU Karting society (inside University in v2) and show in Personal › Week in the society colour.
 
 ## Briefings (scheduled runs write these; the app shows the latest for today in EDEN chat)
 ```sql
