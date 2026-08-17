@@ -87,7 +87,7 @@
 
   function parseRoute() {
     const h = (location.hash || '#/').replace(/^#\/?/, '');
-    const [a, b] = h.split('/');
+    const [a, b, c] = h.split('/');
     if (!a) return { screen: 'ring' };
     if (a === 'eden') return { screen: 'eden' };
     if (a === 'settings') return { screen: 'settings' };
@@ -95,7 +95,8 @@
     if (a === 'calendar') { if (b === 'grid' || b === 'list') { calState.view = b; saveCal(); } return { screen: 'redirect', to: '#/personal/week' }; }
     if (a === 'kart') return { screen: 'redirect', to: '#/uni/societies' };
     if (a === 'society' && b) return { screen: 'society', id: b };
-    if (a === 'module' && b) return { screen: 'module', id: b };
+    if (a === 'module' && b === 'past' && c) return { screen: 'pastmodule', id: c };
+    if (a === 'module' && b) { const m = Store.get('modules', b); if (m && m.status === 'completed') return { screen: 'redirect', to: '#/module/past/' + b }; return { screen: 'module', id: b }; }
     if (SECTIONS[a]) return { screen: 'section', sec: a, tab: SECTIONS[a].tabs.includes(b) ? b : SECTIONS[a].tabs[0] };
     return { screen: 'ring' };
   }
@@ -113,7 +114,7 @@
     const old = current && current.el;
     if (old) { old.classList.add('leaving'); setTimeout(() => old.remove(), 260); }
 
-    document.body.dataset.section = r.screen === 'section' ? r.sec : (r.screen === 'society' || r.screen === 'module') ? 'uni' : '';
+    document.body.dataset.section = r.screen === 'section' ? r.sec : (r.screen === 'society' || r.screen === 'module' || r.screen === 'pastmodule') ? 'uni' : '';
     document.body.dataset.screen = r.screen;
     document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-rgb');
     let el;
@@ -122,6 +123,7 @@
     else if (r.screen === 'settings') el = renderSettings();
     else if (r.screen === 'society') el = renderSociety(r.id);
     else if (r.screen === 'module') el = renderModule(r.id);
+    else if (r.screen === 'pastmodule') el = renderPastModule(r.id);
     else el = renderSection(r.sec, r.tab);
     el.style.setProperty('--ox', lastTap.x + 'px');
     el.style.setProperty('--oy', lastTap.y + 'px');
@@ -130,7 +132,7 @@
     if (r.screen === 'ring') { document.title = 'Iota'; }
     else if (r.screen === 'section') document.title = `${SECTIONS[r.sec].name} · Iota`;
     else if (r.screen === 'society') document.title = `${Store.get('societies', r.id)?.name || 'Society'} · Iota`;
-    else if (r.screen === 'module') document.title = `${Store.get('modules', r.id)?.name || 'Module'} · Iota`;
+    else if (r.screen === 'module' || r.screen === 'pastmodule') document.title = `${Store.get('modules', r.id)?.name || 'Module'} · Iota`;
     else document.title = (r.screen === 'eden' ? 'EDEN' : 'Settings') + ' · Iota';
   }
   /** Tint the current screen with a society/module accent (body-level so hotbar, pills, kicker all follow). */
@@ -316,7 +318,9 @@
           }).join('') + '</div>';
         }
       } else if (tab === 'modules') {
-        const ms = Store.list('modules');
+        const allMods = Store.list('modules');
+        const ms = allMods.filter(m => m.status !== 'completed');
+        const past = allMods.filter(m => m.status === 'completed');
         const notes = Store.list('notes').filter(n => n.section === 'uni');
         const orphan = notes.filter(n => !n.module_id || !ms.some(m => m.id === n.module_id));
         html += `<div class="tab-title">Modules</div>`;
@@ -326,6 +330,7 @@
           return `<button class="row link" data-go="#/module/${m.id}"><span class="bar" style="background:${esc(m.colour || 'var(--accent)')}"></span><div class="t"><b>${esc(m.code ? m.code + ' · ' : '')}${esc(m.name)}</b><span>${esc([m.kind === 'personal' ? 'Personal project' : m.lecturer, m.credits ? m.credits + ' credits' : '', n ? n + ' note' + (n === 1 ? '' : 's') : '', a ? a + ' open assessment' + (a === 1 ? '' : 's') : ''].filter(Boolean).join(' · ') || 'Tap to open the hub')}</span></div>${m.kind === 'personal' ? `<span class="pill" style="background:color-mix(in srgb, ${esc(m.colour || '#C7CBE0')} 18%, transparent);color:${esc(m.colour || 'var(--text-2)')}">Personal</span>` : ''}<span class="chev">›</span></button>`;
         }).join('')}</div><button class="btn ghost" data-new-module style="margin-top:12px">${ICONS.plus} New module</button>`
                          : empty('📚', 'No modules yet', 'Each module gets its own hub — info, sessions, assessments and notes in one place. Course modules arrive with the timetable on <b>Tuesday 18 Aug</b>; personal projects (a language, a skill) can be added now.', { label: 'New module', hint: '__module' });
+        if (past.length) html += pastModulesAccordion(past);
         if (orphan.length) html += `<div class="tab-title" style="margin-top:18px">Unfiled notes</div><div class="list">${orphan.map(n => rowHTML({ ...n, _table: 'notes', title: n.title || n.md, kind: 'uni', location: n.title ? n.md.slice(0, 80) : '' })).join('')}</div><p class="field-note" style="padding:8px 4px 0">Notes without a module. Once modules exist, open a hub and file them there.</p>`;
       } else if (tab === 'societies') {
         const socs = Store.list('societies');
@@ -339,7 +344,7 @@
         html += `<p class="field-note" style="padding:10px 4px 0">Freshers' Fair 29–30 Sept — football and badminton get looked at then. Society events show in your Week in each society's colour.</p>`;
       } else if (tab === 'deadlines') {
         const tk = Store.tasks_open().filter(t => t.section === 'uni').sort((a, b) => new Date(a.due || 8e15) - new Date(b.due || 8e15));
-        const as = Store.list('assessments').filter(a => a.status !== 'graded');
+        const as = Store.list('assessments').filter(a => a.status !== 'graded' && a.status !== 'submitted');
         html += `<div class="tab-title">Deadlines & tasks</div>`;
         const rows = [...as.map(a => rowHTML({ ...a, _table: 'assessments', kind: 'uni', starts_at: a.due_at, location: a.weight_pct ? `${a.weight_pct}% · ${a.status.replace('_', ' ')}` : a.status.replace('_', ' ') }, { deletable: false })), ...tk.map(t => rowHTML({ ...t, _table: 'tasks' }))];
         html += rows.length ? `<div class="list">${rows.join('')}</div>` : empty('⏳', 'No deadlines on file', 'Coursework with weightings, status pipeline and the grade calculator come in Phase 3. Capture anything due now and it will carry over.', { label: 'Add a deadline', hint: 'Essay due ' });
@@ -444,6 +449,7 @@
         out.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
       });
     }
+    $('[data-past-acc]', body)?.addEventListener('toggle', e => sessionStorage.setItem('iota.pastOpen', e.target.open ? '1' : '0'));
     body.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
     body.querySelectorAll('[data-watch-done]').forEach(b => b.addEventListener('click', () => { Store.update('watches', b.dataset.watchDone, { status: 'resolved' }); toast('Resolved'); renderTabBody(el, sec, tab); }));
     body.querySelectorAll('[data-capture-hint]').forEach(b => b.addEventListener('click', () => b.dataset.captureHint === '__timeoff' ? openTimeOff(() => renderTabBody(el, sec, tab)) : b.dataset.captureHint === '__module' ? openModuleSheet(() => renderTabBody(el, sec, tab)) : openCapture(sec, b.dataset.captureHint)));
@@ -816,6 +822,7 @@
       const notes = Store.list('notes').filter(n => n.module_id === id);
       const links = m.links || [];
       let html = `<div class="card"><h3>${m.kind === 'personal' ? 'About' : 'Info'}</h3>${m.notes ? `<p class="sub" style="margin-bottom:6px">${esc(m.notes)}</p>` : ''}<div class="kv">${[['Lecturer', m.lecturer], ['Room', m.room], ['Credits', m.credits]].filter(x => x[1]).map(x => `<div><span>${x[0]}</span><b>${esc(String(x[1]))}</b></div>`).join('') || (m.kind === 'personal' ? '' : '<p class="sub">Lecturer, room, credits and links fill in from the timetable or from EDEN.</p>')}</div>${links.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${links.map(l => `<a class="chip accent" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('')}</div>` : ''}</div>`;
+      if (m.status !== 'completed') html += theoryStrip(m);
       html += `<div class="card"><div class="sub" style="display:flex;justify-content:space-between"><h3>Sessions</h3><span>${sessions.length ? `${pastS.length} done${missed ? ` · ${missed} missed` : ''} · ${upS.length} to come` : 'none yet'}</span></div>${upS.length ? `<div class="list" style="margin-top:10px">${upS.slice(0, 6).map(e => rowHTML({ ...e, _table: 'events' }, { deletable: false })).join('')}</div>` : `<p class="field-note" style="padding:8px 0 0">Timetable slots for this module show here with attendance and catch-up debt.</p>`}</div>`;
       html += `<div class="card"><div class="sub" style="display:flex;justify-content:space-between"><h3>Assessments</h3><span>${avg != null ? `avg ${avg.toFixed(0)}% of ${wSum}% marked` : (as.length ? `${as.length} on file` : 'none yet')}</span></div>${as.length ? `<div class="list" style="margin-top:10px">${as.map(a => `<div class="row"><span class="bar" style="background:${a.status === 'graded' ? 'var(--ok)' : a.status === 'submitted' ? 'var(--text-3)' : 'var(--accent)'}"></span><div class="t"><b>${esc(a.title)}</b><span>${a.weight_pct ? a.weight_pct + '% · ' : ''}${esc(String(a.status).replace('_', ' '))}${a.mark != null ? ` · ${a.mark}%` : ''}</span></div>${a.due_at ? `<div class="when">${esc(Rules.fmtWhen(a.due_at))}</div>` : ''}</div>`).join('')}</div>` : `<p class="field-note" style="padding:8px 0 0">Weightings, status pipeline, workback milestones and marks → the 2:1/First calculator.</p>`}</div>`;
       html += `<div class="card"><div class="sub" style="display:flex;justify-content:space-between"><h3>Notes</h3><button class="chip accent" data-note>${ICONS.plus} New</button></div>${notes.length ? `<div class="list" style="margin-top:10px">${notes.map(n => rowHTML({ ...n, _table: 'notes', title: n.title || n.md, kind: 'uni', location: [n.week ? 'wk ' + n.week : '', n.title ? n.md.slice(0, 80) : ''].filter(Boolean).join(' · ') })).join('')}</div>` : `<p class="field-note" style="padding:8px 0 0">Per-week markdown notes for this module. Photo attachments, revision mode and flashcards come later.</p>`}</div>`;
@@ -826,6 +833,83 @@
     paint();
     return el;
   }
+  // ------------------------------------------------------------
+  // Past Modules archive — one quiet accordion row on Modules; detail page per module; Theory Carry-Forward.
+  // ------------------------------------------------------------
+  const gradeChip = (mark, big) => mark != null ? `<span class="pill grade">${esc(String(Math.round(+mark)))}${big ? '' : '%'}</span>` : `<span class="pill grade hollow" title="Add a grade">＋</span>`;
+  const groupOfPast = m => m.year_label === 'Foundation Year' ? 'Foundation Year 2024-25' : m.semester ? `${m.year_label || 'Year 1'} · Semester ${m.semester}` : (m.year_label || 'Past');
+  function pastModulesAccordion(past) {
+    const open = sessionStorage.getItem('iota.pastOpen') === '1';
+    const groups = new Map();
+    for (const m of past) { const g = groupOfPast(m); if (!groups.has(g)) groups.set(g, []); groups.get(g).push(m); }
+    const theories = Store.list('theories');
+    const thCount = m => theories.filter(t => (t.learned_in || []).includes(m.id)).length;
+    const yearLabels = [...new Set(past.map(m => m.year_label === 'Foundation Year' ? 'FY' : (m.year_label || '').replace('Year ', 'Year ')))].join(' + ');
+    const graded = past.filter(m => m.final_mark != null);
+    return `<details class="past-acc" ${open ? 'open' : ''} data-past-acc>
+      <summary><span class="t">Past modules</span><span class="chev">▾</span><span class="meta">${past.length} · ${esc(yearLabels)}${graded.length ? ` · avg ${Math.round(graded.reduce((a, m) => a + +m.final_mark, 0) / graded.length)}%` : ''}</span></summary>
+      ${[...groups.entries()].map(([g, arr]) => { const gg = arr.filter(m => m.final_mark != null); return `<div class="past-group"><div class="past-gh"><span>${esc(g)}</span>${gg.length === arr.length && gg.length ? `<span>avg ${Math.round(gg.reduce((a, m) => a + +m.final_mark, 0) / gg.length)}%</span>` : ''}</div>
+        ${arr.map(m => `<button class="past-row" data-go="#/module/past/${m.id}"><span class="dot" style="background:${esc(m.colour || '#C7CBE0')}"></span><span class="n">${esc(m.name)}</span>${thCount(m) ? `<span class="pill th">${thCount(m)} theor${thCount(m) === 1 ? 'y' : 'ies'}</span>` : ''}${gradeChip(m.final_mark)}</button>`).join('')}</div>`; }).join('')}
+    </details>`;
+  }
+  /** Theories learned in past modules that return in this (current) module — by code or name keyword. */
+  function carryForwardFor(m) {
+    const key = [(m.code || ''), (m.name || '')].join(' ').toLowerCase();
+    return Store.list('theories').filter(t => (t.returns_in || []).some(r => { const rr = r.toLowerCase(); return (m.code && rr.split(/[^a-z0-9]+/).includes(m.code.toLowerCase())) || (rr.length > 3 && key.includes(rr)); }));
+  }
+  function theoryStrip(m) {
+    const th = carryForwardFor(m); if (!th.length) return '';
+    const mods = Store.list('modules');
+    return `<div class="card carry"><div class="sub" style="display:flex;justify-content:space-between"><b style="color:var(--text)">You already know</b><span>${th.length} from past modules</span></div>
+      <div class="chips-wrap">${th.map(t => { const from = (t.learned_in || []).map(id => mods.find(x => x.id === id)).filter(Boolean); const first = from[0]; return `<button class="chip th" data-go="${first ? '#/module/past/' + first.id : '#/uni/modules'}" title="${esc(t.note || '')}">${esc(t.name)}${first ? `<small>${esc(shortName(first))}</small>` : ''}</button>`; }).join('')}</div>
+      <p class="field-note" style="padding:8px 0 0">Ten minutes revisiting a Year 1 framework routinely earns more than an hour of new reading. Tap one to open where you learned it.</p></div>`;
+  }
+  const shortName = m => (m.code || m.name.split(/\s+/).filter(w => /^[A-Z]/.test(w)).map(w => w[0]).join('').slice(0, 5) || m.name.slice(0, 6)) + (m.status === 'completed' ? (m.year_label === 'Foundation Year' ? ' · FY' : m.year_label ? ' · ' + m.year_label.replace('Year ', 'Y') : '') : '');
+  function renderPastModule(id) {
+    const m = Store.get('modules', id);
+    const el = document.createElement('section');
+    el.className = 'screen section-screen module-screen past-screen';
+    if (!m) { el.innerHTML = `<header class="section-head"><button class="btn icon ghost back" data-go="#/uni/modules">${ICONS.back}</button><h1>Module</h1></header><div class="scroll">${empty('📚', 'Not found', 'That module isn\'t on file any more.')}</div>`; el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go))); return el; }
+    if (m.colour) tint(m.colour);
+    el.innerHTML = `
+      <header class="section-head">
+        <button class="btn icon ghost back" aria-label="Back to modules" data-go="#/uni/modules">${ICONS.back}</button>
+        <h1><span class="kicker">Completed · ${esc(m.period || m.year_label || '')}${m.semester ? ' · Sem ' + m.semester : ''}</span>${esc(m.name)}</h1>
+        <button class="btn icon ghost" aria-label="Add a note" data-review>${ICONS.plus}</button>
+      </header>
+      <div class="scroll" data-body style="padding-bottom:40px"></div>`;
+    el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
+    const body = $('[data-body]', el);
+    const TYPE_ICO = { exam: '📝', report: '📄', essay: '✍️', portfolio: '🗂️', presentation: '🎤', 'group-presentation': '👥', coursework: '📚', unknown: '📄' };
+    const paint = () => {
+      const as = Store.list('assessments').filter(a => a.module_id === id);
+      const revs = Store.list('module_reviews').filter(r => r.module_id === id);
+      const www = revs.filter(r => r.kind === 'www'), ebi = revs.filter(r => r.kind === 'ebi');
+      const th = Store.list('theories').filter(t => (t.learned_in || []).includes(id));
+      const revRow = r => `<div class="rev ${r.draft ? 'draft' : ''}" data-rev="${r.id}"><span>${esc(r.text)}</span>${r.draft ? `<div class="rev-acts"><button class="chip accent" data-rev-ok="${r.id}">Confirm</button><button class="chip" data-rev-del="${r.id}">Remove</button></div>` : `<button class="del" aria-label="Delete" data-rev-del="${r.id}">${ICONS.trash}</button>`}</div>`;
+      let html = `<div class="card past-hero"><div class="ribbon">Completed · ${esc(m.period || '')}</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px"><div><div class="sub">${esc(m.year_label || '')}${m.semester ? ' · Semester ' + m.semester : ''}</div><h3 style="font-size:17px;margin-top:2px">${esc(m.name)}</h3></div>
+        <button class="grade-big" data-grade aria-label="Set final mark">${m.final_mark != null ? `<b>${esc(String(Math.round(+m.final_mark)))}</b><small>%</small>` : `<b class="hollow">＋</b><small>add grade</small>`}</button></div></div>`;
+      html += `<div class="card"><h3>At a glance</h3>${as.length ? `<div class="list" style="margin-top:8px">${as.map(a => `<div class="row"><span class="ico">${TYPE_ICO[a.type] || '📄'}</span><div class="t"><b style="white-space:normal">${esc(a.title)}</b><span>${esc((a.type || '').replace('-', ' '))}${a.weight_pct ? ' · ' + a.weight_pct + '%' : ''}</span></div><button class="pill grade ${a.mark == null ? 'hollow' : ''}" data-amark="${a.id}">${a.mark != null ? Math.round(+a.mark) + '%' : '＋'}</button></div>`).join('')}</div>` : '<p class="sub">No assessments recorded.</p>'}</div>`;
+      html += `<div class="twin"><div class="card www"><h3>What went well</h3>${www.length ? www.map(revRow).join('') : '<p class="sub">Nothing yet.</p>'}<button class="chip" data-add-rev="www" style="margin-top:8px">${ICONS.plus} Add</button></div>
+        <div class="card ebi"><h3>Even better if</h3>${ebi.length ? ebi.map(revRow).join('') : '<p class="sub">Nothing yet.</p>'}<button class="chip" data-add-rev="ebi" style="margin-top:8px">${ICONS.plus} Add</button></div></div>`;
+      if ((m.topics || []).length || th.length) html += `<div class="card"><h3>What it covered</h3><div class="chips-wrap">${(m.topics || []).map(t => `<span class="chip">${esc(t)}</span>`).join('')}${th.map(t => `<span class="chip th" title="${esc(t.note || '')}">${esc(t.name)}${(t.returns_in || []).length ? `<small>→ ${esc(t.returns_in.join(', '))}</small>` : ''}</span>`).join('')}</div></div>`;
+      if (m.source_folder) html += `<button class="row link" data-copy="${esc(m.source_folder)}"><span class="ico">📁</span><div class="t"><b>Source folder</b><span>OneDrive › University › ${esc(m.source_folder)}</span></div><span class="chip">Copy</span></button>`;
+      html += `<button class="btn" data-ask style="margin-top:14px;width:100%">Ask EDEN about this module</button>`;
+      body.innerHTML = html;
+      body.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', async () => { try { await navigator.clipboard.writeText('University/' + b.dataset.copy); toast('Path copied'); } catch (_) { toast('Could not copy'); } }));
+      body.querySelectorAll('[data-rev-ok]').forEach(b => b.addEventListener('click', () => { Store.update('module_reviews', b.dataset.revOk, { draft: false }); toast('Confirmed'); paint(); }));
+      body.querySelectorAll('[data-rev-del]').forEach(b => b.addEventListener('click', () => { Store.remove('module_reviews', b.dataset.revDel); toast('Removed'); paint(); }));
+      body.querySelectorAll('[data-add-rev]').forEach(b => b.addEventListener('click', () => { const t = prompt(b.dataset.addRev === 'www' ? 'What went well?' : 'Even better if…'); if (t && t.trim()) { Store.insert('module_reviews', { module_id: id, kind: b.dataset.addRev, text: t.trim(), draft: false }); paint(); } }));
+      $('[data-grade]', body).addEventListener('click', () => { const v = prompt(`Final mark for ${m.name} (%)`, m.final_mark ?? ''); if (v === null) return; const n = v.trim() === '' ? null : +v; if (n !== null && (isNaN(n) || n < 0 || n > 100)) { toast('0–100 please'); return; } Store.update('modules', id, { final_mark: n }); toast(n === null ? 'Grade cleared' : 'Grade saved'); paint(); });
+      body.querySelectorAll('[data-amark]').forEach(b => b.addEventListener('click', () => { const a = Store.get('assessments', b.dataset.amark); const v = prompt(`Mark for “${a.title}” (%)`, a.mark ?? ''); if (v === null) return; const n = v.trim() === '' ? null : +v; if (n !== null && (isNaN(n) || n < 0 || n > 100)) { toast('0–100 please'); return; } Store.update('assessments', a.id, { mark: n, status: n === null ? 'submitted' : 'graded' }); paint(); }));
+      $('[data-ask]', body).addEventListener('click', () => { sessionStorage.setItem('iota.eden.prefill', `About my ${m.name} module (${m.year_label || ''}${m.semester ? ', semester ' + m.semester : ''}): `); go('#/eden'); });
+      $('[data-review]', el).onclick = () => { const t = prompt('Note for this module — start with WWW: or EBI:'); if (!t) return; const k = /^ebi/i.test(t) ? 'ebi' : 'www'; Store.insert('module_reviews', { module_id: id, kind: k, text: t.replace(/^(www|ebi)[:\s-]+/i, '').trim(), draft: false }); paint(); };
+    };
+    paint();
+    return el;
+  }
+
   /** New-module sheet: course module (from the timetable) or a personal project (language, skill). */
   const MODULE_HUES = ['#F472B6', '#38BDF8', '#A3E635', '#FBBF24', '#C084FC', '#34D399', '#FB7185', '#60A5FA'];
   function nextModuleHue() { const used = new Set(Store.list('modules').map(m => (m.colour || '').toUpperCase())); return MODULE_HUES.find(h => !used.has(h)) || MODULE_HUES[Store.list('modules').length % MODULE_HUES.length]; }
@@ -915,6 +999,7 @@
     if (hist.length) { for (const m of hist) bubble(m.role === 'user' ? 'me' : 'eden', m.content); }
     setTimeout(() => { if (!hist.length && !b0) { bubble('eden', Rules.observation()); orb?.ripple(); } const w = Rules.dueWatches(new Date(), 3); if (w.length && !hist.length) setTimeout(() => { bubble('eden', 'Watching: ' + w.map(x => x.text).join(' · ') + '.', 'promise watcher'); }, 400); }, 250);
 
+    const prefill = sessionStorage.getItem('iota.eden.prefill'); if (prefill) { sessionStorage.removeItem('iota.eden.prefill'); ta.value = prefill; setTimeout(() => { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }, 300); }
     ta.addEventListener('focus', () => setState('listening', 'listening'));
     ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = Math.min(120, ta.scrollHeight) + 'px'; });
     ta.addEventListener('blur', () => idle());
