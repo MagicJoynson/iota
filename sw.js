@@ -1,14 +1,16 @@
 /* Iota service worker — caches the app shell so the Ring opens offline.
    Bump CACHE on every deploy that changes shell files. */
-const CACHE = 'iota-shell-v0.7.6';
+const CACHE = 'iota-shell-v0.8.0';
 const SHELL = [
   './',
   './index.html',
   './css/app.css',
+  './css/jp.css',
   './js/orb.js',
   './js/supabase.js',
   './js/store.js',
   './js/eden.js',
+  './js/jp.js',
   './js/app.js',
   './manifest.webmanifest',
   './assets/brand-512.png',

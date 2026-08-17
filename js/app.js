@@ -73,6 +73,7 @@
   // Toast
   // ------------------------------------------------------------
   let toastT;
+  window.__iotaToast = msg => toast(msg);
   function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2400); }
 
   // ------------------------------------------------------------
@@ -327,7 +328,7 @@
         html += `<label class="search glass"><span>${ICONS.search}</span><input type="search" data-note-search placeholder="Search notes across every module" autocomplete="off"></label><div data-note-results></div>`;
         html += ms.length ? `<div class="list">${ms.map(m => {
           const n = notes.filter(x => x.module_id === m.id).length, a = Store.list('assessments').filter(x => x.module_id === m.id && x.status !== 'graded').length;
-          return `<button class="row link" data-go="#/module/${m.id}"><span class="bar" style="background:${esc(m.colour || 'var(--accent)')}"></span><div class="t"><b>${esc(m.code ? m.code + ' · ' : '')}${esc(m.name)}</b><span>${esc([m.kind === 'personal' ? 'Personal project' : m.lecturer, m.credits ? m.credits + ' credits' : '', n ? n + ' note' + (n === 1 ? '' : 's') : '', a ? a + ' open assessment' + (a === 1 ? '' : 's') : ''].filter(Boolean).join(' · ') || 'Tap to open the hub')}</span></div>${m.kind === 'personal' ? `<span class="pill" style="background:color-mix(in srgb, ${esc(m.colour || '#C7CBE0')} 18%, transparent);color:${esc(m.colour || 'var(--text-2)')}">Personal</span>` : ''}<span class="chev">›</span></button>`;
+          return `<button class="row link" data-go="#/module/${m.id}"><span class="bar" style="background:${esc(m.colour || 'var(--accent)')}"></span><div class="t"><b>${esc(m.code ? m.code + ' · ' : '')}${esc(m.name)}</b><span>${esc([m.kind === 'personal' || m.kind === 'language' ? 'Personal project' : m.lecturer, m.credits ? m.credits + ' credits' : '', n ? n + ' note' + (n === 1 ? '' : 's') : '', a ? a + ' open assessment' + (a === 1 ? '' : 's') : ''].filter(Boolean).join(' · ') || 'Tap to open the hub')}</span></div>${m.kind === 'personal' || m.kind === 'language' ? `<span class="pill" style="background:color-mix(in srgb, ${esc(m.colour || '#C7CBE0')} 18%, transparent);color:${esc(m.colour || 'var(--text-2)')}">${m.kind === 'language' ? '語 · Personal' : 'Personal'}</span>` : ''}<span class="chev">›</span></button>`;
         }).join('')}</div><button class="btn ghost" data-new-module style="margin-top:12px">${ICONS.plus} New module</button>`
                          : empty('📚', 'No modules yet', 'Each module gets its own hub — info, sessions, assessments and notes in one place. Course modules arrive with the timetable on <b>Tuesday 18 Aug</b>; personal projects (a language, a skill) can be added now.', { label: 'New module', hint: '__module' });
         if (past.length) html += pastModulesAccordion(past);
@@ -802,6 +803,14 @@
     if (!m) { el.innerHTML = `<header class="section-head"><button class="btn icon ghost back" data-go="#/uni/modules">${ICONS.back}</button><h1>Module</h1></header><div class="scroll">${empty('📚', 'Not found', 'That module isn\'t on file any more.')}</div>`; el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go))); return el; }
     if (m.colour) tint(m.colour);
     const now = new Date();
+    if (m.kind === 'language' && window.JP) {
+      el.classList.add('jp-screen');
+      el.innerHTML = `<header class="section-head"><button class="btn icon ghost back" aria-label="Back to modules" data-go="#/uni/modules">${ICONS.back}</button><h1><span class="kicker">Personal project · ${esc(m.code || '')}</span>${esc(m.name)}</h1><button class="btn icon ghost" aria-label="Add a note" data-note>${ICONS.plus}</button></header><div class="jp-host" data-jp></div>`;
+      el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
+      $('[data-note]', el).addEventListener('click', () => openNote(m, () => toast('Saved to ' + m.name)));
+      JP.render($('[data-jp]', el), m);
+      return el;
+    }
     el.innerHTML = `
       <header class="section-head">
         <button class="btn icon ghost back" aria-label="Back to modules" data-go="#/uni/modules">${ICONS.back}</button>
@@ -1097,6 +1106,11 @@
         </div>
         <div class="setting-group"><h3>Term dates</h3>
           ${two(f('termStart', 'Term starts', 'date'), f('termWeeks', 'Weeks', 'number'))}
+        </div>
+        <div class="setting-group"><h3>Japanese</h3>
+          ${two(f('jpDailyNewCap', 'New items per day', 'number', 'min="1" max="40" inputmode="numeric"'), f('jpSessionCap', 'Review chunk (min)', 'number', 'min="3" max="60" inputmode="numeric"'))}
+          ${one(f('japanDeparture', 'Japan departure (provisional)', 'date'))}
+          <p class="field-note">Quotas follow the 57-week plan inside the cap. Lower the cap for a fortnight if reviews pile up — that beats stopping.</p>
         </div>
         <div class="setting-group"><h3>Appearance</h3>
           <div class="field"><label for="f-auroraIntensity">Aurora intensity</label><input id="f-auroraIntensity" data-k="auroraIntensity" type="range" min="0.2" max="1" step="0.05" value="${s.auroraIntensity}"></div>

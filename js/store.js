@@ -9,7 +9,7 @@
 
   const CACHE_KEY = 'iota.cache.v2';
   const OUTBOX_KEY = 'iota.outbox.v1';
-  const TABLES = ['events', 'shifts', 'pay_rates', 'tasks', 'notes', 'societies', 'watches', 'briefings', 'modules', 'assessments', 'captures', 'time_off', 'renewals', 'module_reviews', 'theories'];
+  const TABLES = ['events', 'shifts', 'pay_rates', 'tasks', 'notes', 'societies', 'watches', 'briefings', 'modules', 'assessments', 'captures', 'time_off', 'renewals', 'module_reviews', 'theories', 'jp_srs', 'jp_reviews'];
   const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }));
 
   const DEFAULT_SETTINGS = {
@@ -113,6 +113,8 @@
         renewals: 'renewals?select=*&order=expires_on',
         module_reviews: 'module_reviews?select=*&order=created_at',
         theories: 'theories?select=*&order=name',
+        jp_srs: 'jp_srs?select=*&order=due.asc.nullsfirst&limit=6000',
+        jp_reviews: `jp_reviews?select=id,item_id,reviewed_at,grade,ms&reviewed_at=gte.${new Date(Date.now() - 120 * 86400000).toISOString()}&order=reviewed_at.desc&limit=4000`,
         settings: 'settings?select=key,value',
       };
       const results = await Promise.allSettled(Object.entries(q).map(([t, path]) => SB.rest('GET', path).then(rows => [t, rows])));

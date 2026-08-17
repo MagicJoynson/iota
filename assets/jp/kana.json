@@ -1,0 +1,1562 @@
+{
+ "pack": "kana",
+ "source": "authored for Iota by Claude, 2026",
+ "count": 208,
+ "notes": {
+  "small_tsu": "Small っ/ッ doubles the following consonant: きって kitte (stamp). In SRS, test it inside words, not alone.",
+  "long_vowels": "Long vowels: hiragana adds a vowel (おう→ō, えい→ē); katakana uses ー (コーヒー kōhī).",
+  "n_before": "ん assimilates: before b/p/m it sounds like 'm' (しんぶん shimbun).",
+  "wo": "を is the object particle only; pronounced 'o'.",
+  "ordering": "Teach hiragana rows in gojūon order (a ka sa ta na ha ma ya ra wa n); katakana after hiragana is solid."
+ },
+ "items": [
+  {
+   "id": "kana-h001",
+   "kana": "あ",
+   "romaji": "a",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "An Antenna on a roof — two crossed poles."
+  },
+  {
+   "id": "kana-k001",
+   "kana": "ア",
+   "romaji": "a",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "Sharp Axe edge."
+  },
+  {
+   "id": "kana-h002",
+   "kana": "い",
+   "romaji": "i",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "Two eels (ii!) swimming side by side."
+  },
+  {
+   "id": "kana-k002",
+   "kana": "イ",
+   "romaji": "i",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "An easel leaning left."
+  },
+  {
+   "id": "kana-h003",
+   "kana": "う",
+   "romaji": "u",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A side-on face saying 'ooh' with a big nose."
+  },
+  {
+   "id": "kana-k003",
+   "kana": "ウ",
+   "romaji": "u",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A roof with a chimney — 'oo' who's home?"
+  },
+  {
+   "id": "kana-h004",
+   "kana": "え",
+   "romaji": "e",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "An Exotic bird with a curled tail."
+  },
+  {
+   "id": "kana-k004",
+   "kana": "エ",
+   "romaji": "e",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "An Elevator between two floors."
+  },
+  {
+   "id": "kana-h005",
+   "kana": "お",
+   "romaji": "o",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "An Olympic diver mid-twist."
+  },
+  {
+   "id": "kana-k005",
+   "kana": "オ",
+   "romaji": "o",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "An Opera singer with arm flung out."
+  },
+  {
+   "id": "kana-h006",
+   "kana": "か",
+   "romaji": "ka",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A Kite with a trailing ribbon."
+  },
+  {
+   "id": "kana-k006",
+   "kana": "カ",
+   "romaji": "ka",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "Same kite, straighter — cut the ribbon."
+  },
+  {
+   "id": "kana-h007",
+   "kana": "き",
+   "romaji": "ki",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A Key with two teeth."
+  },
+  {
+   "id": "kana-k007",
+   "kana": "キ",
+   "romaji": "ki",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A key again — simplified, two crossbars."
+  },
+  {
+   "id": "kana-h008",
+   "kana": "く",
+   "romaji": "ku",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A bird's beak going 'coo'."
+  },
+  {
+   "id": "kana-k008",
+   "kana": "ク",
+   "romaji": "ku",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A quicker beak with a hat."
+  },
+  {
+   "id": "kana-h009",
+   "kana": "け",
+   "romaji": "ke",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A Keg next to a stick."
+  },
+  {
+   "id": "kana-k009",
+   "kana": "ケ",
+   "romaji": "ke",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "K leaning against a wall."
+  },
+  {
+   "id": "kana-h010",
+   "kana": "こ",
+   "romaji": "ko",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "Two Cozy logs lying together."
+  },
+  {
+   "id": "kana-k010",
+   "kana": "コ",
+   "romaji": "ko",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A Corner bracket."
+  },
+  {
+   "id": "kana-h011",
+   "kana": "さ",
+   "romaji": "sa",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A Saw cutting a branch."
+  },
+  {
+   "id": "kana-k011",
+   "kana": "サ",
+   "romaji": "sa",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A Salad fork, two prongs."
+  },
+  {
+   "id": "kana-h012",
+   "kana": "し",
+   "romaji": "shi",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A fishing hook — 'she' caught a fish."
+  },
+  {
+   "id": "kana-k012",
+   "kana": "シ",
+   "romaji": "shi",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "She winks: two eyes and a smile-stroke."
+  },
+  {
+   "id": "kana-h013",
+   "kana": "す",
+   "romaji": "su",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A Swing with a looped seat."
+  },
+  {
+   "id": "kana-k013",
+   "kana": "ス",
+   "romaji": "su",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A Ski jump ramp."
+  },
+  {
+   "id": "kana-h014",
+   "kana": "せ",
+   "romaji": "se",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A Set of teeth with a filling."
+  },
+  {
+   "id": "kana-k014",
+   "kana": "セ",
+   "romaji": "se",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "Same shape, one tooth pulled."
+  },
+  {
+   "id": "kana-h015",
+   "kana": "そ",
+   "romaji": "so",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A SewIng zigzag stitch."
+  },
+  {
+   "id": "kana-k015",
+   "kana": "ソ",
+   "romaji": "so",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "SOck hanging on one peg (two strokes)."
+  },
+  {
+   "id": "kana-h016",
+   "kana": "た",
+   "romaji": "ta",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "'ta' looks like a t + a squashed together."
+  },
+  {
+   "id": "kana-k016",
+   "kana": "タ",
+   "romaji": "ta",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A Taco shell, open side down."
+  },
+  {
+   "id": "kana-h017",
+   "kana": "ち",
+   "romaji": "chi",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A CHEerleader's ribbon twirl."
+  },
+  {
+   "id": "kana-k017",
+   "kana": "チ",
+   "romaji": "chi",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A CHEck-mark with a crossbar."
+  },
+  {
+   "id": "kana-h018",
+   "kana": "つ",
+   "romaji": "tsu",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A TSUnami wave curling."
+  },
+  {
+   "id": "kana-k018",
+   "kana": "ツ",
+   "romaji": "tsu",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "TSUnami from above — two droplets and a sweep."
+  },
+  {
+   "id": "kana-h019",
+   "kana": "て",
+   "romaji": "te",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A TElephone pole with a drooping wire."
+  },
+  {
+   "id": "kana-k019",
+   "kana": "テ",
+   "romaji": "te",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A TEnt pole with a flag."
+  },
+  {
+   "id": "kana-h020",
+   "kana": "と",
+   "romaji": "to",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A TOe with a splinter in it."
+  },
+  {
+   "id": "kana-k020",
+   "kana": "ト",
+   "romaji": "to",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A TOtem pole notch."
+  },
+  {
+   "id": "kana-h021",
+   "kana": "な",
+   "romaji": "na",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A kNot tied around a cross."
+  },
+  {
+   "id": "kana-k021",
+   "kana": "ナ",
+   "romaji": "na",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A kNife blade."
+  },
+  {
+   "id": "kana-h022",
+   "kana": "に",
+   "romaji": "ni",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A kNEE next to two scars."
+  },
+  {
+   "id": "kana-k022",
+   "kana": "ニ",
+   "romaji": "ni",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "Two NEat lines — 'ni' means two!"
+  },
+  {
+   "id": "kana-h023",
+   "kana": "ぬ",
+   "romaji": "nu",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "NoodleS looping round chopsticks."
+  },
+  {
+   "id": "kana-k023",
+   "kana": "ヌ",
+   "romaji": "nu",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "NUnchucks mid-swing."
+  },
+  {
+   "id": "kana-h024",
+   "kana": "ね",
+   "romaji": "ne",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A cat ('neko') with a curled tail."
+  },
+  {
+   "id": "kana-k024",
+   "kana": "ネ",
+   "romaji": "ne",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A NEcktie on a hook."
+  },
+  {
+   "id": "kana-h025",
+   "kana": "の",
+   "romaji": "no",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A NO-entry swirl — one big loop."
+  },
+  {
+   "id": "kana-k025",
+   "kana": "ノ",
+   "romaji": "no",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A NOse in profile — single slash."
+  },
+  {
+   "id": "kana-h026",
+   "kana": "は",
+   "romaji": "ha",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A House with an antenna."
+  },
+  {
+   "id": "kana-k026",
+   "kana": "ハ",
+   "romaji": "ha",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "HA! — laughing mouth open, two strokes."
+  },
+  {
+   "id": "kana-h027",
+   "kana": "ひ",
+   "romaji": "hi",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A big smile — 'hee hee'."
+  },
+  {
+   "id": "kana-k027",
+   "kana": "ヒ",
+   "romaji": "hi",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A HEel kicking."
+  },
+  {
+   "id": "kana-h028",
+   "kana": "ふ",
+   "romaji": "fu",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "Mount FUji with drifting clouds."
+  },
+  {
+   "id": "kana-k028",
+   "kana": "フ",
+   "romaji": "fu",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A FUll hood, one flap."
+  },
+  {
+   "id": "kana-h029",
+   "kana": "へ",
+   "romaji": "he",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A small hill — 'heh, easy climb'."
+  },
+  {
+   "id": "kana-k029",
+   "kana": "ヘ",
+   "romaji": "he",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "Same hill — kana twins."
+  },
+  {
+   "id": "kana-h030",
+   "kana": "ほ",
+   "romaji": "ho",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A HOuse with a cross on the roof and a flag."
+  },
+  {
+   "id": "kana-k030",
+   "kana": "ホ",
+   "romaji": "ho",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A HOlly sprig, four points."
+  },
+  {
+   "id": "kana-h031",
+   "kana": "ま",
+   "romaji": "ma",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A MAgic wand with two rings."
+  },
+  {
+   "id": "kana-k031",
+   "kana": "マ",
+   "romaji": "ma",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A MAp pin."
+  },
+  {
+   "id": "kana-h032",
+   "kana": "み",
+   "romaji": "mi",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "The number 21 — 'mi' is 3, 21÷7."
+  },
+  {
+   "id": "kana-k032",
+   "kana": "ミ",
+   "romaji": "mi",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "Three MIssing scratches — 'mi' = three."
+  },
+  {
+   "id": "kana-h033",
+   "kana": "む",
+   "romaji": "mu",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A cow going 'moo' with a horn."
+  },
+  {
+   "id": "kana-k033",
+   "kana": "ム",
+   "romaji": "mu",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A MUg upside down."
+  },
+  {
+   "id": "kana-h034",
+   "kana": "め",
+   "romaji": "me",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "An eye ('me') with a lash across."
+  },
+  {
+   "id": "kana-k034",
+   "kana": "メ",
+   "romaji": "me",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "An X MArks the eye."
+  },
+  {
+   "id": "kana-h035",
+   "kana": "も",
+   "romaji": "mo",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "MOre hooks on one line."
+  },
+  {
+   "id": "kana-k035",
+   "kana": "モ",
+   "romaji": "mo",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "MOwing lines on a lawn."
+  },
+  {
+   "id": "kana-h036",
+   "kana": "や",
+   "romaji": "ya",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A YAk's head with one horn."
+  },
+  {
+   "id": "kana-k036",
+   "kana": "ヤ",
+   "romaji": "ya",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A YAcht mast leaning."
+  },
+  {
+   "id": "kana-h037",
+   "kana": "ゆ",
+   "romaji": "yu",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A U-boat periscope through a loop."
+  },
+  {
+   "id": "kana-k037",
+   "kana": "ユ",
+   "romaji": "yu",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A U-turn sign."
+  },
+  {
+   "id": "kana-h038",
+   "kana": "よ",
+   "romaji": "yo",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A YO-yo hanging off a finger."
+  },
+  {
+   "id": "kana-k038",
+   "kana": "ヨ",
+   "romaji": "yo",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A comb ('yo!' three teeth)."
+  },
+  {
+   "id": "kana-h039",
+   "kana": "ら",
+   "romaji": "ra",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A RAbbit ear over a cheek."
+  },
+  {
+   "id": "kana-k039",
+   "kana": "ラ",
+   "romaji": "ra",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A RAdio antenna over a shelf."
+  },
+  {
+   "id": "kana-h040",
+   "kana": "り",
+   "romaji": "ri",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A RIver between two banks."
+  },
+  {
+   "id": "kana-k040",
+   "kana": "リ",
+   "romaji": "ri",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "Same river, straighter banks."
+  },
+  {
+   "id": "kana-h041",
+   "kana": "る",
+   "romaji": "ru",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A loop-the-loop RoUte with a curl."
+  },
+  {
+   "id": "kana-k041",
+   "kana": "ル",
+   "romaji": "ru",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A RUnning leg pair."
+  },
+  {
+   "id": "kana-h042",
+   "kana": "れ",
+   "romaji": "re",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A REed bending in wind."
+  },
+  {
+   "id": "kana-k042",
+   "kana": "レ",
+   "romaji": "re",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A LEdge — one clean corner."
+  },
+  {
+   "id": "kana-h043",
+   "kana": "ろ",
+   "romaji": "ro",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A ROad winding downhill."
+  },
+  {
+   "id": "kana-k043",
+   "kana": "ロ",
+   "romaji": "ro",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A ROom — a plain square."
+  },
+  {
+   "id": "kana-h044",
+   "kana": "わ",
+   "romaji": "wa",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A WAsp's rounded body."
+  },
+  {
+   "id": "kana-k044",
+   "kana": "ワ",
+   "romaji": "wa",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A WAterslide rim."
+  },
+  {
+   "id": "kana-h045",
+   "kana": "を",
+   "romaji": "wo",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "A person doing a WObbly cartwheel."
+  },
+  {
+   "id": "kana-k045",
+   "kana": "ヲ",
+   "romaji": "wo",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A WObbly shelf (rare — particle only)."
+  },
+  {
+   "id": "kana-h046",
+   "kana": "ん",
+   "romaji": "n",
+   "script": "hiragana",
+   "group": "base",
+   "mnemonic": "An 'n' that slid down a slide."
+  },
+  {
+   "id": "kana-k046",
+   "kana": "ン",
+   "romaji": "n",
+   "script": "katakana",
+   "group": "base",
+   "mnemonic": "A wiNk — one eye, one slash."
+  },
+  {
+   "id": "kana-hd001",
+   "kana": "が",
+   "romaji": "ga",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd001",
+   "kana": "ガ",
+   "romaji": "ga",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd002",
+   "kana": "ぎ",
+   "romaji": "gi",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd002",
+   "kana": "ギ",
+   "romaji": "gi",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd003",
+   "kana": "ぐ",
+   "romaji": "gu",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd003",
+   "kana": "グ",
+   "romaji": "gu",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd004",
+   "kana": "げ",
+   "romaji": "ge",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd004",
+   "kana": "ゲ",
+   "romaji": "ge",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd005",
+   "kana": "ご",
+   "romaji": "go",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd005",
+   "kana": "ゴ",
+   "romaji": "go",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd006",
+   "kana": "ざ",
+   "romaji": "za",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd006",
+   "kana": "ザ",
+   "romaji": "za",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd007",
+   "kana": "じ",
+   "romaji": "ji",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd007",
+   "kana": "ジ",
+   "romaji": "ji",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd008",
+   "kana": "ず",
+   "romaji": "zu",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd008",
+   "kana": "ズ",
+   "romaji": "zu",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd009",
+   "kana": "ぜ",
+   "romaji": "ze",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd009",
+   "kana": "ゼ",
+   "romaji": "ze",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd010",
+   "kana": "ぞ",
+   "romaji": "zo",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd010",
+   "kana": "ゾ",
+   "romaji": "zo",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd011",
+   "kana": "だ",
+   "romaji": "da",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd011",
+   "kana": "ダ",
+   "romaji": "da",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd012",
+   "kana": "ぢ",
+   "romaji": "dji",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd012",
+   "kana": "ヂ",
+   "romaji": "dji",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd013",
+   "kana": "づ",
+   "romaji": "dzu",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd013",
+   "kana": "ヅ",
+   "romaji": "dzu",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd014",
+   "kana": "で",
+   "romaji": "de",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd014",
+   "kana": "デ",
+   "romaji": "de",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd015",
+   "kana": "ど",
+   "romaji": "do",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd015",
+   "kana": "ド",
+   "romaji": "do",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd016",
+   "kana": "ば",
+   "romaji": "ba",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd016",
+   "kana": "バ",
+   "romaji": "ba",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd017",
+   "kana": "び",
+   "romaji": "bi",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd017",
+   "kana": "ビ",
+   "romaji": "bi",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd018",
+   "kana": "ぶ",
+   "romaji": "bu",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd018",
+   "kana": "ブ",
+   "romaji": "bu",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd019",
+   "kana": "べ",
+   "romaji": "be",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd019",
+   "kana": "ベ",
+   "romaji": "be",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd020",
+   "kana": "ぼ",
+   "romaji": "bo",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd020",
+   "kana": "ボ",
+   "romaji": "bo",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd021",
+   "kana": "ぱ",
+   "romaji": "pa",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd021",
+   "kana": "パ",
+   "romaji": "pa",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd022",
+   "kana": "ぴ",
+   "romaji": "pi",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd022",
+   "kana": "ピ",
+   "romaji": "pi",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd023",
+   "kana": "ぷ",
+   "romaji": "pu",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd023",
+   "kana": "プ",
+   "romaji": "pu",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd024",
+   "kana": "ぺ",
+   "romaji": "pe",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd024",
+   "kana": "ペ",
+   "romaji": "pe",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hd025",
+   "kana": "ぽ",
+   "romaji": "po",
+   "script": "hiragana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-kd025",
+   "kana": "ポ",
+   "romaji": "po",
+   "script": "katakana",
+   "group": "dakuten"
+  },
+  {
+   "id": "kana-hc001",
+   "kana": "きゃ",
+   "romaji": "kya",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc001",
+   "kana": "キャ",
+   "romaji": "kya",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc002",
+   "kana": "きゅ",
+   "romaji": "kyu",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc002",
+   "kana": "キュ",
+   "romaji": "kyu",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc003",
+   "kana": "きょ",
+   "romaji": "kyo",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc003",
+   "kana": "キョ",
+   "romaji": "kyo",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc004",
+   "kana": "しゃ",
+   "romaji": "sha",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc004",
+   "kana": "シャ",
+   "romaji": "sha",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc005",
+   "kana": "しゅ",
+   "romaji": "shu",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc005",
+   "kana": "シュ",
+   "romaji": "shu",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc006",
+   "kana": "しょ",
+   "romaji": "sho",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc006",
+   "kana": "ショ",
+   "romaji": "sho",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc007",
+   "kana": "ちゃ",
+   "romaji": "cha",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc007",
+   "kana": "チャ",
+   "romaji": "cha",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc008",
+   "kana": "ちゅ",
+   "romaji": "chu",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc008",
+   "kana": "チュ",
+   "romaji": "chu",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc009",
+   "kana": "ちょ",
+   "romaji": "cho",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc009",
+   "kana": "チョ",
+   "romaji": "cho",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc010",
+   "kana": "にゃ",
+   "romaji": "nya",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc010",
+   "kana": "ニャ",
+   "romaji": "nya",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc011",
+   "kana": "にゅ",
+   "romaji": "nyu",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc011",
+   "kana": "ニュ",
+   "romaji": "nyu",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc012",
+   "kana": "にょ",
+   "romaji": "nyo",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc012",
+   "kana": "ニョ",
+   "romaji": "nyo",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc013",
+   "kana": "ひゃ",
+   "romaji": "hya",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc013",
+   "kana": "ヒャ",
+   "romaji": "hya",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc014",
+   "kana": "ひゅ",
+   "romaji": "hyu",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc014",
+   "kana": "ヒュ",
+   "romaji": "hyu",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc015",
+   "kana": "ひょ",
+   "romaji": "hyo",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc015",
+   "kana": "ヒョ",
+   "romaji": "hyo",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc016",
+   "kana": "みゃ",
+   "romaji": "mya",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc016",
+   "kana": "ミャ",
+   "romaji": "mya",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc017",
+   "kana": "みゅ",
+   "romaji": "myu",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc017",
+   "kana": "ミュ",
+   "romaji": "myu",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc018",
+   "kana": "みょ",
+   "romaji": "myo",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc018",
+   "kana": "ミョ",
+   "romaji": "myo",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc019",
+   "kana": "りゃ",
+   "romaji": "rya",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc019",
+   "kana": "リャ",
+   "romaji": "rya",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc020",
+   "kana": "りゅ",
+   "romaji": "ryu",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc020",
+   "kana": "リュ",
+   "romaji": "ryu",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc021",
+   "kana": "りょ",
+   "romaji": "ryo",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc021",
+   "kana": "リョ",
+   "romaji": "ryo",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc022",
+   "kana": "ぎゃ",
+   "romaji": "gya",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc022",
+   "kana": "ギャ",
+   "romaji": "gya",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc023",
+   "kana": "ぎゅ",
+   "romaji": "gyu",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc023",
+   "kana": "ギュ",
+   "romaji": "gyu",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc024",
+   "kana": "ぎょ",
+   "romaji": "gyo",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc024",
+   "kana": "ギョ",
+   "romaji": "gyo",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc025",
+   "kana": "じゃ",
+   "romaji": "ja",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc025",
+   "kana": "ジャ",
+   "romaji": "ja",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc026",
+   "kana": "じゅ",
+   "romaji": "ju",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc026",
+   "kana": "ジュ",
+   "romaji": "ju",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc027",
+   "kana": "じょ",
+   "romaji": "jo",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc027",
+   "kana": "ジョ",
+   "romaji": "jo",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc028",
+   "kana": "びゃ",
+   "romaji": "bya",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc028",
+   "kana": "ビャ",
+   "romaji": "bya",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc029",
+   "kana": "びゅ",
+   "romaji": "byu",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc029",
+   "kana": "ビュ",
+   "romaji": "byu",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc030",
+   "kana": "びょ",
+   "romaji": "byo",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc030",
+   "kana": "ビョ",
+   "romaji": "byo",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc031",
+   "kana": "ぴゃ",
+   "romaji": "pya",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc031",
+   "kana": "ピャ",
+   "romaji": "pya",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc032",
+   "kana": "ぴゅ",
+   "romaji": "pyu",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc032",
+   "kana": "ピュ",
+   "romaji": "pyu",
+   "script": "katakana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-hc033",
+   "kana": "ぴょ",
+   "romaji": "pyo",
+   "script": "hiragana",
+   "group": "combo"
+  },
+  {
+   "id": "kana-kc033",
+   "kana": "ピョ",
+   "romaji": "pyo",
+   "script": "katakana",
+   "group": "combo"
+  }
+ ]
+}

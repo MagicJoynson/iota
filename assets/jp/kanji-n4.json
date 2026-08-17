@@ -1,0 +1,3824 @@
+{
+ "pack": "kanji-n4",
+ "source": "davidluzgouveia/kanji-data, KANJIDIC2 (c) EDRDG CC-BY-SA 4.0",
+ "count": 166,
+ "items": [
+  {
+   "id": "n4-k001",
+   "kanji": "会",
+   "meanings": [
+    "Meeting",
+    "Meet",
+    "Party",
+    "Association"
+   ],
+   "on": [
+    "かい",
+    "え"
+   ],
+   "kun": [
+    "あ.う",
+    "あ.わせる",
+    "あつ.まる"
+   ],
+   "strokes": 6,
+   "freq": 4,
+   "radicals": [
+    "Meet"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k002",
+   "kanji": "同",
+   "meanings": [
+    "Same",
+    "Agree",
+    "Equal"
+   ],
+   "on": [
+    "どう"
+   ],
+   "kun": [
+    "おな.じ"
+   ],
+   "strokes": 6,
+   "freq": 15,
+   "radicals": [
+    "Mustache",
+    "Ground"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k003",
+   "kanji": "事",
+   "meanings": [
+    "Matter",
+    "Thing",
+    "Fact",
+    "Business"
+   ],
+   "on": [
+    "じ",
+    "ず"
+   ],
+   "kun": [
+    "こと",
+    "つか.う",
+    "つか.える"
+   ],
+   "strokes": 8,
+   "freq": 18,
+   "radicals": [
+    "Cross",
+    "Mouth",
+    "Brush"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k004",
+   "kanji": "自",
+   "meanings": [
+    "Oneself"
+   ],
+   "on": [
+    "じ",
+    "し"
+   ],
+   "kun": [
+    "みずか.ら",
+    "おの.ずから",
+    "おの.ずと"
+   ],
+   "strokes": 6,
+   "freq": 19,
+   "radicals": [
+    "Self"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k005",
+   "kanji": "社",
+   "meanings": [
+    "Company",
+    "Firm",
+    "Office",
+    "Association"
+   ],
+   "on": [
+    "しゃ"
+   ],
+   "kun": [
+    "やしろ"
+   ],
+   "strokes": 7,
+   "freq": 21,
+   "radicals": [
+    "Spirit",
+    "Dirt"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k006",
+   "kanji": "発",
+   "meanings": [
+    "Departure",
+    "Discharge",
+    "Publish",
+    "Emit"
+   ],
+   "on": [
+    "はつ",
+    "ほつ"
+   ],
+   "kun": [
+    "た.つ",
+    "あば.く",
+    "おこ.る"
+   ],
+   "strokes": 9,
+   "freq": 32,
+   "radicals": [
+    "Tent",
+    "Lantern"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k007",
+   "kanji": "者",
+   "meanings": [
+    "Someone",
+    "Person"
+   ],
+   "on": [
+    "しゃ"
+   ],
+   "kun": [
+    "もの"
+   ],
+   "strokes": 8,
+   "freq": 38,
+   "radicals": [
+    "Coffin",
+    "Sun"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k008",
+   "kanji": "地",
+   "meanings": [
+    "Ground",
+    "Earth"
+   ],
+   "on": [
+    "ち",
+    "じ"
+   ],
+   "kun": [],
+   "strokes": 6,
+   "freq": 40,
+   "radicals": [
+    "Dirt",
+    "Alligator"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k009",
+   "kanji": "業",
+   "meanings": [
+    "Business",
+    "Vocation",
+    "Arts",
+    "Performance"
+   ],
+   "on": [
+    "ぎょう",
+    "ごう"
+   ],
+   "kun": [
+    "わざ"
+   ],
+   "strokes": 13,
+   "freq": 43,
+   "radicals": [
+    "Spikes",
+    "Sheep",
+    "Fins"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k010",
+   "kanji": "方",
+   "meanings": [
+    "Direction",
+    "Person",
+    "Alternative"
+   ],
+   "on": [
+    "ほう"
+   ],
+   "kun": [
+    "かた",
+    "-かた",
+    "-がた"
+   ],
+   "strokes": 4,
+   "freq": 46,
+   "radicals": [
+    "Direction"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k011",
+   "kanji": "新",
+   "meanings": [
+    "New"
+   ],
+   "on": [
+    "しん"
+   ],
+   "kun": [
+    "あたら.しい",
+    "あら.た",
+    "あら-"
+   ],
+   "strokes": 13,
+   "freq": 51,
+   "radicals": [
+    "Stand",
+    "Tree",
+    "Axe"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k012",
+   "kanji": "場",
+   "meanings": [
+    "Location",
+    "Place"
+   ],
+   "on": [
+    "じょう",
+    "ちょう"
+   ],
+   "kun": [
+    "ば"
+   ],
+   "strokes": 12,
+   "freq": 52,
+   "radicals": [
+    "Dirt",
+    "Easy"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k013",
+   "kanji": "員",
+   "meanings": [
+    "Employee",
+    "Member",
+    "Number",
+    "The One In Charge"
+   ],
+   "on": [
+    "いん"
+   ],
+   "kun": [],
+   "strokes": 10,
+   "freq": 54,
+   "radicals": [
+    "Mouth",
+    "Shellfish"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k014",
+   "kanji": "立",
+   "meanings": [
+    "Stand Up",
+    "Rise",
+    "Set Up",
+    "Erect"
+   ],
+   "on": [
+    "りつ",
+    "りゅう",
+    "りっとる"
+   ],
+   "kun": [
+    "た.つ",
+    "-た.つ",
+    "た.ち-"
+   ],
+   "strokes": 5,
+   "freq": 58,
+   "radicals": [
+    "Stand"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k015",
+   "kanji": "開",
+   "meanings": [
+    "Open",
+    "Unfold",
+    "Unseal"
+   ],
+   "on": [
+    "かい"
+   ],
+   "kun": [
+    "ひら.く",
+    "ひら.き",
+    "-びら.き"
+   ],
+   "strokes": 12,
+   "freq": 59,
+   "radicals": [
+    "Gate",
+    "Lantern"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k016",
+   "kanji": "手",
+   "meanings": [
+    "Hand"
+   ],
+   "on": [
+    "しゅ",
+    "ず"
+   ],
+   "kun": [
+    "て",
+    "て-",
+    "-て"
+   ],
+   "strokes": 4,
+   "freq": 60,
+   "radicals": [
+    "Hand"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k017",
+   "kanji": "力",
+   "meanings": [
+    "Power",
+    "Strength",
+    "Strong",
+    "Strain"
+   ],
+   "on": [
+    "りょく",
+    "りき",
+    "りい"
+   ],
+   "kun": [
+    "ちから"
+   ],
+   "strokes": 2,
+   "freq": 62,
+   "radicals": [
+    "Power"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k018",
+   "kanji": "問",
+   "meanings": [
+    "Question",
+    "Ask",
+    "Problem"
+   ],
+   "on": [
+    "もん"
+   ],
+   "kun": [
+    "と.う",
+    "と.い",
+    "とん"
+   ],
+   "strokes": 11,
+   "freq": 64,
+   "radicals": [
+    "Gate",
+    "Mouth"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k019",
+   "kanji": "代",
+   "meanings": [
+    "Substitute",
+    "Change",
+    "Convert",
+    "Replace"
+   ],
+   "on": [
+    "だい",
+    "たい"
+   ],
+   "kun": [
+    "か.わる",
+    "かわ.る",
+    "かわ.り"
+   ],
+   "strokes": 5,
+   "freq": 66,
+   "radicals": [
+    "Leader",
+    "Ceremony"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k020",
+   "kanji": "明",
+   "meanings": [
+    "Bright",
+    "Light"
+   ],
+   "on": [
+    "めい",
+    "みょう",
+    "みん"
+   ],
+   "kun": [
+    "あ.かり",
+    "あか.るい",
+    "あか.るむ"
+   ],
+   "strokes": 8,
+   "freq": 67,
+   "radicals": [
+    "Sun",
+    "Moon"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k021",
+   "kanji": "動",
+   "meanings": [
+    "Move",
+    "Motion",
+    "Change",
+    "Confusion"
+   ],
+   "on": [
+    "どう"
+   ],
+   "kun": [
+    "うご.く",
+    "うご.かす"
+   ],
+   "strokes": 11,
+   "freq": 73,
+   "radicals": [
+    "Heavy",
+    "Power"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k022",
+   "kanji": "京",
+   "meanings": [
+    "Capital",
+    "10**16"
+   ],
+   "on": [
+    "きょう",
+    "けい",
+    "きん"
+   ],
+   "kun": [
+    "みやこ"
+   ],
+   "strokes": 8,
+   "freq": 74,
+   "radicals": [
+    "Lid",
+    "Mouth",
+    "Small"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k023",
+   "kanji": "目",
+   "meanings": [
+    "Eye",
+    "Class",
+    "Look",
+    "Insight"
+   ],
+   "on": [
+    "もく",
+    "ぼく"
+   ],
+   "kun": [
+    "め",
+    "-め",
+    "ま-"
+   ],
+   "strokes": 5,
+   "freq": 76,
+   "radicals": [
+    "Eye"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k024",
+   "kanji": "通",
+   "meanings": [
+    "Traffic",
+    "Pass Through",
+    "Avenue",
+    "Commute"
+   ],
+   "on": [
+    "つう",
+    "つ"
+   ],
+   "kun": [
+    "とお.る",
+    "とお.り",
+    "-とお.り"
+   ],
+   "strokes": 10,
+   "freq": 80,
+   "radicals": [
+    "Scooter",
+    "Mama",
+    "Task"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k025",
+   "kanji": "言",
+   "meanings": [
+    "Say",
+    "Word"
+   ],
+   "on": [
+    "げん",
+    "ごん"
+   ],
+   "kun": [
+    "い.う",
+    "こと"
+   ],
+   "strokes": 7,
+   "freq": 83,
+   "radicals": [
+    "Say"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k026",
+   "kanji": "理",
+   "meanings": [
+    "Logic",
+    "Arrangement",
+    "Reason",
+    "Justice"
+   ],
+   "on": [
+    "り"
+   ],
+   "kun": [
+    "ことわり"
+   ],
+   "strokes": 11,
+   "freq": 86,
+   "radicals": [
+    "King",
+    "Village"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k027",
+   "kanji": "体",
+   "meanings": [
+    "Body",
+    "Substance",
+    "Object",
+    "Reality"
+   ],
+   "on": [
+    "たい",
+    "てい"
+   ],
+   "kun": [
+    "からだ",
+    "かたち"
+   ],
+   "strokes": 7,
+   "freq": 88,
+   "radicals": [
+    "Leader",
+    "Book"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k028",
+   "kanji": "田",
+   "meanings": [
+    "Rice Field",
+    "Rice Paddy"
+   ],
+   "on": [
+    "でん"
+   ],
+   "kun": [
+    "た"
+   ],
+   "strokes": 5,
+   "freq": 90,
+   "radicals": [
+    "Rice Paddy"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k029",
+   "kanji": "主",
+   "meanings": [
+    "Lord",
+    "Chief",
+    "Master",
+    "Main Thing"
+   ],
+   "on": [
+    "しゅ",
+    "す",
+    "しゅう"
+   ],
+   "kun": [
+    "ぬし",
+    "おも",
+    "あるじ"
+   ],
+   "strokes": 5,
+   "freq": 95,
+   "radicals": [
+    "Master"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k030",
+   "kanji": "題",
+   "meanings": [
+    "Topic",
+    "Subject"
+   ],
+   "on": [
+    "だい"
+   ],
+   "kun": [],
+   "strokes": 18,
+   "freq": 96,
+   "radicals": [
+    "Sun",
+    "Correct",
+    "Geoduck"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k031",
+   "kanji": "意",
+   "meanings": [
+    "Idea",
+    "Mind",
+    "Heart",
+    "Taste"
+   ],
+   "on": [
+    "い"
+   ],
+   "kun": [],
+   "strokes": 13,
+   "freq": 99,
+   "radicals": [
+    "Sound",
+    "Heart"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k032",
+   "kanji": "不",
+   "meanings": [
+    "Negative",
+    "Non-",
+    "Bad",
+    "Ugly"
+   ],
+   "on": [
+    "ふ",
+    "ぶ"
+   ],
+   "kun": [],
+   "strokes": 4,
+   "freq": 101,
+   "radicals": [
+    "Not"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k033",
+   "kanji": "作",
+   "meanings": [
+    "Make",
+    "Production",
+    "Prepare",
+    "Build"
+   ],
+   "on": [
+    "さく",
+    "さ"
+   ],
+   "kun": [
+    "つく.る",
+    "つく.り",
+    "-づく.り"
+   ],
+   "strokes": 7,
+   "freq": 103,
+   "radicals": [
+    "Leader",
+    "Key"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k034",
+   "kanji": "用",
+   "meanings": [
+    "Utilize",
+    "Business",
+    "Service",
+    "Use"
+   ],
+   "on": [
+    "よう"
+   ],
+   "kun": [
+    "もち.いる"
+   ],
+   "strokes": 5,
+   "freq": 107,
+   "radicals": [
+    "Task"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k035",
+   "kanji": "度",
+   "meanings": [
+    "Degrees",
+    "Occurrence",
+    "Time",
+    "Counter For Occurrences"
+   ],
+   "on": [
+    "ど",
+    "と",
+    "たく"
+   ],
+   "kun": [
+    "たび",
+    "-た.い"
+   ],
+   "strokes": 9,
+   "freq": 110,
+   "radicals": [
+    "Yurt",
+    "Stool"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k036",
+   "kanji": "強",
+   "meanings": [
+    "Strong"
+   ],
+   "on": [
+    "きょう",
+    "ごう"
+   ],
+   "kun": [
+    "つよ.い",
+    "つよ.まる",
+    "つよ.める"
+   ],
+   "strokes": 11,
+   "freq": 112,
+   "radicals": [
+    "Bow",
+    "Private",
+    "Insect"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k037",
+   "kanji": "公",
+   "meanings": [
+    "Public",
+    "Prince",
+    "Official",
+    "Governmental"
+   ],
+   "on": [
+    "こう",
+    "く"
+   ],
+   "kun": [
+    "おおやけ"
+   ],
+   "strokes": 4,
+   "freq": 118,
+   "radicals": [
+    "Fins",
+    "Private"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k038",
+   "kanji": "持",
+   "meanings": [
+    "Hold",
+    "Have"
+   ],
+   "on": [
+    "じ"
+   ],
+   "kun": [
+    "も.つ",
+    "-も.ち",
+    "も.てる"
+   ],
+   "strokes": 9,
+   "freq": 119,
+   "radicals": [
+    "Fingers",
+    "Temple"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k039",
+   "kanji": "野",
+   "meanings": [
+    "Plains",
+    "Field",
+    "Rustic",
+    "Civilian Life"
+   ],
+   "on": [
+    "や",
+    "しょ"
+   ],
+   "kun": [
+    "の",
+    "の-"
+   ],
+   "strokes": 11,
+   "freq": 120,
+   "radicals": [
+    "Village",
+    "Beforehand"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k040",
+   "kanji": "以",
+   "meanings": [
+    "By Means Of",
+    "Because",
+    "In View Of",
+    "Compared With"
+   ],
+   "on": [
+    "い"
+   ],
+   "kun": [
+    "もっ.て"
+   ],
+   "strokes": 5,
+   "freq": 126,
+   "radicals": [
+    "Lion",
+    "Drop",
+    "Person"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k041",
+   "kanji": "思",
+   "meanings": [
+    "Think"
+   ],
+   "on": [
+    "し"
+   ],
+   "kun": [
+    "おも.う",
+    "おもえら.く",
+    "おぼ.す"
+   ],
+   "strokes": 9,
+   "freq": 132,
+   "radicals": [
+    "Rice Paddy",
+    "Heart"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k042",
+   "kanji": "家",
+   "meanings": [
+    "House",
+    "Home",
+    "Family",
+    "Professional"
+   ],
+   "on": [
+    "か",
+    "け"
+   ],
+   "kun": [
+    "いえ",
+    "や",
+    "うち"
+   ],
+   "strokes": 10,
+   "freq": 133,
+   "radicals": [
+    "Roof",
+    "Pig"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k043",
+   "kanji": "世",
+   "meanings": [
+    "Generation",
+    "World",
+    "Society",
+    "Public"
+   ],
+   "on": [
+    "せい",
+    "せ",
+    "そう"
+   ],
+   "kun": [
+    "よ"
+   ],
+   "strokes": 5,
+   "freq": 135,
+   "radicals": [
+    "World"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k044",
+   "kanji": "多",
+   "meanings": [
+    "Many",
+    "Frequent",
+    "Much"
+   ],
+   "on": [
+    "た"
+   ],
+   "kun": [
+    "おお.い",
+    "まさ.に",
+    "まさ.る"
+   ],
+   "strokes": 6,
+   "freq": 139,
+   "radicals": [
+    "Evening"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k045",
+   "kanji": "正",
+   "meanings": [
+    "Correct",
+    "Justice",
+    "Righteous",
+    "10**40"
+   ],
+   "on": [
+    "せい",
+    "しょう"
+   ],
+   "kun": [
+    "ただ.しい",
+    "ただ.す",
+    "まさ"
+   ],
+   "strokes": 5,
+   "freq": 143,
+   "radicals": [
+    "Ground",
+    "Stop"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k046",
+   "kanji": "安",
+   "meanings": [
+    "Relax",
+    "Cheap",
+    "Low",
+    "Quiet"
+   ],
+   "on": [
+    "あん"
+   ],
+   "kun": [
+    "やす.い",
+    "やす.まる",
+    "やす"
+   ],
+   "strokes": 6,
+   "freq": 144,
+   "radicals": [
+    "Roof",
+    "Woman"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k047",
+   "kanji": "院",
+   "meanings": [
+    "Inst.",
+    "Institution",
+    "Temple",
+    "Mansion"
+   ],
+   "on": [
+    "いん"
+   ],
+   "kun": [],
+   "strokes": 10,
+   "freq": 150,
+   "radicals": [
+    "Building",
+    "Roof",
+    "Origin"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k048",
+   "kanji": "心",
+   "meanings": [
+    "Heart",
+    "Mind",
+    "Spirit",
+    "Heart Radical (no. 61)"
+   ],
+   "on": [
+    "しん"
+   ],
+   "kun": [
+    "こころ",
+    "-ごころ"
+   ],
+   "strokes": 4,
+   "freq": 157,
+   "radicals": [
+    "Heart"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k049",
+   "kanji": "界",
+   "meanings": [
+    "World",
+    "Boundary"
+   ],
+   "on": [
+    "かい"
+   ],
+   "kun": [],
+   "strokes": 9,
+   "freq": 158,
+   "radicals": [
+    "Rice Paddy",
+    "Jammed In"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k050",
+   "kanji": "教",
+   "meanings": [
+    "Teach",
+    "Faith",
+    "Doctrine"
+   ],
+   "on": [
+    "きょう"
+   ],
+   "kun": [
+    "おし.える",
+    "おそ.わる"
+   ],
+   "strokes": 11,
+   "freq": 166,
+   "radicals": [
+    "Teacher",
+    "Winter"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k051",
+   "kanji": "文",
+   "meanings": [
+    "Sentence",
+    "Literature",
+    "Style",
+    "Art"
+   ],
+   "on": [
+    "ぶん",
+    "もん"
+   ],
+   "kun": [
+    "ふみ",
+    "あや"
+   ],
+   "strokes": 4,
+   "freq": 190,
+   "radicals": [
+    "Writing"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k052",
+   "kanji": "元",
+   "meanings": [
+    "Beginning",
+    "Former Time",
+    "Origin"
+   ],
+   "on": [
+    "げん",
+    "がん"
+   ],
+   "kun": [
+    "もと"
+   ],
+   "strokes": 4,
+   "freq": 192,
+   "radicals": [
+    "Origin"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k053",
+   "kanji": "重",
+   "meanings": [
+    "Heavy",
+    "Important",
+    "Esteem",
+    "Respect"
+   ],
+   "on": [
+    "じゅう",
+    "ちょう"
+   ],
+   "kun": [
+    "え",
+    "おも.い",
+    "おも.り"
+   ],
+   "strokes": 9,
+   "freq": 193,
+   "radicals": [
+    "Heavy"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k054",
+   "kanji": "近",
+   "meanings": [
+    "Near",
+    "Early",
+    "Akin",
+    "Tantamount"
+   ],
+   "on": [
+    "きん",
+    "こん"
+   ],
+   "kun": [
+    "ちか.い"
+   ],
+   "strokes": 7,
+   "freq": 194,
+   "radicals": [
+    "Scooter",
+    "Axe"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k055",
+   "kanji": "考",
+   "meanings": [
+    "Consider",
+    "Think Over"
+   ],
+   "on": [
+    "こう"
+   ],
+   "kun": [
+    "かんが.える",
+    "かんが.え"
+   ],
+   "strokes": 6,
+   "freq": 196,
+   "radicals": [
+    "Coffin",
+    "Beggar"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k056",
+   "kanji": "画",
+   "meanings": [
+    "Brush-stroke",
+    "Picture"
+   ],
+   "on": [
+    "が",
+    "かく",
+    "え"
+   ],
+   "kun": [
+    "えが.く",
+    "かく.する",
+    "かぎ.る"
+   ],
+   "strokes": 8,
+   "freq": 199,
+   "radicals": [
+    "Leaf",
+    "Rice Paddy",
+    "Box"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k057",
+   "kanji": "海",
+   "meanings": [
+    "Sea",
+    "Ocean"
+   ],
+   "on": [
+    "かい"
+   ],
+   "kun": [
+    "うみ"
+   ],
+   "strokes": 9,
+   "freq": 200,
+   "radicals": [
+    "Tsunami",
+    "Gun",
+    "Window"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k058",
+   "kanji": "売",
+   "meanings": [
+    "Sell"
+   ],
+   "on": [
+    "ばい"
+   ],
+   "kun": [
+    "う.る",
+    "う.れる"
+   ],
+   "strokes": 7,
+   "freq": 202,
+   "radicals": [
+    "Samurai",
+    "Forehead",
+    "Legs"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k059",
+   "kanji": "知",
+   "meanings": [
+    "Know",
+    "Wisdom"
+   ],
+   "on": [
+    "ち"
+   ],
+   "kun": [
+    "し.る",
+    "し.らせる"
+   ],
+   "strokes": 8,
+   "freq": 205,
+   "radicals": [
+    "Arrow",
+    "Mouth"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k060",
+   "kanji": "道",
+   "meanings": [
+    "Road-way",
+    "Street",
+    "District",
+    "Journey"
+   ],
+   "on": [
+    "どう",
+    "とう"
+   ],
+   "kun": [
+    "みち",
+    "いう"
+   ],
+   "strokes": 12,
+   "freq": 207,
+   "radicals": [
+    "Scooter",
+    "Neck"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k061",
+   "kanji": "集",
+   "meanings": [
+    "Gather",
+    "Meet",
+    "Congregate",
+    "Swarm"
+   ],
+   "on": [
+    "しゅう"
+   ],
+   "kun": [
+    "あつ.まる",
+    "あつ.める",
+    "つど.う"
+   ],
+   "strokes": 12,
+   "freq": 210,
+   "radicals": [
+    "Turkey",
+    "Tree"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k062",
+   "kanji": "別",
+   "meanings": [
+    "Separate",
+    "Branch Off",
+    "Diverge",
+    "Fork"
+   ],
+   "on": [
+    "べつ"
+   ],
+   "kun": [
+    "わか.れる",
+    "わ.ける"
+   ],
+   "strokes": 7,
+   "freq": 214,
+   "radicals": [
+    "Mouth",
+    "Sword",
+    "Knife"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k063",
+   "kanji": "物",
+   "meanings": [
+    "Thing",
+    "Object",
+    "Matter"
+   ],
+   "on": [
+    "ぶつ",
+    "もつ"
+   ],
+   "kun": [
+    "もの",
+    "もの-"
+   ],
+   "strokes": 8,
+   "freq": 215,
+   "radicals": [
+    "Cow",
+    "Wing"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k064",
+   "kanji": "使",
+   "meanings": [
+    "Use",
+    "Send On A Mission",
+    "Order",
+    "Messenger"
+   ],
+   "on": [
+    "し"
+   ],
+   "kun": [
+    "つか.う",
+    "つか.い",
+    "-つか.い"
+   ],
+   "strokes": 8,
+   "freq": 219,
+   "radicals": [
+    "Leader",
+    "Ground",
+    "History"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k065",
+   "kanji": "品",
+   "meanings": [
+    "Goods",
+    "Refinement",
+    "Dignity",
+    "Article"
+   ],
+   "on": [
+    "ひん",
+    "ほん"
+   ],
+   "kun": [
+    "しな"
+   ],
+   "strokes": 9,
+   "freq": 225,
+   "radicals": [
+    "Products"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k066",
+   "kanji": "計",
+   "meanings": [
+    "Plot",
+    "Plan",
+    "Scheme",
+    "Measure"
+   ],
+   "on": [
+    "けい"
+   ],
+   "kun": [
+    "はか.る",
+    "はか.らう"
+   ],
+   "strokes": 9,
+   "freq": 228,
+   "radicals": [
+    "Say",
+    "Cross"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k067",
+   "kanji": "死",
+   "meanings": [
+    "Death",
+    "Die"
+   ],
+   "on": [
+    "し"
+   ],
+   "kun": [
+    "し.ぬ",
+    "し.に-"
+   ],
+   "strokes": 6,
+   "freq": 229,
+   "radicals": [
+    "Yakuza",
+    "Spoon"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k068",
+   "kanji": "特",
+   "meanings": [
+    "Special"
+   ],
+   "on": [
+    "とく"
+   ],
+   "kun": [],
+   "strokes": 10,
+   "freq": 234,
+   "radicals": [
+    "Cow",
+    "Temple"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k069",
+   "kanji": "私",
+   "meanings": [
+    "Private",
+    "I",
+    "Me"
+   ],
+   "on": [
+    "し"
+   ],
+   "kun": [
+    "わたくし",
+    "わたし"
+   ],
+   "strokes": 7,
+   "freq": 242,
+   "radicals": [
+    "Grain",
+    "Private"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k070",
+   "kanji": "始",
+   "meanings": [
+    "Commence",
+    "Begin"
+   ],
+   "on": [
+    "し"
+   ],
+   "kun": [
+    "はじ.める",
+    "-はじ.める",
+    "はじ.まる"
+   ],
+   "strokes": 8,
+   "freq": 244,
+   "radicals": [
+    "Woman",
+    "Machine"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k071",
+   "kanji": "朝",
+   "meanings": [
+    "Morning",
+    "Dynasty",
+    "Regime",
+    "Epoch"
+   ],
+   "on": [
+    "ちょう"
+   ],
+   "kun": [
+    "あさ"
+   ],
+   "strokes": 12,
+   "freq": 248,
+   "radicals": [
+    "Cross",
+    "Sun",
+    "Moon"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k072",
+   "kanji": "運",
+   "meanings": [
+    "Carry",
+    "Luck",
+    "Destiny",
+    "Fate"
+   ],
+   "on": [
+    "うん"
+   ],
+   "kun": [
+    "はこ.ぶ"
+   ],
+   "strokes": 12,
+   "freq": 255,
+   "radicals": [
+    "Scooter",
+    "Forehead",
+    "Car"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k073",
+   "kanji": "終",
+   "meanings": [
+    "End",
+    "Finish"
+   ],
+   "on": [
+    "しゅう"
+   ],
+   "kun": [
+    "お.わる",
+    "-お.わる",
+    "おわ.る"
+   ],
+   "strokes": 11,
+   "freq": 256,
+   "radicals": [
+    "Thread",
+    "Winter",
+    "Two"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k074",
+   "kanji": "台",
+   "meanings": [
+    "Pedestal",
+    "A Stand",
+    "Counter For Machines And Vehicles"
+   ],
+   "on": [
+    "だい",
+    "たい"
+   ],
+   "kun": [
+    "うてな",
+    "われ",
+    "つかさ"
+   ],
+   "strokes": 5,
+   "freq": 262,
+   "radicals": [
+    "Private",
+    "Mouth"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k075",
+   "kanji": "広",
+   "meanings": [
+    "Wide",
+    "Broad",
+    "Spacious"
+   ],
+   "on": [
+    "こう"
+   ],
+   "kun": [
+    "ひろ.い",
+    "ひろ.まる",
+    "ひろ.める"
+   ],
+   "strokes": 5,
+   "freq": 263,
+   "radicals": [
+    "Canopy",
+    "Private"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k076",
+   "kanji": "住",
+   "meanings": [
+    "Dwell",
+    "Reside",
+    "Live",
+    "Inhabit"
+   ],
+   "on": [
+    "じゅう",
+    "ぢゅう",
+    "ちゅう"
+   ],
+   "kun": [
+    "す.む",
+    "す.まう",
+    "-ず.まい"
+   ],
+   "strokes": 7,
+   "freq": 270,
+   "radicals": [
+    "Leader",
+    "Master"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k077",
+   "kanji": "真",
+   "meanings": [
+    "True",
+    "Reality",
+    "Buddhist Sect"
+   ],
+   "on": [
+    "しん"
+   ],
+   "kun": [
+    "ま",
+    "ま-",
+    "まこと"
+   ],
+   "strokes": 10,
+   "freq": 279,
+   "radicals": [
+    "Pope",
+    "Ground",
+    "Fins"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k078",
+   "kanji": "有",
+   "meanings": [
+    "Possess",
+    "Have",
+    "Exist",
+    "Happen"
+   ],
+   "on": [
+    "ゆう",
+    "う"
+   ],
+   "kun": [
+    "あ.る"
+   ],
+   "strokes": 6,
+   "freq": 282,
+   "radicals": [
+    "Narwhal",
+    "Moon"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k079",
+   "kanji": "口",
+   "meanings": [
+    "Mouth"
+   ],
+   "on": [
+    "こう",
+    "く"
+   ],
+   "kun": [
+    "くち"
+   ],
+   "strokes": 3,
+   "freq": 284,
+   "radicals": [
+    "Mouth"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k080",
+   "kanji": "少",
+   "meanings": [
+    "Few",
+    "Little"
+   ],
+   "on": [
+    "しょう"
+   ],
+   "kun": [
+    "すく.ない",
+    "すこ.し"
+   ],
+   "strokes": 4,
+   "freq": 287,
+   "radicals": [
+    "Small",
+    "Slide"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k081",
+   "kanji": "町",
+   "meanings": [
+    "Town",
+    "Village",
+    "Block",
+    "Street"
+   ],
+   "on": [
+    "ちょう"
+   ],
+   "kun": [
+    "まち"
+   ],
+   "strokes": 7,
+   "freq": 292,
+   "radicals": [
+    "Rice Paddy",
+    "Street"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k082",
+   "kanji": "料",
+   "meanings": [
+    "Fee",
+    "Materials"
+   ],
+   "on": [
+    "りょう"
+   ],
+   "kun": [],
+   "strokes": 10,
+   "freq": 295,
+   "radicals": [
+    "Rice",
+    "Ladle"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k083",
+   "kanji": "工",
+   "meanings": [
+    "Craft",
+    "Construction",
+    "Katakana E Radical (no. 48)"
+   ],
+   "on": [
+    "こう",
+    "く",
+    "ぐ"
+   ],
+   "kun": [],
+   "strokes": 3,
+   "freq": 299,
+   "radicals": [
+    "Construction"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k084",
+   "kanji": "建",
+   "meanings": [
+    "Build"
+   ],
+   "on": [
+    "けん",
+    "こん"
+   ],
+   "kun": [
+    "た.てる",
+    "た.て",
+    "-だ.て"
+   ],
+   "strokes": 9,
+   "freq": 300,
+   "radicals": [
+    "Yoga",
+    "Brush"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k085",
+   "kanji": "空",
+   "meanings": [
+    "Empty",
+    "Sky",
+    "Void",
+    "Vacant"
+   ],
+   "on": [
+    "くう"
+   ],
+   "kun": [
+    "そら",
+    "あ.く",
+    "あ.き"
+   ],
+   "strokes": 8,
+   "freq": 304,
+   "radicals": [
+    "Roof",
+    "Legs",
+    "Construction"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k086",
+   "kanji": "急",
+   "meanings": [
+    "Hurry",
+    "Emergency",
+    "Sudden",
+    "Steep"
+   ],
+   "on": [
+    "きゅう"
+   ],
+   "kun": [
+    "いそ.ぐ",
+    "いそ.ぎ",
+    "せ.く"
+   ],
+   "strokes": 9,
+   "freq": 309,
+   "radicals": [
+    "Prison",
+    "Wolverine",
+    "Heart"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k087",
+   "kanji": "止",
+   "meanings": [
+    "Stop",
+    "Halt"
+   ],
+   "on": [
+    "し"
+   ],
+   "kun": [
+    "と.まる",
+    "-ど.まり",
+    "と.める"
+   ],
+   "strokes": 4,
+   "freq": 310,
+   "radicals": [
+    "Stop"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k088",
+   "kanji": "送",
+   "meanings": [
+    "Escort",
+    "Send"
+   ],
+   "on": [
+    "そう"
+   ],
+   "kun": [
+    "おく.る"
+   ],
+   "strokes": 9,
+   "freq": 311,
+   "radicals": [
+    "Scooter",
+    "Horns",
+    "Heaven"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k089",
+   "kanji": "切",
+   "meanings": [
+    "Cut",
+    "Cutoff",
+    "Be Sharp"
+   ],
+   "on": [
+    "せつ",
+    "さい"
+   ],
+   "kun": [
+    "き.る",
+    "-き.る",
+    "き.り"
+   ],
+   "strokes": 4,
+   "freq": 324,
+   "radicals": [
+    "Seven",
+    "Sword"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k090",
+   "kanji": "転",
+   "meanings": [
+    "Revolve",
+    "Turn Around",
+    "Change"
+   ],
+   "on": [
+    "てん"
+   ],
+   "kun": [
+    "ころ.がる",
+    "ころ.げる",
+    "ころ.がす"
+   ],
+   "strokes": 11,
+   "freq": 327,
+   "radicals": [
+    "Car",
+    "Cloud"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k091",
+   "kanji": "研",
+   "meanings": [
+    "Polish",
+    "Study Of",
+    "Sharpen"
+   ],
+   "on": [
+    "けん"
+   ],
+   "kun": [
+    "と.ぐ"
+   ],
+   "strokes": 9,
+   "freq": 336,
+   "radicals": [
+    "Stone",
+    "Lantern"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k092",
+   "kanji": "足",
+   "meanings": [
+    "Leg",
+    "Foot",
+    "Be Sufficient",
+    "Counter For Pairs Of Footwear"
+   ],
+   "on": [
+    "そく"
+   ],
+   "kun": [
+    "あし",
+    "た.りる",
+    "た.る"
+   ],
+   "strokes": 7,
+   "freq": 343,
+   "radicals": [
+    "Foot"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k093",
+   "kanji": "究",
+   "meanings": [
+    "Research",
+    "Study"
+   ],
+   "on": [
+    "きゅう",
+    "く"
+   ],
+   "kun": [
+    "きわ.める"
+   ],
+   "strokes": 7,
+   "freq": 368,
+   "radicals": [
+    "Hole",
+    "Nine"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k094",
+   "kanji": "楽",
+   "meanings": [
+    "Music",
+    "Comfort",
+    "Ease"
+   ],
+   "on": [
+    "がく",
+    "らく",
+    "ごう"
+   ],
+   "kun": [
+    "たの.しい",
+    "たの.しむ",
+    "この.む"
+   ],
+   "strokes": 13,
+   "freq": 373,
+   "radicals": [
+    "White",
+    "Ice",
+    "Tree"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k095",
+   "kanji": "起",
+   "meanings": [
+    "Rouse",
+    "Wake Up",
+    "Get Up"
+   ],
+   "on": [
+    "き"
+   ],
+   "kun": [
+    "お.きる",
+    "お.こる",
+    "お.こす"
+   ],
+   "strokes": 10,
+   "freq": 374,
+   "radicals": [
+    "Run",
+    "Oneself"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k096",
+   "kanji": "着",
+   "meanings": [
+    "Don",
+    "Arrive",
+    "Wear",
+    "Counter For Suits Of Clothing"
+   ],
+   "on": [
+    "ちゃく",
+    "じゃく"
+   ],
+   "kun": [
+    "き.る",
+    "-ぎ",
+    "き.せる"
+   ],
+   "strokes": 12,
+   "freq": 376,
+   "radicals": [
+    "Horns",
+    "King",
+    "Slide"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k097",
+   "kanji": "店",
+   "meanings": [
+    "Store",
+    "Shop"
+   ],
+   "on": [
+    "てん"
+   ],
+   "kun": [
+    "みせ",
+    "たな"
+   ],
+   "strokes": 8,
+   "freq": 378,
+   "radicals": [
+    "Canopy",
+    "Fortune"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k098",
+   "kanji": "病",
+   "meanings": [
+    "Ill",
+    "Sick"
+   ],
+   "on": [
+    "びょう",
+    "へい"
+   ],
+   "kun": [
+    "や.む",
+    "-や.み",
+    "やまい"
+   ],
+   "strokes": 10,
+   "freq": 384,
+   "radicals": [
+    "Sick",
+    "Dynamite"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k099",
+   "kanji": "質",
+   "meanings": [
+    "Substance",
+    "Quality",
+    "Matter",
+    "Temperament"
+   ],
+   "on": [
+    "しつ",
+    "しち",
+    "ち"
+   ],
+   "kun": [
+    "たち",
+    "ただ.す",
+    "もと"
+   ],
+   "strokes": 15,
+   "freq": 389,
+   "radicals": [
+    "Axe",
+    "Shellfish"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k100",
+   "kanji": "待",
+   "meanings": [
+    "Wait",
+    "Depend On"
+   ],
+   "on": [
+    "たい"
+   ],
+   "kun": [
+    "ま.つ",
+    "-ま.ち"
+   ],
+   "strokes": 9,
+   "freq": 391,
+   "radicals": [
+    "Loiter",
+    "Temple"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k101",
+   "kanji": "試",
+   "meanings": [
+    "Test",
+    "Try",
+    "Attempt",
+    "Experiment"
+   ],
+   "on": [
+    "し"
+   ],
+   "kun": [
+    "こころ.みる",
+    "ため.す"
+   ],
+   "strokes": 13,
+   "freq": 392,
+   "radicals": [
+    "Say",
+    "Ceremony",
+    "Construction"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k102",
+   "kanji": "族",
+   "meanings": [
+    "Tribe",
+    "Family"
+   ],
+   "on": [
+    "ぞく"
+   ],
+   "kun": [],
+   "strokes": 11,
+   "freq": 393,
+   "radicals": [
+    "Direction",
+    "Gun",
+    "Arrow"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k103",
+   "kanji": "銀",
+   "meanings": [
+    "Silver"
+   ],
+   "on": [
+    "ぎん"
+   ],
+   "kun": [
+    "しろがね"
+   ],
+   "strokes": 14,
+   "freq": 395,
+   "radicals": [
+    "Gold",
+    "Root"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k104",
+   "kanji": "早",
+   "meanings": [
+    "Early",
+    "Fast"
+   ],
+   "on": [
+    "そう",
+    "さっ"
+   ],
+   "kun": [
+    "はや.い",
+    "はや",
+    "はや-"
+   ],
+   "strokes": 6,
+   "freq": 402,
+   "radicals": [
+    "Sun",
+    "Cross"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k105",
+   "kanji": "映",
+   "meanings": [
+    "Reflect",
+    "Reflection",
+    "Projection"
+   ],
+   "on": [
+    "えい"
+   ],
+   "kun": [
+    "うつ.る",
+    "うつ.す",
+    "は.える"
+   ],
+   "strokes": 9,
+   "freq": 404,
+   "radicals": [
+    "Sun",
+    "Center"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k106",
+   "kanji": "親",
+   "meanings": [
+    "Parent",
+    "Intimacy",
+    "Relative",
+    "Familiarity"
+   ],
+   "on": [
+    "しん"
+   ],
+   "kun": [
+    "おや",
+    "おや-",
+    "した.しい"
+   ],
+   "strokes": 16,
+   "freq": 406,
+   "radicals": [
+    "Stand",
+    "Tree",
+    "See"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k107",
+   "kanji": "験",
+   "meanings": [
+    "Verification",
+    "Effect",
+    "Testing"
+   ],
+   "on": [
+    "けん",
+    "げん"
+   ],
+   "kun": [
+    "あかし",
+    "しるし",
+    "ため.す"
+   ],
+   "strokes": 18,
+   "freq": 410,
+   "radicals": [
+    "Horse",
+    "Squid"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k108",
+   "kanji": "英",
+   "meanings": [
+    "England",
+    "English",
+    "Hero",
+    "Outstanding"
+   ],
+   "on": [
+    "えい"
+   ],
+   "kun": [
+    "はなぶさ"
+   ],
+   "strokes": 8,
+   "freq": 430,
+   "radicals": [
+    "Flowers",
+    "Center"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k109",
+   "kanji": "医",
+   "meanings": [
+    "Doctor",
+    "Medicine"
+   ],
+   "on": [
+    "い"
+   ],
+   "kun": [
+    "い.やす",
+    "い.する",
+    "くすし"
+   ],
+   "strokes": 7,
+   "freq": 437,
+   "radicals": [
+    "Cage",
+    "Arrow"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k110",
+   "kanji": "仕",
+   "meanings": [
+    "Attend",
+    "Doing",
+    "Official",
+    "Serve"
+   ],
+   "on": [
+    "し",
+    "じ"
+   ],
+   "kun": [
+    "つか.える"
+   ],
+   "strokes": 5,
+   "freq": 439,
+   "radicals": [
+    "Leader",
+    "Samurai"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k111",
+   "kanji": "去",
+   "meanings": [
+    "Gone",
+    "Past",
+    "Quit",
+    "Leave"
+   ],
+   "on": [
+    "きょ",
+    "こ"
+   ],
+   "kun": [
+    "さ.る",
+    "-さ.る"
+   ],
+   "strokes": 5,
+   "freq": 440,
+   "radicals": [
+    "Dirt",
+    "Private"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k112",
+   "kanji": "味",
+   "meanings": [
+    "Flavor",
+    "Taste"
+   ],
+   "on": [
+    "み"
+   ],
+   "kun": [
+    "あじ",
+    "あじ.わう"
+   ],
+   "strokes": 8,
+   "freq": 442,
+   "radicals": [
+    "Mouth",
+    "Jet"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k113",
+   "kanji": "写",
+   "meanings": [
+    "Copy",
+    "Be Photographed",
+    "Describe"
+   ],
+   "on": [
+    "しゃ",
+    "じゃ"
+   ],
+   "kun": [
+    "うつ.す",
+    "うつ.る",
+    "うつ-"
+   ],
+   "strokes": 5,
+   "freq": 453,
+   "radicals": [
+    "Forehead",
+    "Ground",
+    "Beggar"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k114",
+   "kanji": "字",
+   "meanings": [
+    "Character",
+    "Letter",
+    "Word",
+    "Section Of Village"
+   ],
+   "on": [
+    "じ"
+   ],
+   "kun": [
+    "あざ",
+    "あざな",
+    "-な"
+   ],
+   "strokes": 6,
+   "freq": 485,
+   "radicals": [
+    "Roof",
+    "Child"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k115",
+   "kanji": "答",
+   "meanings": [
+    "Solution",
+    "Answer"
+   ],
+   "on": [
+    "とう"
+   ],
+   "kun": [
+    "こた.える",
+    "こた.え"
+   ],
+   "strokes": 12,
+   "freq": 486,
+   "radicals": [
+    "Bamboo",
+    "Suit"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k116",
+   "kanji": "夜",
+   "meanings": [
+    "Night",
+    "Evening"
+   ],
+   "on": [
+    "や"
+   ],
+   "kun": [
+    "よ",
+    "よる"
+   ],
+   "strokes": 8,
+   "freq": 487,
+   "radicals": [
+    "Lid",
+    "Leader",
+    "Winter"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k117",
+   "kanji": "音",
+   "meanings": [
+    "Sound",
+    "Noise"
+   ],
+   "on": [
+    "おん",
+    "いん",
+    "-のん"
+   ],
+   "kun": [
+    "おと",
+    "ね"
+   ],
+   "strokes": 9,
+   "freq": 491,
+   "radicals": [
+    "Stand",
+    "Sun"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k118",
+   "kanji": "注",
+   "meanings": [
+    "Pour",
+    "Irrigate",
+    "Shed (tears)",
+    "Flow Into"
+   ],
+   "on": [
+    "ちゅう"
+   ],
+   "kun": [
+    "そそ.ぐ",
+    "さ.す",
+    "つ.ぐ"
+   ],
+   "strokes": 8,
+   "freq": 497,
+   "radicals": [
+    "Tsunami",
+    "Master"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k119",
+   "kanji": "帰",
+   "meanings": [
+    "Homecoming",
+    "Arrive At",
+    "Lead To",
+    "Result In"
+   ],
+   "on": [
+    "き"
+   ],
+   "kun": [
+    "かえ.る",
+    "かえ.す",
+    "おく.る"
+   ],
+   "strokes": 10,
+   "freq": 504,
+   "radicals": [
+    "Knife",
+    "Wolverine",
+    "Forehead"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k120",
+   "kanji": "古",
+   "meanings": [
+    "Old"
+   ],
+   "on": [
+    "こ"
+   ],
+   "kun": [
+    "ふる.い",
+    "ふる-",
+    "-ふる.す"
+   ],
+   "strokes": 5,
+   "freq": 509,
+   "radicals": [
+    "Old"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k121",
+   "kanji": "歌",
+   "meanings": [
+    "Song",
+    "Sing"
+   ],
+   "on": [
+    "か"
+   ],
+   "kun": [
+    "うた",
+    "うた.う"
+   ],
+   "strokes": 14,
+   "freq": 519,
+   "radicals": [
+    "Lip Ring",
+    "Lack"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k122",
+   "kanji": "買",
+   "meanings": [
+    "Buy"
+   ],
+   "on": [
+    "ばい"
+   ],
+   "kun": [
+    "か.う"
+   ],
+   "strokes": 12,
+   "freq": 520,
+   "radicals": [
+    "Net",
+    "Shellfish"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k123",
+   "kanji": "悪",
+   "meanings": [
+    "Bad",
+    "Vice",
+    "Rascal",
+    "False"
+   ],
+   "on": [
+    "あく",
+    "お"
+   ],
+   "kun": [
+    "わる.い",
+    "わる-",
+    "あ.し"
+   ],
+   "strokes": 11,
+   "freq": 530,
+   "radicals": [
+    "Asia",
+    "Heart"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k124",
+   "kanji": "図",
+   "meanings": [
+    "Map",
+    "Drawing",
+    "Plan",
+    "Extraordinary"
+   ],
+   "on": [
+    "ず",
+    "と"
+   ],
+   "kun": [
+    "え",
+    "はか.る"
+   ],
+   "strokes": 7,
+   "freq": 539,
+   "radicals": [
+    "Mouth",
+    "Treasure",
+    "Ice"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k125",
+   "kanji": "週",
+   "meanings": [
+    "Week"
+   ],
+   "on": [
+    "しゅう"
+   ],
+   "kun": [],
+   "strokes": 11,
+   "freq": 540,
+   "radicals": [
+    "Scooter",
+    "Circumference"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k126",
+   "kanji": "室",
+   "meanings": [
+    "Room",
+    "Apartment",
+    "Chamber",
+    "Greenhouse"
+   ],
+   "on": [
+    "しつ"
+   ],
+   "kun": [
+    "むろ"
+   ],
+   "strokes": 9,
+   "freq": 550,
+   "radicals": [
+    "Roof",
+    "Ground",
+    "Private"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k127",
+   "kanji": "歩",
+   "meanings": [
+    "Walk",
+    "Counter For Steps"
+   ],
+   "on": [
+    "ほ",
+    "ぶ",
+    "ふ"
+   ],
+   "kun": [
+    "ある.く",
+    "あゆ.む"
+   ],
+   "strokes": 8,
+   "freq": 554,
+   "radicals": [
+    "Stop",
+    "Small",
+    "Slide"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k128",
+   "kanji": "風",
+   "meanings": [
+    "Wind",
+    "Air",
+    "Style",
+    "Manner"
+   ],
+   "on": [
+    "ふう",
+    "ふ"
+   ],
+   "kun": [
+    "かぜ",
+    "かざ-",
+    "-かぜ"
+   ],
+   "strokes": 9,
+   "freq": 558,
+   "radicals": [
+    "Table",
+    "Slide",
+    "Insect"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k129",
+   "kanji": "紙",
+   "meanings": [
+    "Paper"
+   ],
+   "on": [
+    "し"
+   ],
+   "kun": [
+    "かみ"
+   ],
+   "strokes": 10,
+   "freq": 559,
+   "radicals": [
+    "Thread",
+    "Clan"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k130",
+   "kanji": "黒",
+   "meanings": [
+    "Black"
+   ],
+   "on": [
+    "こく"
+   ],
+   "kun": [
+    "くろ",
+    "くろ.ずむ",
+    "くろ.い"
+   ],
+   "strokes": 11,
+   "freq": 573,
+   "radicals": [
+    "Black"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k131",
+   "kanji": "花",
+   "meanings": [
+    "Flower"
+   ],
+   "on": [
+    "か",
+    "け"
+   ],
+   "kun": [
+    "はな"
+   ],
+   "strokes": 7,
+   "freq": 578,
+   "radicals": [
+    "Flowers",
+    "Leader",
+    "Spoon"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k132",
+   "kanji": "春",
+   "meanings": [
+    "Springtime",
+    "Spring (season)"
+   ],
+   "on": [
+    "しゅん"
+   ],
+   "kun": [
+    "はる"
+   ],
+   "strokes": 9,
+   "freq": 579,
+   "radicals": [
+    "Spring",
+    "Sun"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k133",
+   "kanji": "赤",
+   "meanings": [
+    "Red"
+   ],
+   "on": [
+    "せき",
+    "しゃく"
+   ],
+   "kun": [
+    "あか",
+    "あか-",
+    "あか.い"
+   ],
+   "strokes": 7,
+   "freq": 584,
+   "radicals": [
+    "Red"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k134",
+   "kanji": "青",
+   "meanings": [
+    "Blue",
+    "Green"
+   ],
+   "on": [
+    "せい",
+    "しょう"
+   ],
+   "kun": [
+    "あお",
+    "あお-",
+    "あお.い"
+   ],
+   "strokes": 8,
+   "freq": 589,
+   "radicals": [
+    "Blue"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k135",
+   "kanji": "館",
+   "meanings": [
+    "Building",
+    "Mansion",
+    "Large Building",
+    "Palace"
+   ],
+   "on": [
+    "かん"
+   ],
+   "kun": [
+    "やかた",
+    "たて"
+   ],
+   "strokes": 16,
+   "freq": 613,
+   "radicals": [
+    "Eat",
+    "Roof",
+    "Bear"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k136",
+   "kanji": "屋",
+   "meanings": [
+    "Roof",
+    "House",
+    "Shop",
+    "Dealer"
+   ],
+   "on": [
+    "おく"
+   ],
+   "kun": [
+    "や"
+   ],
+   "strokes": 9,
+   "freq": 616,
+   "radicals": [
+    "Flag",
+    "Ground",
+    "Private"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k137",
+   "kanji": "色",
+   "meanings": [
+    "Color"
+   ],
+   "on": [
+    "しょく",
+    "しき"
+   ],
+   "kun": [
+    "いろ"
+   ],
+   "strokes": 6,
+   "freq": 621,
+   "radicals": [
+    "Color"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k138",
+   "kanji": "走",
+   "meanings": [
+    "Run"
+   ],
+   "on": [
+    "そう"
+   ],
+   "kun": [
+    "はし.る"
+   ],
+   "strokes": 7,
+   "freq": 626,
+   "radicals": [
+    "Run"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k139",
+   "kanji": "秋",
+   "meanings": [
+    "Autumn"
+   ],
+   "on": [
+    "しゅう"
+   ],
+   "kun": [
+    "あき",
+    "とき"
+   ],
+   "strokes": 9,
+   "freq": 635,
+   "radicals": [
+    "Grain",
+    "Fire"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k140",
+   "kanji": "夏",
+   "meanings": [
+    "Summer"
+   ],
+   "on": [
+    "か",
+    "が",
+    "げ"
+   ],
+   "kun": [
+    "なつ"
+   ],
+   "strokes": 10,
+   "freq": 659,
+   "radicals": [
+    "Leaf",
+    "Eye",
+    "Winter"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k141",
+   "kanji": "習",
+   "meanings": [
+    "Learn"
+   ],
+   "on": [
+    "しゅう",
+    "じゅ"
+   ],
+   "kun": [
+    "なら.う",
+    "なら.い"
+   ],
+   "strokes": 11,
+   "freq": 706,
+   "radicals": [
+    "Feathers",
+    "White"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k142",
+   "kanji": "駅",
+   "meanings": [
+    "Station"
+   ],
+   "on": [
+    "えき"
+   ],
+   "kun": [],
+   "strokes": 14,
+   "freq": 724,
+   "radicals": [
+    "Horse",
+    "Shrimp"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k143",
+   "kanji": "洋",
+   "meanings": [
+    "Ocean",
+    "Sea",
+    "Foreign",
+    "Western Style"
+   ],
+   "on": [
+    "よう"
+   ],
+   "kun": [],
+   "strokes": 9,
+   "freq": 763,
+   "radicals": [
+    "Tsunami",
+    "Sheep"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k144",
+   "kanji": "旅",
+   "meanings": [
+    "Trip",
+    "Travel"
+   ],
+   "on": [
+    "りょ"
+   ],
+   "kun": [
+    "たび"
+   ],
+   "strokes": 10,
+   "freq": 783,
+   "radicals": [
+    "Direction",
+    "Gun",
+    "Tofu"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k145",
+   "kanji": "服",
+   "meanings": [
+    "Clothing",
+    "Admit",
+    "Obey",
+    "Discharge"
+   ],
+   "on": [
+    "ふく"
+   ],
+   "kun": [],
+   "strokes": 8,
+   "freq": 873,
+   "radicals": [
+    "Moon",
+    "Stamp",
+    "Stool"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k146",
+   "kanji": "夕",
+   "meanings": [
+    "Evening"
+   ],
+   "on": [
+    "せき"
+   ],
+   "kun": [
+    "ゆう"
+   ],
+   "strokes": 3,
+   "freq": 924,
+   "radicals": [
+    "Evening"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k147",
+   "kanji": "借",
+   "meanings": [
+    "Borrow",
+    "Rent"
+   ],
+   "on": [
+    "しゃく"
+   ],
+   "kun": [
+    "か.りる"
+   ],
+   "strokes": 10,
+   "freq": 932,
+   "radicals": [
+    "Leader",
+    "Long Ago"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k148",
+   "kanji": "曜",
+   "meanings": [
+    "Weekday"
+   ],
+   "on": [
+    "よう"
+   ],
+   "kun": [],
+   "strokes": 18,
+   "freq": 940,
+   "radicals": [
+    "Sun",
+    "Wolverine",
+    "Turkey"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k149",
+   "kanji": "飲",
+   "meanings": [
+    "Drink",
+    "Smoke",
+    "Take"
+   ],
+   "on": [
+    "いん",
+    "おん"
+   ],
+   "kun": [
+    "の.む",
+    "-の.み"
+   ],
+   "strokes": 12,
+   "freq": 969,
+   "radicals": [
+    "Eat",
+    "Lack"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k150",
+   "kanji": "肉",
+   "meanings": [
+    "Meat"
+   ],
+   "on": [
+    "にく"
+   ],
+   "kun": [
+    "しし"
+   ],
+   "strokes": 6,
+   "freq": 986,
+   "radicals": [
+    "Meat"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k151",
+   "kanji": "貸",
+   "meanings": [
+    "Lend"
+   ],
+   "on": [
+    "たい"
+   ],
+   "kun": [
+    "か.す",
+    "か.し-",
+    "かし-"
+   ],
+   "strokes": 12,
+   "freq": 995,
+   "radicals": [
+    "Substitute",
+    "Shellfish"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k152",
+   "kanji": "堂",
+   "meanings": [
+    "Public Chamber",
+    "Hall"
+   ],
+   "on": [
+    "どう"
+   ],
+   "kun": [],
+   "strokes": 11,
+   "freq": 1010,
+   "radicals": [
+    "Viking",
+    "Mouth",
+    "Dirt"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k153",
+   "kanji": "鳥",
+   "meanings": [
+    "Bird",
+    "Chicken"
+   ],
+   "on": [
+    "ちょう"
+   ],
+   "kun": [
+    "とり"
+   ],
+   "strokes": 11,
+   "freq": 1043,
+   "radicals": [
+    "Bird"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k154",
+   "kanji": "飯",
+   "meanings": [
+    "Meal",
+    "Boiled Rice"
+   ],
+   "on": [
+    "はん"
+   ],
+   "kun": [
+    "めし"
+   ],
+   "strokes": 12,
+   "freq": 1046,
+   "radicals": [
+    "Eat",
+    "Anti"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k155",
+   "kanji": "勉",
+   "meanings": [
+    "Exertion",
+    "Endeavour",
+    "Encourage",
+    "Strive"
+   ],
+   "on": [
+    "べん"
+   ],
+   "kun": [
+    "つと.める"
+   ],
+   "strokes": 10,
+   "freq": 1066,
+   "radicals": [
+    "Excuse",
+    "Power"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k156",
+   "kanji": "冬",
+   "meanings": [
+    "Winter"
+   ],
+   "on": [
+    "とう"
+   ],
+   "kun": [
+    "ふゆ"
+   ],
+   "strokes": 5,
+   "freq": 1090,
+   "radicals": [
+    "Winter",
+    "Two"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k157",
+   "kanji": "昼",
+   "meanings": [
+    "Daytime",
+    "Noon"
+   ],
+   "on": [
+    "ちゅう"
+   ],
+   "kun": [
+    "ひる"
+   ],
+   "strokes": 9,
+   "freq": 1115,
+   "radicals": [
+    "Shrimp",
+    "Sun",
+    "Ground"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k158",
+   "kanji": "茶",
+   "meanings": [
+    "Tea"
+   ],
+   "on": [
+    "ちゃ",
+    "さ"
+   ],
+   "kun": [],
+   "strokes": 9,
+   "freq": 1116,
+   "radicals": [
+    "Flowers",
+    "Hat",
+    "Angel"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k159",
+   "kanji": "弟",
+   "meanings": [
+    "Younger Brother",
+    "Faithful Service To Elders"
+   ],
+   "on": [
+    "てい",
+    "だい",
+    "で"
+   ],
+   "kun": [
+    "おとうと"
+   ],
+   "strokes": 7,
+   "freq": 1161,
+   "radicals": [
+    "Horns",
+    "Bow",
+    "Stick"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k160",
+   "kanji": "牛",
+   "meanings": [
+    "Cow"
+   ],
+   "on": [
+    "ぎゅう"
+   ],
+   "kun": [
+    "うし"
+   ],
+   "strokes": 4,
+   "freq": 1202,
+   "radicals": [
+    "Cow"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k161",
+   "kanji": "魚",
+   "meanings": [
+    "Fish"
+   ],
+   "on": [
+    "ぎょ"
+   ],
+   "kun": [
+    "うお",
+    "さかな",
+    "-ざかな"
+   ],
+   "strokes": 11,
+   "freq": 1208,
+   "radicals": [
+    "Fish"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k162",
+   "kanji": "兄",
+   "meanings": [
+    "Elder Brother",
+    "Big Brother"
+   ],
+   "on": [
+    "けい",
+    "きょう"
+   ],
+   "kun": [
+    "あに"
+   ],
+   "strokes": 5,
+   "freq": 1219,
+   "radicals": [
+    "Mouth",
+    "Legs"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k163",
+   "kanji": "犬",
+   "meanings": [
+    "Dog"
+   ],
+   "on": [
+    "けん"
+   ],
+   "kun": [
+    "いぬ",
+    "いぬ-"
+   ],
+   "strokes": 4,
+   "freq": 1326,
+   "radicals": [
+    "Dog"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k164",
+   "kanji": "妹",
+   "meanings": [
+    "Younger Sister"
+   ],
+   "on": [
+    "まい"
+   ],
+   "kun": [
+    "いもうと"
+   ],
+   "strokes": 8,
+   "freq": 1446,
+   "radicals": [
+    "Woman",
+    "Jet"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k165",
+   "kanji": "姉",
+   "meanings": [
+    "Elder Sister"
+   ],
+   "on": [
+    "し"
+   ],
+   "kun": [
+    "あね",
+    "はは"
+   ],
+   "strokes": 8,
+   "freq": 1473,
+   "radicals": [
+    "Woman",
+    "City"
+   ],
+   "level": "N4"
+  },
+  {
+   "id": "n4-k166",
+   "kanji": "漢",
+   "meanings": [
+    "Sino-",
+    "China"
+   ],
+   "on": [
+    "かん"
+   ],
+   "kun": [],
+   "strokes": 13,
+   "freq": 1487,
+   "radicals": [
+    "Tsunami",
+    "Chinese"
+   ],
+   "level": "N4"
+  }
+ ]
+}

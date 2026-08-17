@@ -1,0 +1,29 @@
+{"pack":"numbers-counters","source":"authored for Iota by Claude, 2026","sections":{
+"numbers":[
+{"n":1,"ja":"一","kana":"いち","romaji":"ichi"},{"n":2,"ja":"二","kana":"に","romaji":"ni"},{"n":3,"ja":"三","kana":"さん","romaji":"san"},{"n":4,"ja":"四","kana":"よん/し","romaji":"yon/shi"},{"n":5,"ja":"五","kana":"ご","romaji":"go"},{"n":6,"ja":"六","kana":"ろく","romaji":"roku"},{"n":7,"ja":"七","kana":"なな/しち","romaji":"nana/shichi"},{"n":8,"ja":"八","kana":"はち","romaji":"hachi"},{"n":9,"ja":"九","kana":"きゅう/く","romaji":"kyū/ku"},{"n":10,"ja":"十","kana":"じゅう","romaji":"jū"},
+{"n":100,"ja":"百","kana":"ひゃく","romaji":"hyaku","note":"300=さんびゃく, 600=ろっぴゃく, 800=はっぴゃく"},
+{"n":1000,"ja":"千","kana":"せん","romaji":"sen","note":"3000=さんぜん, 8000=はっせん"},
+{"n":10000,"ja":"万","kana":"まん","romaji":"man","note":"Japanese groups by 10,000: 100,000 = 十万, 1,000,000 = 百万"}
+],
+"counters":[
+{"counter":"つ","use":"general things (1-10)","forms":"ひとつ ふたつ みっつ よっつ いつつ むっつ ななつ やっつ ここのつ とお","example":"りんごを三つください。"},
+{"counter":"人 (にん)","use":"people","forms":"ひとり ふたり さんにん よにん…","example":"学生が四人います。"},
+{"counter":"本 (ほん)","use":"long thin things (bottles, pens, films, trains)","forms":"いっぽん にほん さんぼん…ろっぽん…はっぽん…じゅっぽん","example":"ビールを二本ください。"},
+{"counter":"枚 (まい)","use":"flat things (paper, tickets, shirts)","forms":"いちまい にまい さんまい…","example":"きっぷを一枚ください。"},
+{"counter":"匹 (ひき)","use":"small animals","forms":"いっぴき にひき さんびき…","example":"ねこが三匹います。"},
+{"counter":"台 (だい)","use":"machines & vehicles (karts!)","forms":"いちだい にだい さんだい…","example":"カートが十台あります。"},
+{"counter":"回 (かい)","use":"times / occurrences","forms":"いっかい にかい さんかい…","example":"週に三回練習します。"},
+{"counter":"歳 (さい)","use":"age","forms":"いっさい にさい…はたち(20)…","example":"二十歳です。"},
+{"counter":"分 (ふん/ぷん)","use":"minutes","forms":"いっぷん にふん さんぷん よんぷん ごふん ろっぷん ななふん はっぷん きゅうふん じゅっぷん","example":"十分ぐらいかかります。"},
+{"counter":"時 (じ)","use":"o'clock","forms":"いちじ…よじ(4)…しちじ(7)…くじ(9)…","example":"九時に始まります。"},
+{"counter":"月 (がつ)","use":"months of the year","forms":"いちがつ…しがつ(April)…しちがつ(July)…くがつ(September)","example":"九月に日本へ行きます。"},
+{"counter":"日 (にち/か)","use":"days of month","forms":"ついたち ふつか みっか よっか いつか むいか なのか ようか ここのか とおか…はつか(20th)","example":"十四日に帰ります。"},
+{"counter":"階 (かい)","use":"floors of a building","forms":"いっかい にかい…","example":"三階にあります。"},
+{"counter":"冊 (さつ)","use":"books/volumes","forms":"いっさつ にさつ…","example":"ノートを二冊買いました。"},
+{"counter":"杯 (はい)","use":"cups/glassfuls","forms":"いっぱい にはい さんばい…","example":"コーヒーを一杯どうですか。"}
+],
+"time":{
+"days_of_week":[{"ja":"月曜日","romaji":"getsuyōbi","en":"Monday"},{"ja":"火曜日","romaji":"kayōbi","en":"Tuesday"},{"ja":"水曜日","romaji":"suiyōbi","en":"Wednesday"},{"ja":"木曜日","romaji":"mokuyōbi","en":"Thursday"},{"ja":"金曜日","romaji":"kinyōbi","en":"Friday"},{"ja":"土曜日","romaji":"doyōbi","en":"Saturday"},{"ja":"日曜日","romaji":"nichiyōbi","en":"Sunday"}],
+"relative":[{"ja":"おととい","en":"day before yesterday"},{"ja":"きのう","en":"yesterday"},{"ja":"きょう","en":"today"},{"ja":"あした","en":"tomorrow"},{"ja":"あさって","en":"day after tomorrow"},{"ja":"先週/今週/来週","en":"last/this/next week"},{"ja":"先月/今月/来月","en":"last/this/next month"},{"ja":"去年/ことし/来年","en":"last/this/next year"},{"ja":"毎日/毎週/毎月/毎年","en":"every day/week/month/year"}],
+"parts_of_day":[{"ja":"朝","romaji":"asa","en":"morning"},{"ja":"昼","romaji":"hiru","en":"midday"},{"ja":"夕方","romaji":"yūgata","en":"evening"},{"ja":"夜","romaji":"yoru","en":"night"},{"ja":"午前/午後","romaji":"gozen/gogo","en":"a.m./p.m."}]
+}}}

@@ -1,0 +1,419 @@
+{
+ "pack": "study-plan",
+ "source": "authored for Iota by Claude, 2026",
+ "start": "2026-08-17",
+ "departure_target": "2027-09",
+ "jlpt_hour_benchmarks": {
+  "N5": "350-500h",
+  "N4": "550-1000h",
+  "N3": "900-1325h"
+ },
+ "realistic_target": "Solid N4 + N3-curious by departure on ~45-60 min/day; that is the level where daily life in Japan clicks",
+ "daily_template": {
+  "reviews": "10-20 min SRS (do this even on race days — streak preserved by 1 review)",
+  "new": "10-15 min new items",
+  "immersion": "10-30 min listening/reading, scaling up over the year",
+  "speaking": "EDEN conversation practice 1-2×/week from week 19"
+ },
+ "weeks": [
+  {
+   "week": 1,
+   "starts": "2026-08-17",
+   "stage": "Hiragana",
+   "goals": "All 104 hiragana readable + survival phrases pack begun; write your name",
+   "quota": "kana: 8 new/day · phrases: 4/day · reviews daily"
+  },
+  {
+   "week": 2,
+   "starts": "2026-08-24",
+   "stage": "Hiragana",
+   "goals": "All 104 hiragana readable + survival phrases pack begun; write your name",
+   "quota": "kana: 8 new/day · phrases: 4/day · reviews daily"
+  },
+  {
+   "week": 3,
+   "starts": "2026-08-31",
+   "stage": "Katakana",
+   "goals": "All 104 katakana + numbers/time pack; read a konbini shelf",
+   "quota": "kana: 8/day · numbers pack · reviews daily"
+  },
+  {
+   "week": 4,
+   "starts": "2026-09-07",
+   "stage": "Katakana",
+   "goals": "All 104 katakana + numbers/time pack; read a konbini shelf",
+   "quota": "kana: 8/day · numbers pack · reviews daily"
+  },
+  {
+   "week": 5,
+   "starts": "2026-09-14",
+   "stage": "N5 core",
+   "goals": "N5 vocab (~50/wk), N5 kanji (~6/wk), N5 grammar (~5 points/wk), phrases finished by wk 12",
+   "quota": "vocab 8/day · kanji 1/day · grammar 5/wk · 10 min listening/day"
+  },
+  {
+   "week": 6,
+   "starts": "2026-09-21",
+   "stage": "N5 core",
+   "goals": "N5 vocab (~50/wk), N5 kanji (~6/wk), N5 grammar (~5 points/wk), phrases finished by wk 12",
+   "quota": "vocab 8/day · kanji 1/day · grammar 5/wk · 10 min listening/day"
+  },
+  {
+   "week": 7,
+   "starts": "2026-09-28",
+   "stage": "N5 core",
+   "goals": "N5 vocab (~50/wk), N5 kanji (~6/wk), N5 grammar (~5 points/wk), phrases finished by wk 12",
+   "quota": "vocab 8/day · kanji 1/day · grammar 5/wk · 10 min listening/day"
+  },
+  {
+   "week": 8,
+   "starts": "2026-10-05",
+   "stage": "N5 core",
+   "goals": "N5 vocab (~50/wk), N5 kanji (~6/wk), N5 grammar (~5 points/wk), phrases finished by wk 12",
+   "quota": "vocab 8/day · kanji 1/day · grammar 5/wk · 10 min listening/day"
+  },
+  {
+   "week": 9,
+   "starts": "2026-10-12",
+   "stage": "N5 core",
+   "goals": "N5 vocab (~50/wk), N5 kanji (~6/wk), N5 grammar (~5 points/wk), phrases finished by wk 12",
+   "quota": "vocab 8/day · kanji 1/day · grammar 5/wk · 10 min listening/day"
+  },
+  {
+   "week": 10,
+   "starts": "2026-10-19",
+   "stage": "N5 core",
+   "goals": "N5 vocab (~50/wk), N5 kanji (~6/wk), N5 grammar (~5 points/wk), phrases finished by wk 12",
+   "quota": "vocab 8/day · kanji 1/day · grammar 5/wk · 10 min listening/day"
+  },
+  {
+   "week": 11,
+   "starts": "2026-10-26",
+   "stage": "N5 core",
+   "goals": "N5 vocab (~50/wk), N5 kanji (~6/wk), N5 grammar (~5 points/wk), phrases finished by wk 12",
+   "quota": "vocab 8/day · kanji 1/day · grammar 5/wk · 10 min listening/day"
+  },
+  {
+   "week": 12,
+   "starts": "2026-11-02",
+   "stage": "N5 core",
+   "goals": "N5 vocab (~50/wk), N5 kanji (~6/wk), N5 grammar (~5 points/wk), phrases finished by wk 12",
+   "quota": "vocab 8/day · kanji 1/day · grammar 5/wk · 10 min listening/day"
+  },
+  {
+   "week": 13,
+   "starts": "2026-11-09",
+   "stage": "N5 core",
+   "goals": "N5 vocab (~50/wk), N5 kanji (~6/wk), N5 grammar (~5 points/wk), phrases finished by wk 12",
+   "quota": "vocab 8/day · kanji 1/day · grammar 5/wk · 10 min listening/day"
+  },
+  {
+   "week": 14,
+   "starts": "2026-11-16",
+   "stage": "N5 core",
+   "goals": "N5 vocab (~50/wk), N5 kanji (~6/wk), N5 grammar (~5 points/wk), phrases finished by wk 12",
+   "quota": "vocab 8/day · kanji 1/day · grammar 5/wk · 10 min listening/day"
+  },
+  {
+   "week": 15,
+   "starts": "2026-11-23",
+   "stage": "N5 core",
+   "goals": "N5 vocab (~50/wk), N5 kanji (~6/wk), N5 grammar (~5 points/wk), phrases finished by wk 12",
+   "quota": "vocab 8/day · kanji 1/day · grammar 5/wk · 10 min listening/day"
+  },
+  {
+   "week": 16,
+   "starts": "2026-11-30",
+   "stage": "N5 core",
+   "goals": "N5 vocab (~50/wk), N5 kanji (~6/wk), N5 grammar (~5 points/wk), phrases finished by wk 12",
+   "quota": "vocab 8/day · kanji 1/day · grammar 5/wk · 10 min listening/day"
+  },
+  {
+   "week": 17,
+   "starts": "2026-12-07",
+   "stage": "N5 core",
+   "goals": "N5 vocab (~50/wk), N5 kanji (~6/wk), N5 grammar (~5 points/wk), phrases finished by wk 12",
+   "quota": "vocab 8/day · kanji 1/day · grammar 5/wk · 10 min listening/day"
+  },
+  {
+   "week": 18,
+   "starts": "2026-12-14",
+   "stage": "N5 core",
+   "goals": "N5 vocab (~50/wk), N5 kanji (~6/wk), N5 grammar (~5 points/wk), phrases finished by wk 12",
+   "quota": "vocab 8/day · kanji 1/day · grammar 5/wk · 10 min listening/day"
+  },
+  {
+   "week": 19,
+   "starts": "2026-12-21",
+   "stage": "N5 consolidation",
+   "goals": "Mock N5 in-app; weak-item sweep; first EDEN-only-Japanese chat day",
+   "quota": "reviews only + mock + speaking drills"
+  },
+  {
+   "week": 20,
+   "starts": "2026-12-28",
+   "stage": "N5 consolidation",
+   "goals": "Mock N5 in-app; weak-item sweep; first EDEN-only-Japanese chat day",
+   "quota": "reviews only + mock + speaking drills"
+  },
+  {
+   "week": 21,
+   "starts": "2027-01-04",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 22,
+   "starts": "2027-01-11",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 23,
+   "starts": "2027-01-18",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 24,
+   "starts": "2027-01-25",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 25,
+   "starts": "2027-02-01",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 26,
+   "starts": "2027-02-08",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 27,
+   "starts": "2027-02-15",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 28,
+   "starts": "2027-02-22",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 29,
+   "starts": "2027-03-01",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 30,
+   "starts": "2027-03-08",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 31,
+   "starts": "2027-03-15",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 32,
+   "starts": "2027-03-22",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 33,
+   "starts": "2027-03-29",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 34,
+   "starts": "2027-04-05",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 35,
+   "starts": "2027-04-12",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 36,
+   "starts": "2027-04-19",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 37,
+   "starts": "2027-04-26",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 38,
+   "starts": "2027-05-03",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 39,
+   "starts": "2027-05-10",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 40,
+   "starts": "2027-05-17",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 41,
+   "starts": "2027-05-24",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 42,
+   "starts": "2027-05-31",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 43,
+   "starts": "2027-06-07",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 44,
+   "starts": "2027-06-14",
+   "stage": "N4 core",
+   "goals": "N4 vocab (~28/wk), N4 kanji (~7/wk), N4 grammar (~2-3/wk); anime/YouTube with JP subs from wk 30; fortnightly EDEN conversation",
+   "quota": "vocab 4/day · kanji 1/day · grammar 3/wk · 20 min immersion/day"
+  },
+  {
+   "week": 45,
+   "starts": "2027-06-21",
+   "stage": "N4 consolidation",
+   "goals": "Mock N4; consider real JLPT N4 (July 2027 sitting, London/Edinburgh); catch-up debt zero",
+   "quota": "reviews + mock + booking decision"
+  },
+  {
+   "week": 46,
+   "starts": "2027-06-28",
+   "stage": "N4 consolidation",
+   "goals": "Mock N4; consider real JLPT N4 (July 2027 sitting, London/Edinburgh); catch-up debt zero",
+   "quota": "reviews + mock + booking decision"
+  },
+  {
+   "week": 47,
+   "starts": "2027-07-05",
+   "stage": "N3 head start + Japan prep",
+   "goals": "N3 vocab pack opened (frequency-first), keigo recognition, phone/admin phrases mastered, 30+ min daily immersion; arrive in Japan reading N4, speaking survival-fluent",
+   "quota": "vocab 6/day · immersion 30 min/day · weekly EDEN convo in JP"
+  },
+  {
+   "week": 48,
+   "starts": "2027-07-12",
+   "stage": "N3 head start + Japan prep",
+   "goals": "N3 vocab pack opened (frequency-first), keigo recognition, phone/admin phrases mastered, 30+ min daily immersion; arrive in Japan reading N4, speaking survival-fluent",
+   "quota": "vocab 6/day · immersion 30 min/day · weekly EDEN convo in JP"
+  },
+  {
+   "week": 49,
+   "starts": "2027-07-19",
+   "stage": "N3 head start + Japan prep",
+   "goals": "N3 vocab pack opened (frequency-first), keigo recognition, phone/admin phrases mastered, 30+ min daily immersion; arrive in Japan reading N4, speaking survival-fluent",
+   "quota": "vocab 6/day · immersion 30 min/day · weekly EDEN convo in JP"
+  },
+  {
+   "week": 50,
+   "starts": "2027-07-26",
+   "stage": "N3 head start + Japan prep",
+   "goals": "N3 vocab pack opened (frequency-first), keigo recognition, phone/admin phrases mastered, 30+ min daily immersion; arrive in Japan reading N4, speaking survival-fluent",
+   "quota": "vocab 6/day · immersion 30 min/day · weekly EDEN convo in JP"
+  },
+  {
+   "week": 51,
+   "starts": "2027-08-02",
+   "stage": "N3 head start + Japan prep",
+   "goals": "N3 vocab pack opened (frequency-first), keigo recognition, phone/admin phrases mastered, 30+ min daily immersion; arrive in Japan reading N4, speaking survival-fluent",
+   "quota": "vocab 6/day · immersion 30 min/day · weekly EDEN convo in JP"
+  },
+  {
+   "week": 52,
+   "starts": "2027-08-09",
+   "stage": "N3 head start + Japan prep",
+   "goals": "N3 vocab pack opened (frequency-first), keigo recognition, phone/admin phrases mastered, 30+ min daily immersion; arrive in Japan reading N4, speaking survival-fluent",
+   "quota": "vocab 6/day · immersion 30 min/day · weekly EDEN convo in JP"
+  },
+  {
+   "week": 53,
+   "starts": "2027-08-16",
+   "stage": "N3 head start + Japan prep",
+   "goals": "N3 vocab pack opened (frequency-first), keigo recognition, phone/admin phrases mastered, 30+ min daily immersion; arrive in Japan reading N4, speaking survival-fluent",
+   "quota": "vocab 6/day · immersion 30 min/day · weekly EDEN convo in JP"
+  },
+  {
+   "week": 54,
+   "starts": "2027-08-23",
+   "stage": "N3 head start + Japan prep",
+   "goals": "N3 vocab pack opened (frequency-first), keigo recognition, phone/admin phrases mastered, 30+ min daily immersion; arrive in Japan reading N4, speaking survival-fluent",
+   "quota": "vocab 6/day · immersion 30 min/day · weekly EDEN convo in JP"
+  },
+  {
+   "week": 55,
+   "starts": "2027-08-30",
+   "stage": "N3 head start + Japan prep",
+   "goals": "N3 vocab pack opened (frequency-first), keigo recognition, phone/admin phrases mastered, 30+ min daily immersion; arrive in Japan reading N4, speaking survival-fluent",
+   "quota": "vocab 6/day · immersion 30 min/day · weekly EDEN convo in JP"
+  },
+  {
+   "week": 56,
+   "starts": "2027-09-06",
+   "stage": "N3 head start + Japan prep",
+   "goals": "N3 vocab pack opened (frequency-first), keigo recognition, phone/admin phrases mastered, 30+ min daily immersion; arrive in Japan reading N4, speaking survival-fluent",
+   "quota": "vocab 6/day · immersion 30 min/day · weekly EDEN convo in JP"
+  },
+  {
+   "week": 57,
+   "starts": "2027-09-13",
+   "stage": "N3 head start + Japan prep",
+   "goals": "N3 vocab pack opened (frequency-first), keigo recognition, phone/admin phrases mastered, 30+ min daily immersion; arrive in Japan reading N4, speaking survival-fluent",
+   "quota": "vocab 6/day · immersion 30 min/day · weekly EDEN convo in JP"
+  }
+ ]
+}
