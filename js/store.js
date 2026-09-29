@@ -17,6 +17,7 @@
     travelMode: 'walk', travelCampusMin: 15, travelWorkMin: 30, travelTrackMin: 40, loadingMin: 15,
     homeAddress: '', campusAddress: '', workAddress: '', trackAddress: '',
     termStart: '', termWeeks: 12, apiKey: '', reduceMotion: false,
+    defaultPriority: 4, defaultDueTime: '18:00', dayEndHour: 23, weekStart: 1, snoozeMorning: '09:00', snoozeEvening: '18:00', areaPrefs: {},
   };
   const LOCAL_ONLY_KEYS = new Set(['apiKey', 'theme']); // never leaves the device
 
@@ -99,17 +100,35 @@
     const seeds = S.events.map(e => { const o = { ...e, id: uuidFrom(e.k), _local: true }; delete o.k; return o; }).filter(e => !have.has(e.id));
     db.events = [...real, ...seeds];
   }
-  /** Apply the task import once per version. Tasks you delete or complete are never resurrected. */
+  /** Fields an import owns. If a task still matches what the last import wrote, a newer import may refresh it; once you edit it, it's yours. */
+  const seedRow = x => ({ title: x.t, due: x.d || null, due_kind: x.d ? (x.h ? 'hard' : 'soft') : null, priority: x.p || 4, duration_min: x.m || null, notes: x.n || null, link: x.u || null, area: x.a || null, section: x.s });
+  const sigOf = r => JSON.stringify([r.title, r.due || null, r.due_kind || null, +r.priority || 4, +r.duration_min || null, r.notes || null, r.link || null, r.area || null]);
+  const SIG_KEY = 'iota.seedSig';
+  /** Apply the task import once per version: adds what's missing, refreshes imported tasks you haven't touched. Deleted or completed ones stay that way. */
   function applySeed(force) {
     const S = seedData(); if (!S || !Array.isArray(S.tasks)) return 0;
     if (!force && localStorage.getItem('iota.seed') === S.version) { ensureSeedEvents(); return 0; }
-    let n = 0; const have = new Set(db.tasks.map(t => t.id));
+    let sigs = {}; try { sigs = JSON.parse(localStorage.getItem(SIG_KEY) || '{}'); } catch (_) {}
+    let n = 0, refreshed = 0; const byId = new Map(db.tasks.map(t => [t.id, t]));
     for (const x of S.tasks) {
-      const id = x.id || uuidFrom('task:' + x.k); if (have.has(id)) continue;
-      Store.insert('tasks', { id, title: x.t, section: x.s, area: x.a, due: x.d || null, due_kind: x.d ? (x.h ? 'hard' : 'soft') : null, priority: x.p, duration_min: x.m, notes: x.n || null, link: x.u || null, source: x.src, status: x.st || 'open', done_at: x.da || null, snoozed_until: x.sz || null, created_at: x.ca || (S.created ? S.created + 'T02:00:00+01:00' : new Date().toISOString()) }, { silent: true, ignoreDup: true });
-      n++;
+      const id = x.id || uuidFrom('task:' + x.k), row = seedRow(x), sig = sigOf(row);
+      const cur = byId.get(id);
+      if (cur) {
+        const expected = sigs[id] || (S.prevSigs && S.prevSigs[x.k]) || null;
+        if (cur.status === 'open' && expected && sigOf(cur) === expected && sig !== expected) {
+          const patch = {}; for (const k of Object.keys(row)) if ((cur[k] ?? null) !== (row[k] ?? null)) patch[k] = row[k];
+          if (Object.keys(patch).length) { Store.update('tasks', id, patch); refreshed++; }
+        }
+        if (!sigs[id] && sigOf(cur) === sig) sigs[id] = sig;
+        else if (cur.status === 'open' && (sigOf(Store.get('tasks', id)) === sig)) sigs[id] = sig;
+        continue;
+      }
+      Store.insert('tasks', { id, ...row, source: x.src, status: x.st || 'open', done_at: x.da || null, snoozed_until: x.sz || null, created_at: x.ca || (S.created ? S.created + 'T02:00:00+01:00' : new Date().toISOString()) }, { silent: true, ignoreDup: true });
+      sigs[id] = sig; n++;
     }
+    try { localStorage.setItem(SIG_KEY, JSON.stringify(sigs)); } catch (_) {}
     localStorage.setItem('iota.seed', S.version);
+    Store.lastSeed = { added: n, refreshed };
     ensureSeedEvents(); persist(); emit('change');
     return n;
   }
@@ -117,7 +136,7 @@
   function exportSeed() {
     const tasks = db.tasks.filter(t => t.status !== 'dropped').map(t => ({ id: t.id, t: t.title, s: t.section, a: t.area || null, d: t.due || null, h: t.due_kind === 'hard', p: t.priority || 4, m: t.duration_min || null, n: t.notes || null, src: t.source || null, u: t.link || null, st: t.status, da: t.done_at || null, sz: t.snoozed_until || null, ca: t.created_at || null }));
     const S = seedData();
-    return { format: 'iota-seed/1', version: 'export-' + new Date().toISOString(), created: new Date().toISOString().slice(0, 10), tasks, events: S?.events || [] };
+    return { format: 'iota-seed/1', version: 'export-' + new Date().toISOString(), created: new Date().toISOString().slice(0, 10), tasks, events: S?.events || [], areas: S?.areas || null };
   }
   /** Import a task file (the JSON Claude writes to OneDrive). Returns how many tasks were added. */
   function importSeed(obj) {
@@ -128,7 +147,7 @@
 
   const Store = {
     status: navigator.onLine ? 'unknown' : 'offline',
-    uuidFrom, applySeed, importSeed, exportSeed, get hasSeed() { return !!seedData(); },
+    uuidFrom, applySeed, importSeed, exportSeed, seedData, lastSeed: null, get hasSeed() { return !!seedData(); },
     get offlineMode() { return localStorage.getItem('iota.offline') === '1'; },
     setOfflineMode(on) { if (on) localStorage.setItem('iota.offline', '1'); else localStorage.removeItem('iota.offline'); },
     on(fn) { listeners.add(fn); return () => listeners.delete(fn); },

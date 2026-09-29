@@ -371,7 +371,23 @@ A glyph reduced from the original Iota Ring (`MARK_ARCS` in `js/ui.js`): three a
 ### Navigation
 - **Tab bar:** `surface` with a top hairline. Inactive tabs are ink-3 and the current one ink (`aria-current="page"`). Icons are 22px over a 10.5px label.
 - **Sidebar:** 30px items, 13.5px 500 ink-2, 16px icons at 80%. Hover is `fill` and current is `fill-2` with ink text. Counts are right-aligned 12px ink-3 tabular. Group labels are 12px 550 ink-3. Quick actions are `surface` buttons with a hairline ring and a `kbd` hint.
+- **Sidebar area groups:** University, Work and Personal are collapsible groups (a 14px chevron that rotates, state remembered per device). Their areas sit beneath as 28px, 13px items indented to 30px along a 1px `line` rail. The current area shows a 2px ink tick on the rail rather than a new colour. A collapsed group shows its total count.
 - **Crumb/back:** 13.5px 500 ink-2 with a 15px chevron.
+
+### Areas
+- **Taxonomy:** twenty areas under the three sections, defined once in `Tasks.AREA_DEFS` (key, group, icon, blurb, hub, public links). Private links arrive with the task import. The person can rename, hide and reorder them (`areaPrefs`). Section hue stays on dots only; each area gets a line icon, never a colour of its own.
+- **Areas index (phone tab):** each section is a 17px 650 heading row with a dot and the next thing on its calendar, over a list of its areas. Each area row shows the soonest dated task and an open count.
+- **Area page (`#/area/<slug>`):** crumb to the section, a 34px `fill` icon tile beside the h1, a blurb, and one EDEN line that says what's open and where to start. Tasks follow grouped by bucket, with the area meta dropped because it's redundant here. At ≥1180px a 300px side column holds Coming up, Links and the hub link.
+
+### Settings
+- **Structure:** a declarative schema (`js/settings.js`) of panes → sections → rows. Every row has a label, an optional description and search synonyms.
+- **Desktop:** a split view. The left column is 212px and sticky, holding search and the pane list in four groups separated by hairlines. The pane is at most 640px wide.
+- **Phone:** a drill-down. The index is iOS-style inset lists with 28px `fill-2` icon tiles and the current value on the right. A pane opens at `#/settings/<pane>` with a "‹ Settings" crumb.
+- **Rows:** label (14.5px 550) and description (13px ink-2) on the left, control on the right. Rows with wide controls stack under 560px. Panels are `surface` with a hairline and 12px radius.
+- **Saving:** there are no Save buttons and no toasts. A change saves at once, and a green "Saved" (12px 550, `ok`) fades in beside the row label for 1.6s.
+- **Destructive actions:** they live in a Danger zone panel with a p1-tinted ring. They confirm inline (question, then Cancel and a filled red button), never in a dialog. Clearing is blocked while changes are unsynced.
+- **Search:** matches label, description and synonyms across all panes. Choosing a result opens the pane, scrolls to the row and flashes it in `sel`.
+- **Theme tiles:** three miniature app frames (System, Light, Dark). The selected one gets a 2px ink ring.
 
 ### Sheets, dialogs, palette, toasts
 - **Sheet (phone):** a `surface` panel with 14px top corners, the sheet shadow, and a 36×4 `line-2` grip. It's max 88dvh and slides up over 260ms `cubic-bezier(.32,.72,0,1)`. The scrim fades in.

@@ -48,6 +48,17 @@
     jp: P('<path d="M4.5 6.5h11M10 4v2.5M6.5 6.5c.5 5 3.5 8.5 8 10.5M14 6.5c-1 4.5-4 8.5-9 10.5M14.5 20l3-7.5 3 7.5M15.5 17.5h4"/>'),
     flagk: P('<path d="M5.5 21V4.5h13v8h-13"/><path d="M9.8 4.5v8M14.2 4.5v8M5.5 8.5h13"/>'),
     logout: P('<path d="M9.5 20H6.5A2.5 2.5 0 0 1 4 17.5v-11A2.5 2.5 0 0 1 6.5 4h3M15 16l4-4-4-4M19 12H9.5"/>'),
+    home: P('<path d="M4 10.5L12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5h-4V15h-5v5.5h-4A1.5 1.5 0 0 1 4 19v-8.5z"/>'),
+    heart: P('<path d="M12 19.5s-7.5-4.4-7.5-10A4.2 4.2 0 0 1 12 7a4.2 4.2 0 0 1 7.5 2.5c0 5.6-7.5 10-7.5 10z"/>'),
+    play: P('<rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M10.2 9.2v5.6l4.6-2.8-4.6-2.8z"/>'),
+    tv: P('<rect x="3.5" y="5.5" width="17" height="11.5" rx="2"/><path d="M8.5 20.5h7M12 17v3.5"/>'),
+    keyboard: P('<rect x="2.8" y="6" width="18.4" height="12" rx="2"/><path d="M6.5 9.5h.01M10 9.5h.01M13.5 9.5h.01M17 9.5h.01M6.5 12.5h.01M17 12.5h.01M9 15h6"/>'),
+    user: P('<circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.6-3.8 3.6-6.2 7.5-6.2s6.9 2.4 7.5 6.2"/>'),
+    grip: P('<path d="M9 7h.01M15 7h.01M9 12h.01M15 12h.01M9 17h.01M15 17h.01"/>', 'stroke-width="2.4"'),
+    up: P('<path d="M6 14.5l6-6 6 6"/>'),
+    eye: P('<path d="M2.8 12S6 5.8 12 5.8 21.2 12 21.2 12 18 18.2 12 18.2 2.8 12 2.8 12z"/><circle cx="12" cy="12" r="2.8"/>'),
+    eyeoff: P('<path d="M4 4l16 16M9.9 6.1A9.6 9.6 0 0 1 12 5.8C18 5.8 21.2 12 21.2 12a15.6 15.6 0 0 1-2.9 3.6M6.3 7.7A15 15 0 0 0 2.8 12S6 18.2 12 18.2a9 9 0 0 0 4-.9M10 10a2.8 2.8 0 0 0 4 4"/>'),
+    dot: P('<circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/>'),
     dots: P('<circle cx="6" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="18" cy="12" r="1" fill="currentColor"/>'),
   };
   const icon = (k, cls = '') => I[k] ? (cls ? I[k].replace('class="i"', `class="i ${cls}"`) : I[k]) : '';
@@ -109,10 +120,10 @@
   function checkHTML(t) { return `<button class="check p${Tasks.pr(t)}" data-check="${t.id}" aria-label="Complete: ${esc(t.title)}">${TICK}</button>`; }
   function taskRow(t, opts = {}) {
     const now = opts.now || new Date();
-    const sec = Tasks.sectionOf(t), area = Tasks.area(t), m = Tasks.mins(t);
+    const sec = Tasks.sectionOf(t), area = Tasks.areaName(t), m = Tasks.mins(t);
     const due = Tasks.dueLabel(t, now), dc = Tasks.dueClass(t, now);
     const meta = [
-      `<span><i class="dot ${sec}"></i>${esc(area)}</span>`,
+      opts.hideArea ? '' : `<span><i class="dot ${sec}"></i>${esc(area)}</span>`,
       t.due_kind === 'hard' && t.due ? `<span class="tag hard">Deadline</span>` : '',
       m ? `<span class="tnum">${Tasks.fmtMins(m)}</span>` : '',
       opts.showSource && t.source ? `<span class="src">${icon(SRC_ICON[t.source] || 'note', 'i-sm')}${esc(t.source)}</span>` : '',

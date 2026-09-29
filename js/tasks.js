@@ -7,16 +7,50 @@
 (function () {
   'use strict';
   const H = 3600000, D = 86400000;
-  const AREAS = {
-    'Uni': 'uni', 'Coursework': 'uni', 'Career': 'uni', 'Year abroad': 'uni', 'Societies': 'uni', 'Japanese': 'uni',
-    'Karting': 'kart',
-    "McDonald's": 'work', 'FallingHippo': 'work', 'usBox': 'work', 'Skein': 'work', 'Clients': 'work',
-    'Money': 'personal', 'Admin': 'personal', 'Security': 'personal', 'Life': 'personal', 'Writing': 'personal', 'Streaming': 'personal', 'Health': 'personal',
-  };
-  const SECTION_AREA = { uni: 'Uni', work: 'Work', personal: 'Life', kart: 'Karting' };
+  // ------------------------------------------------------------
+  // Areas — the finer grain under University / Work / Personal. Keys are what tasks store in `area`.
+  // Personal links (Drive docs etc.) arrive with the private task import, never in this public file.
+  // ------------------------------------------------------------
+  const AREA_DEFS = [
+    { key: 'Coursework', group: 'uni', icon: 'book', blurb: 'Assessments, modules and the deadlines that carry marks.', hub: '#/uni/deadlines', links: [['Moodle', 'https://moodle.mmu.ac.uk/'], ['Term dates', 'https://www.mmu.ac.uk/about-us/term-dates']] },
+    { key: 'Uni', name: 'Uni admin', group: 'uni', icon: 'folder', blurb: 'Enrolment, timetable and the paperwork of being a student.', hub: '#/uni', links: [['Student Hub', 'https://studenthub.mmu.ac.uk/']] },
+    { key: 'Year abroad', group: 'uni', icon: 'plane', blurb: 'The 2027/28 exchange: Kansai Gaidai, NUFS, Soka, Chonnam.', links: [['Study abroad', 'https://www.mmu.ac.uk/study/international/study-abroad'], ['How to apply', 'https://www.mmu.ac.uk/study/international/study-abroad/how-to-apply/guidance'], ['Sessions', 'https://www.mmu.ac.uk/study/international/study-abroad/events']] },
+    { key: 'Career', group: 'uni', icon: 'briefcase', blurb: 'Placements, CV and applications.', links: [['MyCareerHub', 'https://mycareerhub.mmu.ac.uk/'], ['Get Placed', 'https://www.mmu.ac.uk/careers/students/get-placed'], ['Careers events', 'https://www.mmu.ac.uk/careers/students/events']] },
+    { key: 'Karting', group: 'uni', icon: 'flagk', blurb: 'MMU Karting: your committee jobs, events and the app.', hub: '#/uni/societies', links: [['SU committee hub', 'https://www.theunionmmu.org/clubs-and-societies/committee-hub']] },
+    { key: 'Societies', group: 'uni', icon: 'users', blurb: 'Football and everything else you join.', hub: '#/uni/societies', links: [['The Union', 'https://www.theunionmmu.org/']] },
+    { key: 'Japanese', group: 'uni', icon: 'jp', blurb: 'Kana to N4 before Japan.', module: 'language' },
+    { key: 'FallingHippo', group: 'work', icon: 'briefcase', blurb: 'The family company: the site, the admin, the legal.' },
+    { key: 'usBox', group: 'work', icon: 'tv', blurb: 'The household TV tracker: beta, build and launch.' },
+    { key: 'Skein', group: 'work', icon: 'note', blurb: 'The writing app and its UI rework.' },
+    { key: "McDonald's", group: 'work', icon: 'clock', blurb: 'Shifts at Oxford Road.', hub: '#/work/shifts' },
+    { key: 'Clients', group: 'work', icon: 'users', blurb: 'Websites for other people.' },
+    { key: 'Money', group: 'personal', icon: 'wallet', blurb: 'Pay, loan, rent and subscriptions.', hub: '#/personal/money' },
+    { key: 'Home', group: 'personal', icon: 'home', blurb: 'The Hulme house: council tax, deposit, insurance, bills.' },
+    { key: 'Health', group: 'personal', icon: 'heart', blurb: 'GP, vaccines, the NHS bits.' },
+    { key: 'Admin', group: 'personal', icon: 'folder', blurb: 'Accounts, apps, inboxes and loose ends.', hub: '#/personal/admin' },
+    { key: 'Security', group: 'personal', icon: 'key', blurb: 'Tokens, passwords and sign-ins.' },
+    { key: 'Writing', group: 'personal', icon: 'note', blurb: 'Godsfall, Silver, A Quiet Place to Fall.' },
+    { key: 'Streaming', group: 'personal', icon: 'play', blurb: 'MagicJoynson and the maths channel.' },
+    { key: 'Life', group: 'personal', icon: 'sun', blurb: 'Everything that fits nowhere else.' },
+  ];
+  const GROUPS = [['uni', 'University'], ['work', 'Work'], ['personal', 'Personal']];
+  const slug = k => String(k).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const AREAS = Object.fromEntries(AREA_DEFS.map(d => [d.key, d.key === 'Karting' ? 'kart' : d.group])); // tasks keep their old section key
+  /** Area definitions with the user's preferences (name, hidden, order) and the import's private links merged in. */
+  function areaDefs() {
+    const prefs = (Store.settings.areaPrefs || {}), extra = (Store.seedData && Store.seedData()?.areas) || {};
+    const known = AREA_DEFS.map((d, i) => ({ ...d, name: prefs[d.key]?.name || d.name || d.key, hidden: !!prefs[d.key]?.hidden, order: prefs[d.key]?.order ?? i, links: [...(extra[d.key]?.links || []), ...(d.links || [])], slug: slug(d.key) }));
+    // areas that only exist on tasks (typed with #something) still get a page
+    const seen = new Set(known.map(d => d.key));
+    for (const t of Store.list('tasks')) if (t.area && !seen.has(t.area)) { seen.add(t.area); known.push({ key: t.area, name: prefs[t.area]?.name || t.area, group: t.section === 'kart' ? 'uni' : (t.section || 'personal'), icon: 'dot', blurb: '', links: [], hidden: !!prefs[t.area]?.hidden, order: prefs[t.area]?.order ?? 99, slug: slug(t.area), custom: true }); }
+    return known.sort((a, b) => a.order - b.order);
+  }
+  const areaDef = key => areaDefs().find(d => d.key === key || d.slug === key) || null;
+  const SECTION_AREA = { uni: 'Uni', work: 'FallingHippo', personal: 'Life', kart: 'Karting' };
 
   const pr = t => +(t.priority || 4);
   const area = t => t.area || SECTION_AREA[t.section] || 'Life';
+  const areaName = t => { const k = area(t); return (Store.settings.areaPrefs || {})[k]?.name || AREA_DEFS.find(d => d.key === k)?.name || k; };
   const sectionOf = t => t.section || AREAS[t.area] || 'personal';
   const mins = t => +(t.duration_min || 0) || null;
   const isOpen = t => t.status === 'open';
@@ -146,7 +180,7 @@
     const s = startOfDay(day), e = endOfDay(day);
     const due = open(now).filter(t => t.due && new Date(t.due) >= s && new Date(t.due) <= e || (t.due && new Date(t.due) < s && startOfDay(now).getTime() === s.getTime()));
     const taskMin = due.reduce((a, t) => a + (mins(t) || 30), 0);
-    const wakeStart = Math.max(new Date(s).setHours(8, 0, 0, 0), now.getTime()), wakeEnd = new Date(s).setHours(23, 0, 0, 0);
+    const endH = +Store.settings.dayEndHour || 23, wakeStart = Math.max(new Date(s).setHours(8, 0, 0, 0), now.getTime()), wakeEnd = new Date(s).setHours(Math.min(endH, 24), 0, 0, 0);
     let busy = 0;
     for (const x of Store.allTimed().filter(x => !x.isTask && x.ends_at)) { const a = Math.max(new Date(x.starts_at), wakeStart), b = Math.min(new Date(x.ends_at), wakeEnd); if (b > a) busy += (b - a) / 60000; }
     const free = Math.max(0, (wakeEnd - wakeStart) / 60000 - busy);
@@ -163,14 +197,14 @@
     const out = { priority: null, area: null, due: null, due_kind: null, duration_min: null, tokens: [] };
     t = t.replace(/\s(p[1-4])(?=\s)/i, (_, p) => { out.priority = +p[1]; out.tokens.push({ k: 'p' + p[1], label: 'P' + p[1] }); return ' '; });
     t = t.replace(/\s(!{1,3})(?=\s)/, (_, b) => { out.priority = out.priority || Math.max(1, 3 - b.length + 1); out.tokens.push({ k: 'p' + out.priority, label: 'P' + out.priority }); return ' '; });
-    t = t.replace(/\s#([\w'-]+)(?=\s)/, (_, a) => { const key = a.toLowerCase().replace(/[^a-z]/g, ''); out.area = AREA_KEYS[key] || (a[0].toUpperCase() + a.slice(1)); out.tokens.push({ k: 'area', label: out.area }); return ' '; });
+    t = t.replace(/\s#([\w'-]+)(?=\s)/, (_, a) => { const key = a.toLowerCase().replace(/[^a-z]/g, ''); out.area = AREA_KEYS[key] || areaDefs().find(d => d.name.toLowerCase().replace(/[^a-z]/g, '') === key)?.key || (a[0].toUpperCase() + a.slice(1)); out.tokens.push({ k: 'area', label: areaDef(out.area)?.name || out.area }); return ' '; });
     t = t.replace(/\s(\d+(?:\.\d+)?)\s?(h|hr|hrs|hours?)(?:\s?(\d+)\s?m(?:in)?s?)?(?=\s)/i, (_, h, __, m) => { out.duration_min = Math.round(+h * 60 + (+m || 0)); out.tokens.push({ k: 'dur', label: fmtMins(out.duration_min) }); return ' '; });
     if (!out.duration_min) t = t.replace(/\s(\d{1,3})\s?(m|min|mins|minutes)(?=\s)/i, (_, m) => { out.duration_min = +m; out.tokens.push({ k: 'dur', label: fmtMins(+m) }); return ' '; });
     t = t.replace(/\s(hard|deadline)(?=\s)/i, () => { out.due_kind = 'hard'; return ' '; });
     const w = Rules.parseWhen(t, now);
     if (w) {
       const hasTime = /\d\s*(am|pm)|\d:\d\d|\bat\s+\d/i.test(t);
-      const d = new Date(w.start); if (!hasTime) d.setHours(18, 0, 0, 0);
+      const d = new Date(w.start); if (!hasTime) { const [hh, mm] = String(Store.settings.defaultDueTime || '18:00').split(':').map(Number); d.setHours(hh || 18, mm || 0, 0, 0); }
       out.due = d.toISOString(); out.due_kind = out.due_kind || 'soft';
       out.tokens.push({ k: 'due', label: (out.due_kind === 'hard' ? 'Deadline ' : 'Due ') + d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + (hasTime ? ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '') });
       t = Rules.cleanTitle(t);
@@ -241,5 +275,5 @@
     return say(['Done.', 'Done. Noted.', 'Off the list.', 'Cleared.'], 'd');
   }
 
-  window.Tasks = { AREAS, BUCKETS, score, ranked, open, next, reason, dueLabel, dueClass, fmtMins, bucket, parse, dayLoad, area, sectionOf, pr, mins, freeWindow, brief, doneLine, say, nextEvent, shortName };
+  window.Tasks = { AREAS, AREA_DEFS, GROUPS, areaDefs, areaDef, areaName, slug, BUCKETS, score, ranked, open, next, reason, dueLabel, dueClass, fmtMins, bucket, parse, dayLoad, area, sectionOf, pr, mins, freeWindow, brief, doneLine, say, nextEvent, shortName };
 })();

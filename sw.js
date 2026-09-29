@@ -1,11 +1,11 @@
 /* Iota service worker — caches the app shell so Iota opens offline.
    Bump CACHE on every deploy that changes shell files. */
-const CACHE = 'iota-shell-v1.0.0';
+const CACHE = 'iota-shell-v1.0.1';
 const SHELL = [
   './', './index.html',
   './css/app.css', './css/jp.css',
   './js/supabase.js', './js/store.js', './js/tasks.js', './js/ui.js',
-  './js/eden.js', './js/jp.js', './js/hubs.js', './js/app.js',
+  './js/eden.js', './js/jp.js', './js/hubs.js', './js/settings.js', './js/app.js',
   './manifest.webmanifest', './assets/brand-512.png',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-512-maskable.png', './icons/apple-touch-icon.png', './icons/mark.svg',
   './assets/fonts/hanken-grotesk-latin-wght-normal.woff2', './assets/fonts/hanken-grotesk-latin-ext-wght-normal.woff2',

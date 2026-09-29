@@ -23,7 +23,8 @@
     if (a === 'calendar') return { screen: 'calendar', nav: 'calendar' };
     if (a === 'eden') return { screen: 'eden', nav: 'eden' };
     if (a === 'areas') return { screen: 'areas', nav: 'areas' };
-    if (a === 'settings') return { screen: 'settings', nav: 'settings' };
+    if (a === 'settings') return { screen: 'settings', pane: b || null, nav: 'settings' };
+    if (a === 'area' && b) { const d = Tasks.areaDef(decodeURIComponent(b)); if (!d) return { redirect: '#/areas' }; return { screen: 'area', key: d.key, nav: 'area:' + d.slug, group: d.group }; }
     if (a === 'personal' && b === 'week') return { redirect: '#/calendar' };
     if (a === 'kart') return { redirect: '#/uni/societies' };
     if (a === 'society' && b) return { screen: 'society', id: b, nav: 'uni' };
@@ -58,9 +59,7 @@
         <a href="#/calendar" data-nav="calendar">${icon('calendar')}Calendar</a>
         <a href="#/eden" data-nav="eden">${mark('mono', '')}EDEN</a>
         <h6>Areas</h6>
-        <a href="#/uni" data-nav="uni"><i class="dot uni"></i>University</a>
-        <a href="#/work" data-nav="work"><i class="dot work"></i>Work</a>
-        <a href="#/personal" data-nav="personal"><i class="dot personal"></i>Personal</a>
+        <div class="side-areas" data-side-areas></div>
         <div class="foot"><a href="#/settings" data-nav="settings">${icon('settings')}Settings</a></div>
       </nav>
       <main class="main" id="main" tabindex="-1"></main>
@@ -73,6 +72,7 @@
       </nav>
     </div>`;
     $$('[data-add]', app).forEach(b => b.addEventListener('click', () => openQuickAdd()));
+    $('[data-side-areas]', app).addEventListener('click', e => { const b = e.target.closest('[data-sg-toggle]'); if (!b) return; e.preventDefault(); const k = b.dataset.sgToggle; sideOpen[k] = !(sideOpen[k] ?? true); LS.set('iota.sideOpen', sideOpen); updateShell(); });
     $$('[data-palette]', app).forEach(b => b.addEventListener('click', () => openPalette()));
     // hold EDEN tab → quick add
     const et = $('.tabbar .eden-tab', app); let holdT = 0, held = false;
@@ -82,9 +82,24 @@
     et.addEventListener('contextmenu', e => e.preventDefault());
     shellBuilt = true;
   }
+  // Sidebar areas: three collapsible groups, each with its finer areas and open counts.
+  const sideOpen = LS.get('iota.sideOpen', {});
+  function openCounts(now = new Date()) { const c = {}; for (const t of Tasks.open(now)) { const a = Tasks.area(t); c[a] = (c[a] || 0) + 1; } return c; }
+  function sideAreasHTML() {
+    const cnt = openCounts(), defs = Tasks.areaDefs().filter(d => !d.hidden);
+    return Tasks.GROUPS.map(([g, name]) => {
+      const items = defs.filter(d => d.group === g), open = sideOpen[g] ?? true;
+      const total = Tasks.open().filter(t => { const s = Tasks.sectionOf(t); return g === 'uni' ? s === 'uni' || s === 'kart' : s === g; }).length;
+      return `<div class="sg ${open ? 'open' : ''}">
+        <div class="sg-h"><a href="#/${g}" data-nav="${g}"><i class="dot ${g}"></i>${name}${!open && total ? `<span class="count">${total}</span>` : ''}</a><button class="sg-t" data-sg-toggle="${g}" aria-expanded="${open}" aria-label="${open ? 'Collapse' : 'Expand'} ${name}">${icon('down', 'i-sm')}</button></div>
+        ${open ? `<div class="sg-items">${items.map(d => `<a href="#/area/${d.slug}" data-nav="area:${d.slug}">${esc(d.name)}${cnt[d.key] ? `<span class="count">${cnt[d.key]}</span>` : ''}</a>`).join('')}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
   function updateShell() {
     const nav = route.nav === 'hub' ? route.sec : route.nav;
-    $$('[data-nav]', app).forEach(a => { const k = a.dataset.nav; const on = k === nav || (k === 'areas' && ['uni', 'work', 'personal', 'settings'].includes(nav)); if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    const sa = $('[data-side-areas]', app); if (sa) sa.innerHTML = sideAreasHTML();
+    $$('[data-nav]', app).forEach(a => { const k = a.dataset.nav; const on = k === nav || (k === 'areas' && (['uni', 'work', 'personal', 'settings'].includes(nav) || String(nav).startsWith('area:'))) || (k === route.group && String(nav).startsWith('area:') && sideOpen[k] === false); if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     const n = Tasks.open().length; const c = $('[data-count-tasks]', app); if (c) c.textContent = n || '';
     const s = $('[data-status]', app); if (s) s.innerHTML = statusHTML();
     const aw = awareSection(); $$('.tabbar .mark, .side .brand .mark', app).forEach(m => { if (aw) m.dataset.aware = aw; else delete m.dataset.aware; });
@@ -104,11 +119,11 @@
     const y = window.scrollY;
     main.innerHTML = '';
     const page = document.createElement('div');
-    page.className = 'page' + (r.screen === 'today' || r.screen === 'tasks' || r.screen === 'calendar' ? ' wide' : '') + (opts.enter && prevScreen !== r.screen ? ' page-enter' : '');
+    page.className = 'page' + (r.screen === 'today' || r.screen === 'tasks' || r.screen === 'calendar' ? ' wide' : '') + (r.screen === 'area' ? ' area-page' : '') + (r.screen === 'settings' ? ' settings-page' : '') + (opts.enter && prevScreen !== r.screen ? ' page-enter' : '');
     main.appendChild(page);
     scr(page, r);
     if (keepScroll) window.scrollTo(0, y); else if (opts.enter) window.scrollTo(0, 0);
-    document.title = ({ today: 'Today', tasks: 'Tasks', calendar: 'Calendar', eden: 'EDEN', areas: 'Areas', settings: 'Settings', hub: SECTIONS[r.sec]?.name, module: Store.get('modules', r.id)?.name, pastmodule: Store.get('modules', r.id)?.name, society: Store.get('societies', r.id)?.name }[r.screen] || 'Iota') + ' · Iota';
+    document.title = ({ today: 'Today', tasks: 'Tasks', calendar: 'Calendar', eden: 'EDEN', areas: 'Areas', settings: 'Settings', area: Tasks.areaDef(r.key || '')?.name, hub: SECTIONS[r.sec]?.name, module: Store.get('modules', r.id)?.name, pastmodule: Store.get('modules', r.id)?.name, society: Store.get('societies', r.id)?.name }[r.screen] || 'Iota') + ' · Iota';
   }
   // Re-render on data change, but never under the user's cursor.
   let rrT = 0, animating = 0;
@@ -116,6 +131,7 @@
     clearTimeout(rrT);
     rrT = setTimeout(() => {
       if (!route || animating) return softRender();
+      if (route.screen === 'settings' && (window.__iotaQuiet || 0) > Date.now()) { updateShell(); return; }
       const a = document.activeElement;
       if (a && $('#main')?.contains(a) && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) return; // typing — leave it
       if (route.screen === 'eden') { updateShell(); return; }
@@ -145,12 +161,15 @@
     setTimeout(() => { animating--; commit(); }, 900);
   }
   function snoozeOptions(now = new Date()) {
-    const at = (d, h) => { const x = new Date(now); x.setDate(x.getDate() + d); x.setHours(h, 0, 0, 0); return x; };
+    const hm = (v, dh) => { const [h, m] = String(v || dh).split(':').map(Number); return [isNaN(h) ? +dh.split(':')[0] : h, m || 0]; };
+    const [eh, em] = hm(Store.settings.snoozeEvening, '18:00'), [mh, mm] = hm(Store.settings.snoozeMorning, '09:00');
+    const at = (d, h, m = 0) => { const x = new Date(now); x.setDate(x.getDate() + d); x.setHours(h, m, 0, 0); return x; };
     const sat = new Date(now); sat.setDate(sat.getDate() + ((6 - sat.getDay() + 7) % 7 || 7)); sat.setHours(10, 0, 0, 0);
     const mon = new Date(now); mon.setDate(mon.getDate() + ((8 - mon.getDay()) % 7 || 7)); mon.setHours(9, 0, 0, 0);
     const opts = [];
-    if (now.getHours() < 17 && now.getHours() >= 5) opts.push(['This evening', at(0, 19)]);
-    opts.push(['Tomorrow', at(now.getHours() < 5 ? 0 : 1, 9)], ['Saturday', sat], ['Next week', mon]);
+    if (now < at(0, eh, em) && now.getHours() >= 5) opts.push(['This evening', at(0, eh, em)]);
+    opts.push(['Tomorrow', at(now.getHours() < 5 ? 0 : 1, mh, mm)], ['Saturday', sat], ['Next week', mon]);
+    mon.setHours(mh, mm);
     return opts;
   }
   function snoozeTask(id, until) {
@@ -195,7 +214,8 @@
   const EFFORTS = [0, 5, 10, 15, 30, 45, 60, 90, 120, 180, 240, 360, 900];
   function detailHTML(t) {
     const now = new Date(), d = t.due ? new Date(t.due) : null;
-    const areas = [...new Set([...Object.keys(Tasks.AREAS), Tasks.area(t)])];
+    const defs = Tasks.areaDefs(), cur = Tasks.area(t);
+    const areaOpts = Tasks.GROUPS.map(([g, n]) => `<optgroup label="${n}">${defs.filter(d => d.group === g && (!d.hidden || d.key === cur)).map(d => `<option value="${esc(d.key)}" ${d.key === cur ? 'selected' : ''}>${esc(d.name)}</option>`).join('')}</optgroup>`).join('');
     const reason = Tasks.reason(t, now);
     return `<div class="detail" data-detail="${t.id}">
       <div style="display:flex;gap:12px;align-items:flex-start">
@@ -206,7 +226,7 @@
         <dt>Priority</dt><dd><div class="pchoice" role="radiogroup" aria-label="Priority">${[1, 2, 3, 4].map(p => `<button role="radio" aria-checked="${Tasks.pr(t) === p}" class="${Tasks.pr(t) === p ? 'on' : ''}" data-p="${p}"><span class="check p${p}" aria-hidden="true"></span>P${p}</button>`).join('')}</div></dd>
         <dt>Due</dt><dd><input type="date" data-f="date" value="${d ? dayKey(d) : ''}" aria-label="Due date"><input type="time" data-f="time" value="${d ? fmtTime(d) : ''}" aria-label="Due time"><label class="toggle" style="margin-left:4px"><input type="checkbox" data-f="hard" ${t.due_kind === 'hard' ? 'checked' : ''}>Hard deadline</label></dd>
         <dt>Effort</dt><dd><select data-f="effort" aria-label="Effort">${EFFORTS.map(m => `<option value="${m}" ${(+t.duration_min || 0) === m ? 'selected' : ''}>${m ? Tasks.fmtMins(m) : '—'}</option>`).join('')}${t.duration_min && !EFFORTS.includes(+t.duration_min) ? `<option selected value="${t.duration_min}">${Tasks.fmtMins(+t.duration_min)}</option>` : ''}</select></dd>
-        <dt>Area</dt><dd><select data-f="area" aria-label="Area">${areas.map(a => `<option ${a === Tasks.area(t) ? 'selected' : ''}>${esc(a)}</option>`).join('')}</select><span class="note" style="display:inline-flex;align-items:center;gap:6px;margin-left:4px"><i class="dot ${Tasks.sectionOf(t)}"></i>${esc(SECTIONS[Tasks.sectionOf(t) === 'kart' ? 'uni' : Tasks.sectionOf(t)]?.name || 'Personal')}</span></dd>
+        <dt>Area</dt><dd><select data-f="area" aria-label="Area">${areaOpts}</select><span class="note" style="display:inline-flex;align-items:center;gap:6px;margin-left:4px"><i class="dot ${Tasks.sectionOf(t)}"></i>${esc(SECTIONS[Tasks.sectionOf(t) === 'kart' ? 'uni' : Tasks.sectionOf(t)]?.name || 'Personal')}</span></dd>
         ${t.source || t.link ? `<dt>From</dt><dd>${t.link ? `<a class="link" href="${esc(t.link)}" target="_blank" rel="noopener" style="display:inline-flex;gap:6px;align-items:center">${icon(UI.SRC_ICON[t.source] || 'out', 'i-sm')}${esc(t.source || 'Link')}${icon('out', 'i-sm')}</a>` : `<span class="note">${esc(t.source)}</span>`}</dd>` : ''}
         ${t.snoozed_until && new Date(t.snoozed_until) > now ? `<dt>Snoozed</dt><dd><span class="note">until ${esc(relDay(t.snoozed_until))} ${esc(fmtTime(t.snoozed_until))}</span><button class="btn sm ghost" data-unsnooze>Wake</button></dd>` : ''}
       </dl>
@@ -312,7 +332,7 @@
       </div>` : ''}
 
       ${top ? `<section class="nextup section" aria-label="Do next">
-        <div class="sh"><h2>Do next</h2><span class="meta">${esc(Tasks.area(top))}${Tasks.mins(top) ? ' · ' + Tasks.fmtMins(Tasks.mins(top)) : ''}</span></div>
+        <div class="sh"><h2>Do next</h2><span class="meta">${esc(Tasks.areaName(top))}${Tasks.mins(top) ? ' · ' + Tasks.fmtMins(Tasks.mins(top)) : ''}</span></div>
         <div class="row-wrap" data-task="${top.id}"><div class="task-title row" style="display:flex;padding:0;min-height:0">${UI.checkHTML(top)}<span class="body"><span class="title" style="font-size:inherit;font-weight:inherit"><span class="strike">${esc(top.title)}</span></span></span></div></div>
         <p class="why">${esc(Tasks.reason(top, now) || top.notes || '')}</p>
         <div class="acts">
@@ -380,7 +400,7 @@
     const all = Store.list('tasks');
     const openL = Tasks.open(now);
     const areaCounts = {}; for (const t of openL) { const a = Tasks.area(t); areaCounts[a] = (areaCounts[a] || 0) + 1; }
-    const ORDER = Object.keys(Tasks.AREAS);
+    const ORDER = Tasks.areaDefs().map(d => d.key), nameOf = k => Tasks.areaDef(k)?.name || k;
     const areaList = Object.entries(areaCounts).sort((a, b) => ((ORDER.indexOf(a[0]) + 1) || 99) - ((ORDER.indexOf(b[0]) + 1) || 99) || a[0].localeCompare(b[0]));
     const inArea = t => tstate.area === '*' || Tasks.area(t) === tstate.area;
     const soon = openL.filter(t => t.due && (new Date(t.due) - now) < 48 * 3600000).length;
@@ -391,14 +411,14 @@
     const rowsOf = list => `<div class="rows" data-rows>${list.map(t => taskRow(t, { now, sel, showSource: true })).join('')}</div>`;
     if (tstate.view === 'next') {
       const list = Tasks.ranked(now).filter(inArea);
-      body = list.length ? `<p class="note" style="margin:4px 0 6px">Ordered by EDEN: deadlines, priority, how long things take and what fits around your timetable.</p>${rowsOf(list.slice(0, 40))}${list.length > 40 ? `<p class="note" style="margin-top:12px">${list.length - 40} more in <a class="link" href="#/tasks/all">By area</a>.</p>` : ''}` : empty('Nothing here', tstate.area === '*' ? 'No open tasks. Enjoy it, or press N.' : `No open tasks in ${esc(tstate.area)}.`);
+      body = list.length ? `<p class="note" style="margin:4px 0 6px">Ordered by EDEN: deadlines, priority, how long things take and what fits around your timetable.</p>${rowsOf(list.slice(0, 40))}${list.length > 40 ? `<p class="note" style="margin-top:12px">${list.length - 40} more in <a class="link" href="#/tasks/all">By area</a>.</p>` : ''}` : empty('Nothing here', tstate.area === '*' ? 'No open tasks. Enjoy it, or press N.' : `No open tasks in ${esc(nameOf(tstate.area))}.`);
     } else if (tstate.view === 'today') {
       const b = t => Tasks.bucket(t, now);
       const hot = openL.filter(inArea).filter(t => ['overdue', 'today'].includes(b(t))).sort((x, y) => Tasks.score(y, now) - Tasks.score(x, now));
       const load = Tasks.dayLoad(now, now);
       const sug = Tasks.ranked(now).filter(inArea).filter(t => !hot.includes(t)).slice(0, Math.max(3, 6 - hot.length));
       const over = load.taskMin > load.free;
-      body = `<div class="load" style="margin:4px 0 8px"><span>${Tasks.fmtMins(load.taskMin) || '0m'} due today</span><span class="meter ${over ? 'over' : ''}"><i style="width:${Math.min(100, load.free ? load.taskMin / load.free * 100 : 100).toFixed(0)}%"></i></span><span>${Tasks.fmtMins(Math.round(load.free / 15) * 15) || 'no time'} free before 23:00</span></div>`
+      body = `<div class="load" style="margin:4px 0 8px"><span>${Tasks.fmtMins(load.taskMin) || '0m'} due today</span><span class="meter ${over ? 'over' : ''}"><i style="width:${Math.min(100, load.free ? load.taskMin / load.free * 100 : 100).toFixed(0)}%"></i></span><span>${Tasks.fmtMins(Math.round(load.free / 15) * 15) || 'no time'} free before ${String(+Store.settings.dayEndHour || 23).padStart(2, '0')}:00</span></div>`
         + (over ? `<p class="note" style="margin-bottom:6px">That's more than the day holds. Something moves — I'd move whatever isn't a hard deadline.</p>` : '')
         + (hot.length ? `<div class="group-h ${hot.some(t => b(t) === 'overdue') ? 'late' : ''}">Due today & overdue<span class="n">${hot.length}</span></div>${rowsOf(hot)}` : '')
         + (sug.length ? `<div class="group-h">Worth doing today<span class="n">${sug.length}</span></div>${rowsOf(sug)}` : '');
@@ -407,7 +427,7 @@
       body = Tasks.BUCKETS.filter(([k]) => groups[k]?.length).map(([k, l]) => `<div class="group-h ${k === 'overdue' ? 'late' : ''}">${l}<span class="n">${groups[k].length}</span></div>${rowsOf(groups[k].sort((a, b) => (a.due ? new Date(a.due) : 8e15) - (b.due ? new Date(b.due) : 8e15) || Tasks.pr(a) - Tasks.pr(b)))}`).join('') || empty('Nothing upcoming', 'No open tasks match.');
     } else if (tstate.view === 'all') {
       const byArea = {}; for (const t of openL.filter(inArea)) (byArea[Tasks.area(t)] = byArea[Tasks.area(t)] || []).push(t);
-      body = Object.entries(byArea).sort((a, b) => b[1].length - a[1].length).map(([a, list]) => `<div class="group-h"><i class="dot ${Tasks.sectionOf(list[0])}" style="align-self:center"></i>${esc(a)}<span class="n">${list.length}</span></div>${rowsOf(list.sort((x, y) => Tasks.score(y, now) - Tasks.score(x, now)))}`).join('') || empty('Nothing here', 'No open tasks.');
+      body = Object.entries(byArea).sort((a, b) => b[1].length - a[1].length).map(([a, list]) => `<div class="group-h"><i class="dot ${Tasks.sectionOf(list[0])}" style="align-self:center"></i><a class="link" style="color:inherit;font-size:inherit;font-weight:inherit" href="#/area/${Tasks.slug(a)}">${esc(nameOf(a))}</a><span class="n">${list.length}</span></div>${rowsOf(list.sort((x, y) => Tasks.score(y, now) - Tasks.score(x, now)))}`).join('') || empty('Nothing here', 'No open tasks.');
     } else if (tstate.view === 'done') {
       const done = all.filter(t => t.status === 'done' && inArea(t)).sort((a, b) => new Date(b.done_at || 0) - new Date(a.done_at || 0));
       body = done.length ? `<p class="note" style="margin:4px 0 6px">Tick again to put something back.</p>${rowsOf(done.slice(0, 60))}` : empty('Nothing finished yet', 'Completed tasks collect here, newest first.');
@@ -421,7 +441,7 @@
           <div class="seg-scroll" style="margin-bottom:10px"><div class="seg" role="tablist" aria-label="View">${VIEWS.map(([k, l]) => `<a href="#/tasks/${k}" role="tab" aria-selected="${tstate.view === k}" class="${tstate.view === k ? 'active' : ''}">${l}</a>`).join('')}</div></div>
           <div class="chips" role="group" aria-label="Filter by area" style="margin-bottom:6px">
             <button class="chip ${tstate.area === '*' ? 'on' : ''}" data-area-f="*">All <span class="n">${openL.length}</span></button>
-            ${areaList.filter(([a], i) => tstate.allAreas || i < 8 || a === tstate.area).map(([a, n]) => `<button class="chip ${tstate.area === a ? 'on' : ''}" data-area-f="${esc(a)}"><i class="dot ${Tasks.AREAS[a] || 'personal'}"></i>${esc(a)} <span class="n">${n}</span></button>`).join('')}
+            ${areaList.filter(([a], i) => tstate.allAreas || i < 8 || a === tstate.area).map(([a, n]) => `<button class="chip ${tstate.area === a ? 'on' : ''}" data-area-f="${esc(a)}"><i class="dot ${Tasks.AREAS[a] === 'kart' ? 'uni' : Tasks.AREAS[a] || 'personal'}"></i>${esc(nameOf(a))} <span class="n">${n}</span></button>`).join('')}
             ${areaList.length > 8 ? `<button class="chip" data-more-areas>${tstate.allAreas ? 'Fewer' : `${areaList.length - 8} more`}</button>` : ''}
           </div>
           ${body}
@@ -516,16 +536,71 @@
   }
 
   // ------------------------------------------------------------
-  // AREAS (phone index)
+  // AREAS — the index (phone tab) and one page per area
   // ------------------------------------------------------------
+  const GROUP_BLURB = { uni: 'Modules, deadlines, the year abroad, karting.', work: 'The company, the apps, the shifts.', personal: 'Money, the house, and the rest of life.' };
+  function nextFor(g, now) { return Store.upcoming(now, 60).find(x => (g === 'uni' ? ['uni', 'kart'].includes(x.kind) : x.kind === g) && new Date(x.ends_at || x.starts_at) > now); }
   SCREENS.areas = (page) => {
-    const now = new Date();
-    page.innerHTML = `<div class="head"><div><h1>Areas</h1><p class="sub">Everything that isn't today.</p></div></div>
-      ${areaRows(now)}
+    const now = new Date(), cnt = openCounts(now), defs = Tasks.areaDefs().filter(d => !d.hidden);
+    const soonOf = key => Tasks.open(now).filter(t => Tasks.area(t) === key && t.due).sort((a, b) => new Date(a.due) - new Date(b.due))[0];
+    page.innerHTML = `<div class="head"><div><h1>Areas</h1><p class="sub">Everything that isn't today, sorted by where it lives.</p></div><div class="acts"><a class="btn ghost" href="#/settings/areas">Edit</a></div></div>
+      ${Tasks.GROUPS.map(([g, name]) => {
+        const nx = nextFor(g, now);
+        return `<section class="area-group">
+          <a class="ag-h" href="#/${g}"><i class="dot ${g}"></i><span class="body"><span class="title">${name}</span><span class="meta">${nx ? `${esc(nx.isTask ? 'Due ' : '')}${esc(relDay(nx.starts_at, now))} ${esc(fmtTime(nx.starts_at))} · ${esc(nx.title)}` : esc(GROUP_BLURB[g])}</span></span><span class="chev">${icon('right', 'i-sm')}</span></a>
+          <div class="rows ag-rows">${defs.filter(d => d.group === g).map(d => { const n = cnt[d.key] || 0, sn = soonOf(d.key); return `<a class="row" href="#/area/${d.slug}"><span class="lead ico">${icon(d.icon || 'dot', 'i-sm')}</span><span class="body"><span class="title">${esc(d.name)}</span>${sn ? `<span class="meta"><span class="${Tasks.dueClass(sn, now)}">${esc(Tasks.dueLabel(sn, now))}</span><i class="sep"></i><span>${esc(sn.title)}</span></span>` : ''}</span><span class="trail">${n || ''}</span></a>`; }).join('')}</div>
+        </section>`;
+      }).join('')}
       <div class="section"><div class="sh"><h2>Shortcuts</h2></div><div class="rows">
-        ${[['#/uni/modules', 'book', 'Modules'], ['#/uni/deadlines', 'flag', 'Deadlines'], ['#/uni/societies', 'users', 'Societies'], ['#/work/earnings', 'chart', 'Earnings'], ['#/personal/money', 'wallet', 'Money'], ['#/settings', 'settings', 'Settings']].map(([h, ic, l]) => `<a class="row" href="${h}"><span class="lead ico">${icon(ic)}</span><span class="body"><span class="title">${l}</span></span><span class="chev">${icon('right', 'i-sm')}</span></a>`).join('')}
+        ${[['#/uni/modules', 'book', 'Modules'], ['#/uni/deadlines', 'flag', 'Deadlines'], ['#/work/shifts', 'clock', 'Shifts'], ['#/work/earnings', 'chart', 'Earnings'], ['#/settings', 'settings', 'Settings']].map(([h, ic, l]) => `<a class="row" href="${h}"><span class="lead ico">${icon(ic, 'i-sm')}</span><span class="body"><span class="title">${l}</span></span><span class="chev">${icon('right', 'i-sm')}</span></a>`).join('')}
       </div></div>`;
-    $$('[data-area]', page).forEach(b => b.addEventListener('click', () => go(b.dataset.area)));
+  };
+
+  /** Events that belong to an area — its own calendar lane, where one exists. */
+  function areaEvents(key, now) {
+    const lane = { Coursework: x => x._table === 'assessments' || (x.kind === 'uni' && !x.isTask && /lecture|seminar|workshop|tutorial|exam|assess|deadline|lab/i.test(x.title || '')), Karting: x => x.kind === 'kart' && !x.isTask, "McDonald's": x => x._table === 'shifts', Societies: x => x.kind === 'uni' && !x.isTask && /society|social|football|taster|fair/i.test(x.title || ''), 'Year abroad': x => !x.isTask && /abroad|exchange|japan|korea/i.test(x.title || ''), Career: x => !x.isTask && /career|placement|cv\b|interview/i.test(x.title || '') }[key];
+    return lane ? Store.upcoming(now, 21).filter(x => new Date(x.ends_at || x.starts_at) > now && lane(x)).slice(0, 6) : [];
+  }
+  function areaLine(d, list, now) {
+    if (!list.length) return `Nothing open in ${d.name}. Either you're on top of it or it's quiet.`;
+    const late = list.filter(t => Tasks.bucket(t, now) === 'overdue').length, hard = list.filter(t => t.due_kind === 'hard' && t.due).sort((a, b) => new Date(a.due) - new Date(b.due))[0];
+    const top = list[0];
+    const parts = [`${list.length} open${late ? `, ${late} overdue` : ''}.`];
+    if (hard && hard !== top) { const dl = Tasks.dueLabel(hard, now); parts.push(`The hard deadline is ${hard.title.replace(/\.$/, '')} (${/^(Today|Tomorrow|Overdue)/.test(dl) ? dl.toLowerCase() : dl}).`); }
+    parts.push(`Start with ${top.title.replace(/\.$/, '')}${Tasks.mins(top) ? ` (${Tasks.fmtMins(Tasks.mins(top))})` : ''}.`);
+    return parts.join(' ');
+  }
+  SCREENS.area = (page, r) => {
+    const now = new Date(), d = Tasks.areaDef(r.key); if (!d) return go('#/areas');
+    const all = Store.list('tasks').filter(t => Tasks.area(t) === d.key);
+    const list = Tasks.ranked(now).filter(t => Tasks.area(t) === d.key);
+    const snoozed = all.filter(t => t.status === 'open' && t.snoozed_until && new Date(t.snoozed_until) > now);
+    const done = all.filter(t => t.status === 'done').sort((a, b) => new Date(b.done_at || 0) - new Date(a.done_at || 0)).slice(0, 5);
+    const groups = {}; for (const t of list.concat(snoozed)) { const k = Tasks.bucket(t, now); (groups[k] = groups[k] || []).push(t); }
+    const rowsOf = l => `<div class="rows" data-rows>${l.map(t => taskRow(t, { now, showSource: true, hideArea: true })).join('')}</div>`;
+    const ev = areaEvents(d.key, now);
+    const gname = Tasks.GROUPS.find(g => g[0] === d.group)?.[1] || 'Areas';
+    const jp = d.module === 'language' ? Store.list('modules').find(m => /japan/i.test(m.name || '') || m.kind === 'language') : null;
+    page.innerHTML = `
+      <a class="crumb" href="#/${d.group}">${icon('left', 'i-sm')}${esc(gname)}</a>
+      <div class="head area-head"><div><h1><span class="area-ico">${icon(d.icon || 'dot')}</span>${esc(d.name)}</h1>${d.blurb ? `<p class="sub">${esc(d.blurb)}</p>` : ''}</div>
+        <div class="acts"><button class="btn primary" data-add>${icon('plus', 'i-sm')}Add task</button></div></div>
+      <div class="eden-note area-note">${mark('', d.group)}<p>${esc(areaLine(d, list, now))}</p></div>
+      ${jp ? `<a class="row jp-link" href="#/module/${jp.id}"><span class="lead ico">${icon('jp', 'i-sm')}</span><span class="body"><span class="title">Open the Japanese module</span><span class="meta"><span>Kana, vocabulary and today's reviews</span></span></span><span class="chev">${icon('right', 'i-sm')}</span></a>` : ''}
+      <div class="area-layout">
+        <div class="area-main">
+          ${Tasks.BUCKETS.filter(([k]) => groups[k]?.length).map(([k, l]) => `<div class="group-h ${k === 'overdue' ? 'late' : ''}">${l}<span class="n">${groups[k].length}</span></div>${rowsOf(groups[k])}`).join('') || (all.length ? '' : empty('Nothing here yet', `Tasks tagged #${Tasks.slug(d.key).replace(/-/g, '')} land here.`))}
+          ${done.length ? `<div class="group-h">Done recently<span class="n">${done.length}</span></div>${rowsOf(done)}` : ''}
+        </div>
+        <aside class="area-side">
+          ${ev.length ? `<div class="section"><div class="sh"><h2>Coming up</h2></div><div class="rows">${ev.map(x => `<button class="row" data-ev="${x._table}:${x.id}"><span class="lead"><i class="dot ${x.kind === 'kart' ? 'uni' : x.kind || d.group}"></i></span><span class="body"><span class="title">${esc(x.title)}</span><span class="meta"><span>${esc(relDay(x.starts_at, now))} ${esc(fmtTime(x.starts_at))}</span>${x.location ? `<i class="sep"></i><span>${esc(x.location)}</span>` : ''}</span></span></button>`).join('')}</div></div>` : ''}
+          ${d.links?.length ? `<div class="section"><div class="sh"><h2>Links</h2></div><div class="rows">${d.links.map(([l, u]) => `<a class="row" href="${esc(u)}" target="_blank" rel="noopener"><span class="lead ico">${icon(/docs\.google|drive\.google/.test(u) ? 'file' : 'out', 'i-sm')}</span><span class="body"><span class="title">${esc(l)}</span><span class="meta"><span>${esc(u.replace(/^https?:\/\/(www\.)?/, '').split('/')[0])}</span></span></span></a>`).join('')}</div></div>` : ''}
+          ${d.hub ? `<div class="section"><a class="more-link" href="${d.hub}">Open the ${esc(gname)} hub ${icon('right', 'i-sm')}</a></div>` : ''}
+        </aside>
+      </div>`;
+    $('[data-add]', page).addEventListener('click', () => openQuickAdd({ area: d.key }));
+    wireTaskRows(page);
+    $$('[data-ev]', page).forEach(b => b.addEventListener('click', () => openItem(b.dataset.ev)));
   };
 
   // ------------------------------------------------------------
@@ -638,9 +713,9 @@
     const paint = () => {
       const v = inp.value.trim();
       if (mode === 'any') { if (!v) { toks.innerHTML = ''; return; } const c = Rules.classify(v); const w = c.row.starts_at || c.row.due; toks.innerHTML = `<span class="tok">${esc(c.label)}</span>${w ? `<span class="tok">${esc(Rules.fmtWhen(w))}</span>` : ''}${c.row.kind || c.row.section ? `<span class="tok">${esc(kindName(c.row.kind || c.row.section))}</span>` : ''}`; return; }
-      const p = Tasks.parse(v); const pri = p.priority || 4;
+      const p = Tasks.parse(v); const pri = p.priority || +Store.settings.defaultPriority || 4;
       ring.className = 'check p' + pri;
-      toks.innerHTML = p.tokens.map(t => `<span class="tok ${t.k}">${esc(t.label)}</span>`).join('') + (opts.area && !p.area ? `<span class="tok">${esc(opts.area)}</span>` : '');
+      toks.innerHTML = p.tokens.map(t => `<span class="tok ${t.k}">${esc(t.label)}</span>`).join('') + (opts.area && !p.area ? `<span class="tok">${esc(Tasks.areaDef(opts.area)?.name || opts.area)}</span>` : '');
     };
     inp.addEventListener('input', () => { paint(); help.hidden = !!inp.value.trim(); });
     inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('[data-qa]', s.panel).requestSubmit(); } });
@@ -653,7 +728,7 @@
       }
       const p = Tasks.parse(v);
       const a = p.area || opts.area || null;
-      const row = Store.insert('tasks', { title: p.title || v, section: a ? (Tasks.AREAS[a] || 'personal') : (route?.screen === 'hub' ? route.sec : 'personal'), area: a, due: p.due, due_kind: p.due ? p.due_kind : null, priority: p.priority || 4, duration_min: p.duration_min, status: 'open', source: 'manual' });
+      const row = Store.insert('tasks', { title: p.title || v, section: a ? (Tasks.AREAS[a] || 'personal') : (route?.screen === 'hub' ? route.sec : 'personal'), area: a, due: p.due, due_kind: p.due ? p.due_kind : null, priority: p.priority || +Store.settings.defaultPriority || 4, duration_min: p.duration_min, status: 'open', source: 'manual' });
       s.close(); toast('Added', { undo: () => Store.remove('tasks', row.id) });
     });
     setTimeout(() => inp.focus(), 40);
@@ -676,8 +751,10 @@
       const q = inp.value.trim().toLowerCase();
       const cm = cmds.filter(c => !q || c[0].toLowerCase().includes(q)).map(c => ({ label: c[0], ic: c[1], run: c[2], k: 'Go' }));
       const tk = q ? Store.list('tasks').filter(t => t.status === 'open' && (t.title.toLowerCase().includes(q) || (Tasks.area(t) || '').toLowerCase().includes(q))).slice(0, 8).map(t => ({ label: t.title, ic: 'tasks', run: () => openTask(t.id), k: Tasks.area(t) })) : [];
+      const ar = q ? Tasks.areaDefs().filter(d => !d.hidden && (d.name + ' ' + d.key).toLowerCase().includes(q)).slice(0, 5).map(d => ({ label: d.name, ic: d.icon || 'areas', run: () => go('#/area/' + d.slug), k: 'Area' })) : [];
+      const st = q ? Settings.PANES.filter(p => p.t.toLowerCase().includes(q)).slice(0, 3).map(p => ({ label: p.t, ic: 'settings', run: () => go('#/settings/' + p.k), k: 'Settings' })) : [];
       const ms = q ? Store.list('modules').filter(m => (m.name + ' ' + (m.code || '')).toLowerCase().includes(q)).slice(0, 4).map(m => ({ label: m.name, ic: 'book', run: () => go('#/module/' + m.id), k: 'Module' })) : [];
-      items = [...tk, ...cm, ...ms]; on = Math.min(on, items.length - 1); if (on < 0) on = 0;
+      items = [...tk, ...ar, ...cm, ...st, ...ms]; on = Math.min(on, items.length - 1); if (on < 0) on = 0;
       out.innerHTML = items.length ? items.map((it, i) => `<button class="res ${i === on ? 'on' : ''}" data-i="${i}" role="option" aria-selected="${i === on}">${icon(it.ic, 'i-sm')}<span>${esc(it.label)}</span><span class="k">${esc(it.k || '')}</span></button>`).join('') : `<p class="note" style="padding:12px">Nothing matches. Enter adds it as a task.</p>`;
       $$('[data-i]', out).forEach(b => b.addEventListener('click', () => { s.close(); items[+b.dataset.i].run(); }));
     };
@@ -693,68 +770,7 @@
   // ------------------------------------------------------------
   // SETTINGS
   // ------------------------------------------------------------
-  SCREENS.settings = (page) => {
-    const s = Store.settings;
-    const f = (k, label, type = 'text', extra = '') => `<div class="field"><label for="f-${k}">${label}</label><input id="f-${k}" data-k="${k}" type="${type}" value="${esc(s[k] ?? '')}" ${extra}></div>`;
-    const sel = (k, label, opts) => `<div class="field"><label for="f-${k}">${label}</label><select id="f-${k}" data-k="${k}">${opts.map(o => `<option value="${o[0]}" ${String(s[k]) === String(o[0]) ? 'selected' : ''}>${o[1]}</option>`).join('')}</select></div>`;
-    const two = (a, b) => `<div class="row2">${a}${b}</div>`;
-    const synced = Store.syncedAt ? new Date(Store.syncedAt).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'never';
-    page.innerHTML = `
-      <div class="head"><div><h1>Settings</h1><p class="sub">Iota 1.0</p></div></div>
-      <div class="group" style="margin-top:0"><h3>Account</h3><div class="panel">
-        <div class="row flat account"><span class="body"><span class="title">${esc(SB.user?.email || (window.IOTA_STANDALONE ? 'Private preview' : 'Offline mode — not signed in'))}</span>${window.IOTA_STANDALONE ? '<span class="meta"><span>Everything here stays on this device. Export tasks to move them into the real app.</span></span>' : ''}<span class="meta"><span>Last synced ${esc(synced)}</span>${Store.pending ? `<i class="sep"></i><span>${Store.pending} change${Store.pending === 1 ? '' : 's'} waiting</span>` : ''}<i class="sep"></i>${statusHTML()}</span></span>
-          <span class="trail" style="display:flex;gap:6px">${SB.session ? `<button class="btn sm" data-sync>${icon('sync', 'i-sm')}Sync</button><button class="btn sm ghost danger" data-signout>Sign out</button>` : `${window.IOTA_STANDALONE ? '' : '<button class="btn sm primary" data-signin>Sign in</button>'}`}</span></div>
-        ${SB.session ? `<details class="row flat" style="display:block"><summary class="title" style="cursor:pointer;list-style:none">Change password</summary>
-          <form data-pwform autocomplete="off" style="margin-top:12px">
-            <div class="field"><label for="pw0">Current password</label><input id="pw0" name="pw0" type="password" autocomplete="current-password" required></div>
-            ${two('<div class="field"><label for="pw1">New password</label><input id="pw1" name="pw1" type="password" autocomplete="new-password" minlength="8" required></div>', '<div class="field"><label for="pw2">Again</label><input id="pw2" name="pw2" type="password" autocomplete="new-password" minlength="8" required></div>')}
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px"><span class="field-note" style="margin:0" data-pwmsg>At least 8 characters. Same login as the karting app.</span><button class="btn" type="submit">Update</button></div>
-          </form></details>` : ''}
-      </div></div>
-      <div class="group"><h3>Appearance</h3><div class="panel">
-        <div class="row flat"><span class="body"><span class="title">Theme</span></span><span class="trail"><div class="seg" data-theme-seg>${[['system', 'System'], ['light', 'Light'], ['dark', 'Dark']].map(([v, l]) => `<button data-th="${v}" class="${(s.theme || 'system') === v ? 'active' : ''}">${l}</button>`).join('')}</div></span></div>
-        <div class="row flat"><span class="body"><span class="title">Reduce motion</span><span class="meta"><span>Stops the tick animation and EDEN's movement.</span></span></span><span class="trail"><label class="toggle"><input type="checkbox" data-k="reduceMotion" ${s.reduceMotion ? 'checked' : ''} aria-label="Reduce motion"></label></span></div>
-      </div></div>
-      ${s.bases ? `<div class="group"><h3>Base</h3><div class="seg" data-bases>${Object.entries(s.bases).map(([k, b]) => `<button data-base="${k}" class="${s.activeBase === k ? 'active' : ''}">${esc(b.label || k)}</button>`).join('')}</div><p class="note">Switches home, employer, work address and travel times in one go.</p></div>` : ''}
-      <div class="group"><h3>You</h3><div class="panel">${f('name', 'Name')}${f('homeAddress', 'Home')}</div></div>
-      <div class="group"><h3>Work</h3><div class="panel">${f('employer', 'Employer')}${f('workAddress', 'Work address')}${two(f('rateHourly', 'Hourly rate (£)', 'number', 'step="0.01" inputmode="decimal"'), sel('payFrequency', 'Paid', [['fortnightly', 'Fortnightly'], ['weekly', 'Weekly'], ['monthly', 'Monthly']]))}${two(f('payAnchor', 'A recent payday', 'date'), f('payDayOfMonth', 'Day of month (monthly)', 'number', 'min="1" max="31"'))}</div></div>
-      <div class="group"><h3>Places & travel</h3><div class="panel">${f('campusAddress', 'Campus')}${f('trackAddress', 'Track')}${two(sel('travelMode', 'Usual mode', [['walk', 'Walk'], ['bus', 'Bus'], ['cycle', 'Cycle'], ['drive', 'Drive']]), f('loadingMin', 'Loading time, race days (min)', 'number'))}${two(f('travelCampusMin', 'To campus (min)', 'number'), f('travelWorkMin', 'To work (min)', 'number'))}${f('travelTrackMin', 'To the track (min)', 'number')}</div><p class="note">“Leave by” times are the start minus these.</p></div>
-      <div class="group"><h3>Term</h3><div class="panel">${two(f('termStart', 'Teaching starts', 'date'), f('termWeeks', 'Weeks', 'number'))}</div></div>
-      <div class="group"><h3>Japanese</h3><div class="panel">${two(f('jpDailyNewCap', 'New items per day', 'number', 'min="1" max="40"'), f('jpSessionCap', 'Review chunk (min)', 'number', 'min="3" max="60"'))}${f('japanDeparture', 'Japan departure (provisional)', 'date')}</div></div>
-      <div class="group"><h3>EDEN live mode</h3><div class="panel">${f('apiKey', 'Anthropic API key', 'password', 'autocomplete="off" placeholder="sk-ant-… — stays on this device"')}
-        <div class="row flat"><span class="body"><span class="title">Usage</span><span class="meta"><span class="tnum">${Eden.usage.calls} calls · ${(Eden.usage.in + Eden.usage.cin + Eden.usage.cw).toLocaleString()} in · ${Eden.usage.out.toLocaleString()} out · ≈ £${(Eden.usage.usd * 0.78).toFixed(2)}</span></span></span><span class="trail" style="display:flex;gap:6px"><button class="btn sm ghost" data-eden-clear>Clear chat</button><button class="btn sm ghost" data-eden-reset>Reset</button></span></div></div>
-        <p class="note">With a key, EDEN answers live and can add, move and complete things for you. The key never leaves this browser.</p></div>
-      <div class="group"><h3>Data</h3><div class="panel">
-        <div class="row flat"><span class="body"><span class="title">Export everything</span><span class="meta"><span>JSON of the local copy, including unsynced changes.</span></span></span><span class="trail"><button class="btn sm" data-export>Export</button></span></div>
-        <div class="row flat"><span class="body"><span class="title">Import tasks</span><span class="meta"><span>A task file from Claude (.json). Adds what's missing; completed tasks stay done.</span></span></span><span class="trail"><label class="btn sm" style="cursor:pointer">Choose file<input type="file" accept="application/json,.json" data-import hidden></label></span></div>
-        <div class="row flat"><span class="body"><span class="title">Export tasks</span><span class="meta"><span>Every task with its status, as a file another device (or the real app) can import.</span></span></span><span class="trail"><button class="btn sm" data-export-tasks>Export</button></span></div>
-        ${Store.hasSeed ? `<div class="row flat"><span class="body"><span class="title">Restore imported tasks</span><span class="meta"><span>Re-adds any imported tasks you've deleted.</span></span></span><span class="trail"><button class="btn sm" data-reseed>Restore</button></span></div>` : ''}
-        <div class="row flat"><span class="body"><span class="title">Clear this device's cache</span><span class="meta"><span>Your data on the server is untouched.</span></span></span><span class="trail"><button class="btn sm ghost danger" data-reset>Clear</button></span></div>
-      </div></div>`;
-    $$('[data-k]', page).forEach(inp => inp.addEventListener(inp.type === 'checkbox' ? 'input' : 'change', () => { let v = inp.type === 'checkbox' ? inp.checked : inp.value; if (inp.type === 'number' && v !== '') v = +v; Store.setSetting(inp.dataset.k, v); applyAppearance(); }));
-    $$('[data-th]', page).forEach(b => b.addEventListener('click', () => { Store.setSetting('theme', b.dataset.th); applyAppearance(); render(); }));
-    $$('[data-base]', page).forEach(b => b.addEventListener('click', () => { window.applyBase(b.dataset.base); toast('Base: ' + b.textContent); render(); }));
-    $('[data-export]', page).addEventListener('click', () => saveFile(`iota-export-${dayKey(new Date())}.json`, Store.exportJSON()));
-    $('[data-export-tasks]', page).addEventListener('click', () => saveFile(`iota-tasks-${dayKey(new Date())}.seed.json`, JSON.stringify(Store.exportSeed(), null, 1)));
-    $('[data-reseed]', page)?.addEventListener('click', () => { const n = Store.applySeed(true); toast(n ? `${n} task${n === 1 ? '' : 's'} restored` : 'Nothing missing'); });
-    $('[data-import]', page).addEventListener('change', async e => { const f = e.target.files[0]; if (!f) return; try { const n = Store.importSeed(JSON.parse(await f.text())); toast(n ? `${n} tasks imported` : 'Already up to date'); render(); } catch (ex) { toast(ex.message || 'Couldn\'t read that file'); } });
-    $('[data-reset]', page).addEventListener('click', () => { const snap = Store.exportJSON(); Store.clearLocal(); toast('Local cache cleared', { undo: () => toast('Cache clearing can\'t be undone — sync to reload') }); if (SB.session) Store.sync().then(() => render()); void snap; });
-    $('[data-eden-clear]', page).addEventListener('click', () => { Eden.clearHistory(); toast('Chat history cleared'); });
-    $('[data-eden-reset]', page).addEventListener('click', () => { Eden.resetUsage(); render(); });
-    $('[data-sync]', page)?.addEventListener('click', async () => { toast('Syncing…'); const ok = await Store.sync(); toast(ok ? 'Synced' : 'Couldn\'t reach the server — changes are kept'); render(); });
-    $('[data-signout]', page)?.addEventListener('click', async () => { await SB.signOut(); Store.setOfflineMode(false); Store.clearLocal(); boot(); });
-    $('[data-signin]', page)?.addEventListener('click', () => { Store.setOfflineMode(false); boot(); });
-    const pwf = $('[data-pwform]', page);
-    pwf?.addEventListener('submit', async e => {
-      e.preventDefault(); const msg = $('[data-pwmsg]', page); const cur = pwf.pw0.value, a = pwf.pw1.value, b = pwf.pw2.value;
-      if (a.length < 8) return void (msg.textContent = 'Needs at least 8 characters.');
-      if (a !== b) return void (msg.textContent = 'Those two don\'t match.');
-      if (a === cur) return void (msg.textContent = 'That\'s the current one.');
-      const btn = $('button[type=submit]', pwf); btn.disabled = true; msg.textContent = 'Checking…';
-      try { try { await SB.verifyPassword(cur); } catch (_) { throw new Error('Current password is wrong.'); } await SB.changePassword(a); pwf.reset(); msg.textContent = 'Changed. It applies to the karting app too.'; toast('Password changed'); }
-      catch (ex) { msg.textContent = ex.message || 'Couldn\'t change it.'; } finally { btn.disabled = false; }
-    });
-  };
+  SCREENS.settings = (page, r) => Settings.render(page, r.pane, { statusHTML, applyAppearance, saveFile, boot, toast, refreshShell: () => updateShell() });
   /** Save a generated file: through the viewer's downloads capability when hosted on claude.ai, a plain download otherwise. */
   async function saveFile(filename, text) {
     if (window.IOTA_STANDALONE && window.claude?.use) {
@@ -854,6 +870,7 @@
   document.addEventListener('keydown', e => {
     const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName) || document.activeElement?.isContentEditable;
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); if (shellBuilt) openPalette(); return; }
+    if ((e.metaKey || e.ctrlKey) && e.key === ',') { e.preventDefault(); if (shellBuilt) go('#/settings'); return; }
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && !typing) { if (UI.undo()) e.preventDefault(); return; }
     if (typing || e.metaKey || e.ctrlKey || e.altKey || !shellBuilt || $('.sheet')) return;
     const k = e.key.toLowerCase();
