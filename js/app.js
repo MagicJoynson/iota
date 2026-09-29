@@ -734,8 +734,8 @@
     $$('[data-k]', page).forEach(inp => inp.addEventListener(inp.type === 'checkbox' ? 'input' : 'change', () => { let v = inp.type === 'checkbox' ? inp.checked : inp.value; if (inp.type === 'number' && v !== '') v = +v; Store.setSetting(inp.dataset.k, v); applyAppearance(); }));
     $$('[data-th]', page).forEach(b => b.addEventListener('click', () => { Store.setSetting('theme', b.dataset.th); applyAppearance(); render(); }));
     $$('[data-base]', page).forEach(b => b.addEventListener('click', () => { window.applyBase(b.dataset.base); toast('Base: ' + b.textContent); render(); }));
-    $('[data-export]', page).addEventListener('click', () => { const blob = new Blob([Store.exportJSON()], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `iota-export-${dayKey(new Date())}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
-    $('[data-export-tasks]', page).addEventListener('click', () => { const blob = new Blob([JSON.stringify(Store.exportSeed(), null, 1)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `iota-tasks-${dayKey(new Date())}.seed.json`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); });
+    $('[data-export]', page).addEventListener('click', () => saveFile(`iota-export-${dayKey(new Date())}.json`, Store.exportJSON()));
+    $('[data-export-tasks]', page).addEventListener('click', () => saveFile(`iota-tasks-${dayKey(new Date())}.seed.json`, JSON.stringify(Store.exportSeed(), null, 1)));
     $('[data-reseed]', page)?.addEventListener('click', () => { const n = Store.applySeed(true); toast(n ? `${n} task${n === 1 ? '' : 's'} restored` : 'Nothing missing'); });
     $('[data-import]', page).addEventListener('change', async e => { const f = e.target.files[0]; if (!f) return; try { const n = Store.importSeed(JSON.parse(await f.text())); toast(n ? `${n} tasks imported` : 'Already up to date'); render(); } catch (ex) { toast(ex.message || 'Couldn\'t read that file'); } });
     $('[data-reset]', page).addEventListener('click', () => { const snap = Store.exportJSON(); Store.clearLocal(); toast('Local cache cleared', { undo: () => toast('Cache clearing can\'t be undone — sync to reload') }); if (SB.session) Store.sync().then(() => render()); void snap; });
@@ -755,6 +755,16 @@
       catch (ex) { msg.textContent = ex.message || 'Couldn\'t change it.'; } finally { btn.disabled = false; }
     });
   };
+  /** Save a generated file: through the viewer's downloads capability when hosted on claude.ai, a plain download otherwise. */
+  async function saveFile(filename, text) {
+    if (window.IOTA_STANDALONE && window.claude?.use) {
+      const dl = await window.claude.use('downloads').catch(() => null);
+      if (!dl) { toast('Saving files isn\'t available here'); return; }
+      try { await dl.save({ filename, data: text }); toast('Saved'); } catch (e) { if (e?.code !== 'declined') toast('Couldn\'t save the file'); }
+      return;
+    }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' })); a.download = filename; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
   window.applyBase = function (name) {
     const s = Store.settings, b = s.bases && s.bases[name]; if (!b) return false;
     Store.setSetting('activeBase', name);
