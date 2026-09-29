@@ -221,7 +221,8 @@
 
     if (nx) {
       const m = Math.round((new Date(nx.starts_at) - now) / 60000), buf = Rules.leaveBufferFor(nx) || 0, name = shortName(nx.title);
-      if (h < 5) out.push(`${name} is at ${timeStr(nx.starts_at)}. Sleep would help.`);
+      const sameDay = new Date(nx.starts_at).toDateString() === now.toDateString();
+      if (h < 5) out.push(`${name} is at ${timeStr(nx.starts_at)}${sameDay ? '' : ' tomorrow'}. Sleep would help.`);
       else if (m > 0 && m <= 120 && buf) out.push(m - buf > 0 ? `Leave in ${m - buf} minutes for ${name}.` : `You should already be moving for ${name}.`);
       else if (m > 0 && m <= 180) out.push(`${name} at ${timeStr(nx.starts_at)}.`);
     }

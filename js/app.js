@@ -285,7 +285,7 @@
     const h = now.getHours();
     const dayName = now.toLocaleDateString('en-GB', { weekday: 'long' });
     const sub = [now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }), termLabel(now)].filter(Boolean).join(' · ');
-    const nextBlock = live ? { lbl: 'Now', when: 'Now', sub: `until ${fmtTime(live.ends_at)}`, x: live } : nx ? { lbl: 'Next', when: fmtTime(nx.starts_at), sub: [new Date(nx.starts_at).getDate() !== now.getDate() ? relDay(nx.starts_at, now) : 'Next', until(nx.starts_at, now)].join(', '), x: nx } : null;
+    const nextBlock = live ? { lbl: 'Now', when: 'Now', sub: `until ${fmtTime(live.ends_at)}`, x: live } : nx ? { lbl: 'Next', when: fmtTime(nx.starts_at), sub: dayKey(nx.starts_at) !== dayKey(now) ? relDay(nx.starts_at, now) : `Next, ${until(nx.starts_at, now)}`, x: nx } : null;
     const clash = nextBlock && nextBlock.x === nx ? NE.overlap.filter(x => x !== NE.alongside) : [];
     const dialPhone = dial(now, {});
     const scheduleHTML = todayItems.length ? `<div class="rows">${todayItems.map(x => eventRow(x, now)).join('')}</div>` : `<p class="note" style="padding:10px 0">Nothing timed today.</p>`;
