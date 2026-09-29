@@ -1,3 +1,9 @@
 .DS_Store
 Thumbs.db
 node_modules/
+
+# personal — never public (this repo is public for GitHub Pages)
+PRODUCT.md
+.impeccable/
+*.seed.json
+seed.local.js

@@ -4,6 +4,10 @@
 (function () {
   if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || !/[?&]preview/.test(location.search)) return;
   const U = '236d3551-7600-4ff2-abc5-f46f71100c0d';
+  // ?at=2026-09-30T08:05 pins the clock for screenshots.
+  const at = new URLSearchParams(location.search).get('at');
+  if (at) { const RD = Date, off = new RD(at) - RD.now(); class FD extends RD { constructor(...a) { if (a.length === 0) super(RD.now() + off); else super(...a); } static now() { return RD.now() + off; } } window.Date = FD; }
+  if (/[?&]fresh/.test(location.search)) { for (const k of Object.keys(localStorage)) if (k.startsWith('iota.')) localStorage.removeItem(k); }
   const iso = (d, h, m = 0) => { const x = new Date(); x.setDate(x.getDate() + d); x.setHours(h, m, 0, 0); return x.toISOString(); };
   const settings = [['name', 'Alex'], ['employer', "McDonald's (Oxford Road)"], ['rateHourly', 12.64], ['payFrequency', 'fortnightly'], ['payAnchor', '2026-08-13'], ['travelCampusMin', 15], ['travelWorkMin', 30], ['travelTrackMin', 40], ['loadingMin', 15], ['travelMode', 'walk'], ['homeAddress', '90 Royce Road, Hulme, Manchester'], ['workAddress', "McDonald's, Oxford Road, Manchester"], ['trackAddress', 'Victoria Karting (Team Sport), Manchester'], ['campusAddress', 'MMU Business School, Lyceum Place'], ['termWeeks', 12], ['breakRule', { overHours: 6, longBreakMin: 45, shortBreakMin: 30 }], ['studentFinance', { provider: 'Student Finance England', kind: 'maintenance loan', year: '2026/27', total: 5048, drops: [{ date: '2026-09-28', amount: 1665.84, status: 'awaiting_confirmation' }, { date: '2027-01-11', amount: 1665.84, status: 'awaiting_confirmation' }, { date: '2027-04-12', amount: 1716.32, status: 'awaiting_confirmation' }] }]].map(([key, value]) => ({ key, value }));
   const fx = {
@@ -22,8 +26,7 @@
     ],
     pay_rates: [{ id: 'r1', employer: "McDonald's (Oxford Road)", role: 'Crew member', hourly: 12.64, effective_from: '2026-08-01' }],
     events: [
-      { id: 'e1', kind: 'uni', title: 'Lecture — Marketing Principles', module_id: 'm1', starts_at: iso(2, 9), ends_at: iso(2, 11), location: 'BS 3.12', status: 'planned', source: 'claude' },
-      { id: 'e2', kind: 'kart', title: "Freshers' Fair — day 1", starts_at: '2026-09-29T09:00:00+00:00', ends_at: '2026-09-29T15:00:00+00:00', location: 'MMU campus', status: 'planned', source: 'claude' },
+
     ],
     societies: [
       { id: 'so1', name: 'MMU Karting', status: 'committee', role: 'Committee', colour: '#4DA3FF', links: [{ label: 'Society app', url: 'https://magicjoynson.github.io/mmu-karting/' }], notes: 'Flagship', sort: 0 },
@@ -31,7 +34,7 @@
       { id: 'so3', name: 'Badminton', status: 'prospective', colour: '#FACC15', links: [], notes: 'Maybe', sort: 2 },
     ],
     watches: [{ id: 'w1', text: 'MMU timetable arrives — import into Iota', expected_by: '2026-08-18', status: 'open' }],
-    tasks: [{ id: 't1', title: 'Sort student finance letter', section: 'personal', due: iso(4, 12), status: 'open' }],
+    tasks: [],
     time_off: [{ id: 'to1', title: 'BUKC Round 1', starts_on: iso(9, 9).slice(0, 10), ends_on: iso(10, 9).slice(0, 10), ask_by: iso(2, 9).slice(0, 10), reason: 'kart', status: 'needed' }, { id: 'to2', title: 'Home for the weekend', starts_on: iso(20, 9).slice(0, 10), ends_on: iso(21, 9).slice(0, 10), ask_by: null, reason: 'personal', status: 'asked' }],
     modules: [{ id: 'm1', code: 'ITFI', name: 'International Trade and Firm Internationalisation', colour: '#F472B6', lecturer: 'Dr Example', room: 'BS 3.12', credits: 20, links: [], status: 'current', kind: 'course' },
       { id: 'jpn', code: 'JPN', name: '日本語 · Japanese', colour: '#FF6B6B', kind: 'language', status: 'current', notes: 'Year abroad Sept 2027' },
@@ -45,7 +48,20 @@
     briefings: [], captures: [], jp_srs: [], jp_reviews: [],
   };
   window.__previewWrites = [];
-  SB.rest = async (method, path, opts) => { if (method === 'GET') return fx[path.split('?')[0]] || []; window.__previewWrites.push({ method, path, body: opts && opts.body }); return null; };
+  try { const saved = JSON.parse(localStorage.getItem('iota.previewdb') || 'null'); if (saved) Object.assign(fx, saved); } catch (_) {}
+  const savePv = () => { try { const c = { ...fx }; delete c.settings; localStorage.setItem('iota.previewdb', JSON.stringify(c)); } catch (_) {} };
+  // In-memory PostgREST: GET returns the table, POST upserts, PATCH/DELETE by id — so writes survive a sync.
+  SB.rest = async (method, path, opts) => {
+    const table = path.split('?')[0], id = (path.match(/id=eq\.([^&]+)/) || [])[1];
+    const t = fx[table] = fx[table] || [];
+    if (method === 'GET') return t.slice();
+    window.__previewWrites.push({ method, path, body: opts && opts.body });
+    if (method === 'POST' && table !== 'settings') { for (const r of [].concat(opts.body)) { const i = t.findIndex(x => x.id === r.id); if (i < 0) t.push({ ...r }); else if (!/ignore/.test(opts.prefer || '')) t[i] = { ...t[i], ...r }; } }
+    if (method === 'PATCH' && id) { const i = t.findIndex(x => x.id === id); if (i >= 0) t[i] = { ...t[i], ...opts.body }; }
+    if (method === 'DELETE' && id) fx[table] = t.filter(x => x.id !== id);
+    savePv();
+    return null;
+  };
   Object.defineProperty(SB, 'session', { get: () => ({ access_token: 'preview', user: { email: 'alex.joynson@hotmail.co.uk' } }), configurable: true });
   Object.defineProperty(SB, 'user', { get: () => SB.session.user, configurable: true });
   console.info('Iota preview mode: fixtures, no network');

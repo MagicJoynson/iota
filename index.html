@@ -3,60 +3,35 @@
 <head>
 <meta charset="utf-8">
 <title>Iota</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Iota — the smallest thing that runs everything. University, work and the rest of life, with EDEN at the centre.">
-<meta name="theme-color" content="#070B14">
-<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#F7F7F5">
+<meta name="color-scheme" content="light dark">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Iota">
 <link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="./icons/mark.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
 <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<link rel="preload" href="./assets/fonts/hanken-grotesk-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="./css/app.css">
 <link rel="stylesheet" href="./css/jp.css">
+<script>try{var t=localStorage.getItem('iota.theme');if(t&&t!=='system')document.documentElement.dataset.theme=t;}catch(e){}</script>
 </head>
 <body>
-
-<!-- Aurora canvas (always behind everything) -->
-<div id="aurora" aria-hidden="true">
-  <div class="blob b1"></div>
-  <div class="blob b2"></div>
-  <div class="blob b3"></div>
-  <div class="blob b4"></div>
-</div>
-
-<!-- Boot splash: brand art, fades out once the app is ready -->
-<div id="splash" aria-hidden="true"><canvas id="splashOrb"></canvas></div>
-
-<!-- App root: screens render here -->
-<div id="ringbg" aria-hidden="true"></div>
-<main id="app" aria-live="polite"></main>
-
-<!-- Quick capture sheet (long-press orb) -->
-<div id="capture" class="sheet" hidden>
-  <div class="sheet-backdrop" data-close></div>
-  <form class="sheet-panel glass" id="captureForm" autocomplete="off">
-    <div class="sheet-grip"></div>
-    <label for="captureInput" class="sheet-title">Quick capture</label>
-    <textarea id="captureInput" rows="3" placeholder="e.g. Shift Sat 12–8 · Essay due Thu 4pm · Note: bring kit"></textarea>
-    <div class="sheet-row">
-      <span class="hint" id="captureHint">Filed instantly as a task, event, shift or note. For anything else, talk to EDEN.</span>
-      <button type="submit" class="btn primary">Capture</button>
-    </div>
-  </form>
-</div>
-
-<!-- Toast -->
-<div id="toast" role="status" aria-live="polite"></div>
-
-<script src="./js/orb.js"></script>
+<div id="splash" aria-hidden="true"><span class="mark"><svg viewBox="0 0 24 24"><g class="arcs"><path class="a uni" d="M3.47 15.45A9.2 9.2 0 0 1 10.40 2.94"/><path class="a work" d="M13.60 2.94A9.2 9.2 0 0 1 20.53 15.45"/><path class="a personal" d="M19.25 17.66A9.2 9.2 0 0 1 4.75 17.66"/></g><circle class="core" cx="12" cy="12" r="3.3"/></svg></span></div>
+<div id="app"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script src="./js/supabase.js"></script>
 <script src="./js/store.js"></script>
+<script src="./js/tasks.js"></script>
+<script src="./js/ui.js"></script>
 <script src="./js/eden.js"></script>
 <script src="./js/jp.js"></script>
 <script src="./js/preview.js"></script>
+<script src="./js/hubs.js"></script>
 <script src="./js/app.js"></script>
 </body>
 </html>

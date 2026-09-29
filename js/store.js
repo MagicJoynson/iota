@@ -16,9 +16,9 @@
     name: 'Alex', employer: '', rateHourly: '', payFrequency: 'fortnightly', payAnchor: '', payDayOfMonth: '', payPeriodLagDays: 4,
     travelMode: 'walk', travelCampusMin: 15, travelWorkMin: 30, travelTrackMin: 40, loadingMin: 15,
     homeAddress: '', campusAddress: '', workAddress: '', trackAddress: '',
-    termStart: '', termWeeks: 12, apiKey: '', auroraIntensity: 1, reduceMotion: false,
+    termStart: '', termWeeks: 12, apiKey: '', reduceMotion: false,
   };
-  const LOCAL_ONLY_KEYS = new Set(['apiKey']); // never leaves the device
+  const LOCAL_ONLY_KEYS = new Set(['apiKey', 'theme']); // never leaves the device
 
   let db = load();
   function load() {
@@ -26,7 +26,7 @@
     const base = { settings: { ...DEFAULT_SETTINGS }, syncedAt: null };
     for (const t of TABLES) base[t] = [];
     const out = c ? { ...base, ...c, settings: { ...DEFAULT_SETTINGS, ...(c.settings || {}) } } : base;
-    try { out.settings.apiKey = localStorage.getItem('iota.apiKey') || ''; } catch (_) {}
+    try { out.settings.apiKey = localStorage.getItem('iota.apiKey') || ''; out.settings.theme = localStorage.getItem('iota.theme') || 'system'; } catch (_) {}
     return out;
   }
   function persist() { const { ...c } = db; c.settings = { ...c.settings, apiKey: '' }; localStorage.setItem(CACHE_KEY, JSON.stringify(c)); }
@@ -43,9 +43,29 @@
     catch (e) { if (e.status && e.status >= 400 && e.status < 500 && e.status !== 401 && e.status !== 408 && e.status !== 429) { console.warn('Iota: rejected write', op, e.details || e.message); Store.lastError = e.message; emit('error'); } else queue(op); }
   }
   function queue(op) { outbox.push(op); saveOutbox(); emit('outbox'); }
+  // ---- task metadata (priority, area, notes, link, source, due_kind, snoozed_until) ----
+  // Written to the server once the tasks-v1 migration exists (docs/migrations). Until then the server rejects unknown
+  // columns (PGRST204), so we strip them, retry, and keep them in a local side-table merged back on every sync.
+  const TASK_META = ['priority', 'area', 'notes', 'link', 'source', 'due_kind', 'snoozed_until', 'duration_min', 'done_at'];
+  const META_KEY = 'iota.taskMeta.v1';
+  let taskMeta = {}; try { taskMeta = JSON.parse(localStorage.getItem(META_KEY) || '{}'); } catch (_) {}
+  const saveMeta = () => { try { localStorage.setItem(META_KEY, JSON.stringify(taskMeta)); } catch (_) {} };
+  function rememberMeta(id, obj) { const m = taskMeta[id] || {}; let hit = false; for (const k of TASK_META) if (obj && k in obj) { m[k] = obj[k]; hit = true; } if (hit) { taskMeta[id] = m; saveMeta(); } }
+  const stripMeta = o => { const c = { ...o }; for (const k of TASK_META) if (k !== 'duration_min' && k !== 'done_at') delete c[k]; return c; };
+  const metaUnsupported = () => localStorage.getItem('iota.taskMetaUnsupported') === '1';
   async function runOp(op) {
-    if (op.kind === 'insert') return SB.rest('POST', op.table, { body: op.row, prefer: 'return=minimal,resolution=merge-duplicates' });
-    if (op.kind === 'update') return SB.rest('PATCH', `${op.table}?id=eq.${op.id}`, { body: op.patch, prefer: 'return=minimal' });
+    try { return await runOpRaw(op, op.table === 'tasks' && metaUnsupported()); }
+    catch (e) {
+      if (op.table === 'tasks' && e.status === 400 && /PGRST204|column/i.test((e.details && (e.details.code + ' ' + e.details.message)) || e.message || '')) {
+        localStorage.setItem('iota.taskMetaUnsupported', '1');
+        return runOpRaw(op, true);
+      }
+      throw e;
+    }
+  }
+  async function runOpRaw(op, strip) {
+    if (op.kind === 'insert') return SB.rest('POST', op.table, { body: strip ? stripMeta(op.row) : op.row, prefer: `return=minimal,resolution=${op.ignoreDup ? 'ignore' : 'merge'}-duplicates` });
+    if (op.kind === 'update') { const patch = strip ? stripMeta(op.patch) : op.patch; if (!Object.keys(patch).length) return null; return SB.rest('PATCH', `${op.table}?id=eq.${op.id}`, { body: patch, prefer: 'return=minimal' }); }
     if (op.kind === 'delete') return SB.rest('DELETE', `${op.table}?id=eq.${op.id}`, { prefer: 'return=minimal' });
     if (op.kind === 'setting') return SB.rest('POST', 'settings?on_conflict=owner,key', { body: { key: op.key, value: op.value }, prefer: 'return=minimal,resolution=merge-duplicates' });
   }
@@ -56,7 +76,61 @@
     emit('outbox');
   }
 
+  /** Stable UUID from a string key (FNV-style mix → 128 bits, formatted as v4) so seeded rows upsert, never duplicate. */
+  function uuidFrom(key) {
+    const h = [0x811c9dc5, 0x01000193, 0x9e3779b9, 0x85ebca6b];
+    for (let i = 0; i < key.length; i++) for (let j = 0; j < 4; j++) { h[j] ^= key.charCodeAt(i) + j * 131; h[j] = Math.imul(h[j], 0x01000193 + j * 2654435761) >>> 0; }
+    const hex = h.map(x => x.toString(16).padStart(8, '0')).join('');
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-${(8 + (parseInt(hex[16], 16) & 3)).toString(16)}${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
+  }
+  /** Seed data: bundled (window.IOTA_SEED, private builds only) or imported from a file and kept on this device. */
+  function seedData() {
+    if (window.IOTA_SEED) return window.IOTA_SEED;
+    try { return JSON.parse(localStorage.getItem('iota.seedData') || 'null'); } catch (_) { return null; }
+  }
+  /** Timetable fallback: local-only events used when neither the cache nor the server has any future uni events. Never pushed. */
+  function ensureSeedEvents() {
+    const S = seedData(); if (!S || !Array.isArray(S.events)) return;
+    const now = Date.now();
+    const real = db.events.filter(e => !e._local);
+    const hasFutureUni = real.some(e => e.kind === 'uni' && new Date(e.starts_at).getTime() > now);
+    if (hasFutureUni) { db.events = real; return; }
+    const have = new Set(real.map(e => e.id));
+    const seeds = S.events.map(e => { const o = { ...e, id: uuidFrom(e.k), _local: true }; delete o.k; return o; }).filter(e => !have.has(e.id));
+    db.events = [...real, ...seeds];
+  }
+  /** Apply the task import once per version. Tasks you delete or complete are never resurrected. */
+  function applySeed(force) {
+    const S = seedData(); if (!S || !Array.isArray(S.tasks)) return 0;
+    if (!force && localStorage.getItem('iota.seed') === S.version) { ensureSeedEvents(); return 0; }
+    let n = 0; const have = new Set(db.tasks.map(t => t.id));
+    for (const x of S.tasks) {
+      const id = x.id || uuidFrom('task:' + x.k); if (have.has(id)) continue;
+      Store.insert('tasks', { id, title: x.t, section: x.s, area: x.a, due: x.d || null, due_kind: x.d ? (x.h ? 'hard' : 'soft') : null, priority: x.p, duration_min: x.m, notes: x.n || null, link: x.u || null, source: x.src, status: x.st || 'open', done_at: x.da || null, snoozed_until: x.sz || null, created_at: x.ca || (S.created ? S.created + 'T02:00:00+01:00' : new Date().toISOString()) }, { silent: true, ignoreDup: true });
+      n++;
+    }
+    localStorage.setItem('iota.seed', S.version);
+    ensureSeedEvents(); persist(); emit('change');
+    return n;
+  }
+  /** Export every task in the import format, so a list can move between devices or from the preview into the real app. */
+  function exportSeed() {
+    const tasks = db.tasks.filter(t => t.status !== 'dropped').map(t => ({ id: t.id, t: t.title, s: t.section, a: t.area || null, d: t.due || null, h: t.due_kind === 'hard', p: t.priority || 4, m: t.duration_min || null, n: t.notes || null, src: t.source || null, u: t.link || null, st: t.status, da: t.done_at || null, sz: t.snoozed_until || null, ca: t.created_at || null }));
+    const S = seedData();
+    return { format: 'iota-seed/1', version: 'export-' + new Date().toISOString(), created: new Date().toISOString().slice(0, 10), tasks, events: S?.events || [] };
+  }
+  /** Import a task file (the JSON Claude writes to OneDrive). Returns how many tasks were added. */
+  function importSeed(obj) {
+    if (!obj || !Array.isArray(obj.tasks)) throw new Error('That file isn\'t an Iota task import.');
+    localStorage.setItem('iota.seedData', JSON.stringify(obj));
+    return applySeed(true);
+  }
+
   const Store = {
+    status: navigator.onLine ? 'unknown' : 'offline',
+    uuidFrom, applySeed, importSeed, exportSeed, get hasSeed() { return !!seedData(); },
+    get offlineMode() { return localStorage.getItem('iota.offline') === '1'; },
+    setOfflineMode(on) { if (on) localStorage.setItem('iota.offline', '1'); else localStorage.removeItem('iota.offline'); },
     on(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     emit,
     lastError: null,
@@ -67,7 +141,7 @@
 
     setSetting(k, v) {
       db.settings[k] = v;
-      if (LOCAL_ONLY_KEYS.has(k)) { try { localStorage.setItem('iota.apiKey', v || ''); } catch (_) {} persist(); emit('change'); return; }
+      if (LOCAL_ONLY_KEYS.has(k)) { try { localStorage.setItem(k === 'apiKey' ? 'iota.apiKey' : 'iota.' + k, v || ''); } catch (_) {} persist(); emit('change'); return; }
       persist(); emit('change');
       remote({ kind: 'setting', key: k, value: v });
     },
@@ -75,23 +149,27 @@
     // ---- table ops (optimistic; PostgREST-shaped) ----
     list(table) { return (db[table] || []).slice(); },
     get(table, id) { return (db[table] || []).find(r => r.id === id) || null; },
-    insert(table, row) {
+    insert(table, row, opts = {}) {
       const r = { id: uuid(), created_at: new Date().toISOString(), ...row };
-      (db[table] = db[table] || []).push(r); persist(); emit('change');
-      remote({ kind: 'insert', table, row: r });
+      (db[table] = db[table] || []).push(r); if (table === 'tasks') rememberMeta(r.id, r); persist(); if (!opts.silent) emit('change');
+      remote({ kind: 'insert', table, row: r, ignoreDup: !!opts.ignoreDup });
       return r;
     },
     update(table, id, patch) {
       const i = (db[table] || []).findIndex(r => r.id === id); if (i < 0) return null;
-      db[table][i] = { ...db[table][i], ...patch }; persist(); emit('change');
+      db[table][i] = { ...db[table][i], ...patch }; if (table === 'tasks') rememberMeta(id, patch); persist(); emit('change');
       remote({ kind: 'update', table, id, patch });
       return db[table][i];
     },
     remove(table, id) {
+      const was = (db[table] || []).find(r => r.id === id);
       db[table] = (db[table] || []).filter(r => r.id !== id); persist(); emit('change');
+      if (was && was._local) return;
       remote({ kind: 'delete', table, id });
     },
 
+    /** Put a removed row back (undo). Re-inserts remotely with upsert. */
+    restore(table, row) { (db[table] = db[table] || []).push(row); persist(); emit('change'); if (!row._local) remote({ kind: 'insert', table, row }); },
     /** Pull everything from Supabase into the snapshot. */
     async sync() {
       if (!SB.session) return false;
@@ -122,10 +200,12 @@
       for (const r of results) {
         if (r.status !== 'fulfilled') { console.warn('sync', r.reason); continue; }
         const [t, rows] = r.value; ok++;
-        if (t === 'settings') { const s = { ...DEFAULT_SETTINGS }; for (const row of rows) s[row.key] = row.value; s.apiKey = db.settings.apiKey; db.settings = s; }
+        if (t === 'settings') { const s = { ...DEFAULT_SETTINGS }; for (const row of rows) s[row.key] = row.value; s.apiKey = db.settings.apiKey; s.theme = db.settings.theme; db.settings = s; }
+        else if (t === 'tasks') db.tasks = (rows || []).map(r => { const m = taskMeta[r.id]; if (!m) return r; const o = { ...r }; for (const k of TASK_META) if ((o[k] === undefined || o[k] === null) && m[k] != null) o[k] = m[k]; return o; });
         else db[t] = rows || [];
       }
-      if (ok) { db.syncedAt = new Date().toISOString(); persist(); emit('sync'); }
+      if (ok) { ensureSeedEvents(); db.syncedAt = new Date().toISOString(); Store.status = 'online'; persist(); emit('sync'); }
+      else { Store.status = navigator.onLine ? 'unreachable' : 'offline'; emit('status'); }
       return ok > 0;
     },
     async flush() { return flush(); },

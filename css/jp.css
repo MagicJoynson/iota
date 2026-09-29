@@ -1,135 +1,179 @@
 /* ============================================================
-   IOTA — 日本語 module skin. Violet University wash + vermilion/blossom dual accent.
-   The glyph is the hero: kana/kanji huge, everything else out of the way.
+   IOTA — 日本語 module. The glyph is the hero; everything else is
+   Iota's quiet system, in the same single ink.
    ============================================================ */
-:root { --jp-verm: #FF6B6B; --jp-verm-rgb: 255,107,107; --jp-blossom: #FFB7C5; --jp-gold: #F5C542; --jp-silver: #C9D1E3; --jp-bronze: #D08A5B; }
-.jp-font, .ja, .jp-glyph, .jp-read, .jp-cell .g, .jp-phrase .ja, .jp-nums b, .jp-counter b, .jp-tab .k, .jp-title { font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Noto Sans CJK JP", "Yu Gothic UI", "Yu Gothic", "Meiryo", "MS PGothic", sans-serif; }
-.jp-screen .kicker { color: var(--jp-verm); }
-.jp-host { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-.jp-tabs { display: flex; gap: 4px; padding: 6px 12px 0; }
-.jp-tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 4px 8px; border-radius: 14px; color: var(--text-3); font-size: 10.5px; letter-spacing: .04em; border-bottom: 2px solid transparent; }
-.jp-tab .k { font-size: 17px; color: var(--text-2); }
-.jp-tab.active { color: var(--text); background: rgba(var(--jp-verm-rgb), .10); }
-.jp-tab.active .k { color: var(--jp-verm); }
-.jp-body { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; padding: 12px 16px calc(var(--sab) + 40px); }
-.jp-body::-webkit-scrollbar { display: none; }
-.jp-loading { display: grid; place-items: center; padding: 60px 0; gap: 8px; }
-.jp-title { font-size: 26px; font-weight: 500; letter-spacing: .04em; }
-.jp-hero { background: linear-gradient(160deg, rgba(var(--jp-verm-rgb), .14), rgba(139,124,255,.10) 60%, rgba(255,255,255,.04)), var(--glass); border-color: rgba(var(--jp-verm-rgb), .35); }
-.jp-hero-top { display: flex; justify-content: space-between; align-items: flex-start; }
+:root { --jp: var(--ink); --jp-soft: var(--fill); --jp-gold: #B8860B; --jp-silver: #8A8F98; --jp-bronze: #A0643C; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --jp-gold: #E9B949; --jp-silver: #B7BCC6; --jp-bronze: #D08A5B; } }
+:root[data-theme="dark"] { --jp-gold: #E9B949; --jp-silver: #B7BCC6; --jp-bronze: #D08A5B; }
+
+.jp-font, .ja, .jp-glyph, .jp-read, .jp-cell .g, .jp-phrase .ja, .jp-nums b, .jp-counter b, .jp-tab .k, .jp-title { font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Noto Sans CJK JP", "Yu Gothic UI", "Yu Gothic", "Meiryo", sans-serif; }
+
+/* legacy markup inside the module, mapped onto Iota's primitives */
+.jp-host .card { padding: 16px 0; border-top: 1px solid var(--line); }
+.jp-host .card:first-child { border-top: 0; padding-top: 4px; }
+.jp-host .card h3 { font-size: 16px; font-weight: 650; margin-bottom: 4px; }
+.jp-host .sub, .sheet .sub { color: var(--ink-2); font-size: 14px; line-height: 1.5; }
+.jp-host .field-note, .sheet .field-note { color: var(--ink-2); font-size: 13px; line-height: 1.5; }
+.jp-host .tab-title { font-size: 16px; font-weight: 650; margin: 24px 0 6px; }
+.jp-host .list { display: flex; flex-direction: column; }
+.jp-host .row.link, .jp-host .list > .row { grid-template-columns: auto 1fr auto; align-items: center; padding: 10px 0; min-height: 44px; }
+.jp-host .row .bar { width: 3px; height: 26px; border-radius: 2px; }
+.jp-host .row .t { min-width: 0; }
+.jp-host .row .t b { display: block; font-weight: 550; font-size: 15px; }
+.jp-host .row .t span { display: block; color: var(--ink-2); font-size: 13px; margin-top: 2px; }
+.jp-host .row + .row::before { left: 15px; }
+.jp-host .empty { max-width: none; text-align: center; padding: 28px 0; }
+.jp-host .chips-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.jp-host .pill { font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: var(--r); background: var(--fill); color: var(--ink-2); }
+.jp-host .search { margin: 6px 0 12px; }
+.jp-host .legend { font-size: 12.5px; color: var(--ink-2); }
+.sheet > .sheet-backdrop { position: absolute; inset: 0; background: rgba(10, 10, 9, .32); animation: fade var(--t) var(--ease); }
+.sheet > .sheet-panel { position: relative; width: 100%; max-height: 88dvh; overflow-y: auto; background: var(--surface); border-radius: 14px 14px 0 0; box-shadow: var(--shadow-sheet); padding: 10px var(--gutter) calc(var(--sab) + 20px); animation: sheetUp 260ms cubic-bezier(.32, .72, 0, 1); }
+.sheet .sheet-grip { width: 36px; height: 4px; border-radius: 4px; background: var(--line-2); margin: 0 auto 12px; }
+.sheet .sheet-row { display: flex; align-items: center; gap: 10px; justify-content: space-between; }
+.sheet .sheet-row .hint { color: var(--ink-2); font-size: 13px; }
+@media (min-width: 900px) { .sheet > .sheet-panel { width: 560px; border-radius: var(--r-lg); box-shadow: var(--shadow-pop); padding: 20px 22px; animation: pop 180ms var(--ease); } .sheet .sheet-grip { display: none; } }
+
+/* tabs */
+.jp-host { display: block; }
+.jp-tabs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; padding: 2px; border-radius: 8px; background: var(--fill); margin-bottom: 18px; }
+.jp-tab { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 2px 5px; border-radius: 6px; color: var(--ink-2); font-size: 11.5px; font-weight: 550; }
+.jp-tab .k { font-size: 17px; color: var(--ink-2); line-height: 1.2; }
+.jp-tab:hover { color: var(--ink); }
+.jp-tab.active { background: var(--surface); color: var(--ink); box-shadow: 0 0 0 1px var(--line), 0 1px 2px rgba(0,0,0,.06); }
+.jp-tab.active .k { color: var(--jp); }
+.jp-body { padding-bottom: 24px; }
+.jp-loading { display: grid; place-items: center; padding: 60px 0; gap: 8px; color: var(--ink-2); }
+.jp-title { font-size: 26px; font-weight: 600; letter-spacing: .02em; }
+
+/* path hero */
+.jp-hero { border-top: 0 !important; }
+.jp-hero-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
 .jp-count { text-align: right; }
-.jp-count b { display: block; font-family: var(--font-display); font-weight: 200; font-size: 40px; line-height: 1; letter-spacing: -.03em; }
-.jp-count small { font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
-.jp-ring-wrap { display: flex; align-items: center; gap: 16px; margin: 14px 0 10px; }
-.jp-ring { position: relative; width: 128px; height: 128px; flex: none; }
+.jp-count b { display: block; font-weight: 700; font-size: 36px; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.jp-count small { font-size: 12.5px; color: var(--ink-2); }
+.jp-ring-wrap { display: flex; align-items: center; gap: 20px; margin: 18px 0 12px; }
+.jp-ring { position: relative; width: 112px; height: 112px; flex: none; }
 .jp-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.jp-ring .track { fill: none; stroke: rgba(255,255,255,.08); stroke-width: 9; }
-.jp-ring .fill { fill: none; stroke: var(--jp-verm); stroke-width: 9; stroke-linecap: round; transition: stroke-dashoffset 600ms var(--ease); filter: drop-shadow(0 0 8px rgba(var(--jp-verm-rgb), .55)); }
+.jp-ring .track { fill: none; stroke: var(--fill-2); stroke-width: 8; }
+.jp-ring .fill { fill: none; stroke: var(--jp); stroke-width: 8; stroke-linecap: butt; transition: stroke-dashoffset 600ms var(--ease); }
 .jp-ring-txt { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.jp-ring-txt b { font-family: var(--font-display); font-weight: 200; font-size: 40px; line-height: 1; }
-.jp-ring-txt small { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); }
+.jp-ring-txt b { font-weight: 700; font-size: 30px; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.jp-ring-txt small { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
 .jp-kpis { flex: 1; display: grid; gap: 8px; }
 .jp-kpis > div { display: flex; align-items: baseline; gap: 8px; }
-.jp-kpis b { font-family: var(--font-display); font-weight: 400; font-size: 20px; }
-.jp-kpis small { color: var(--text-3); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
-.jp-eden { display: flex; gap: 8px; align-items: baseline; font-size: 13px; color: var(--text-2); }
-.jp-eden b { font-family: var(--font-display); font-size: 11px; letter-spacing: .12em; color: var(--text); }
+.jp-kpis b { font-weight: 650; font-size: 18px; font-variant-numeric: tabular-nums; min-width: 1.5em; }
+.jp-kpis small { color: var(--ink-2); font-size: 13px; }
+.jp-eden { display: flex; gap: 8px; align-items: baseline; font-size: 14px; color: var(--ink-2); }
+.jp-eden b { font-size: 13px; font-weight: 650; color: var(--ink); }
+
 .jp-path { position: relative; padding-left: 26px; margin-bottom: 14px; }
-.jp-path::before { content: ""; position: absolute; left: 11px; top: 14px; bottom: 14px; width: 2px; background: linear-gradient(180deg, rgba(var(--jp-verm-rgb), .7), rgba(255,183,197,.35), rgba(255,255,255,.06)); border-radius: 2px; }
-.jp-stage { position: relative; display: flex; gap: 12px; align-items: center; padding: 10px 12px; margin-bottom: 8px; border-radius: var(--r-sm); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); }
-.jp-stage .torii { position: absolute; left: -26px; width: 24px; text-align: center; font-size: 15px; filter: grayscale(1) opacity(.5); }
-.jp-stage.cur .torii, .jp-stage.done .torii { filter: none; }
-.jp-stage.cur { border-color: rgba(var(--jp-verm-rgb), .55); background: rgba(var(--jp-verm-rgb), .08); box-shadow: 0 0 22px rgba(var(--jp-verm-rgb), .18); }
-.jp-stage.done { opacity: .75; }
+.jp-path::before { content: ""; position: absolute; left: 10px; top: 16px; bottom: 16px; width: 1px; background: var(--line-2); }
+.jp-stage { position: relative; display: flex; gap: 12px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.jp-stage .torii { position: absolute; left: -20px; width: 9px; height: 9px; border-radius: 50%; background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--ink-3); }
+.jp-stage.done .torii { background: var(--ink-2); box-shadow: none; }
+.jp-stage.cur .torii { background: var(--ink); box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px var(--ink); }
+
+.jp-stage.done { color: var(--ink-2); }
 .jp-stage .st { flex: 1; min-width: 0; }
-.jp-stage .st b { display: block; font-size: 14px; }
-.jp-stage .st span { font-size: 12px; color: var(--text-3); }
-.jp-stage .bar { height: 5px; border-radius: 5px; background: rgba(255,255,255,.08); margin-top: 6px; overflow: hidden; }
-.jp-stage .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--jp-verm), var(--jp-blossom)); border-radius: 5px; }
-.jp-stage.plane .torii { font-size: 16px; filter: none; }
-.jp-quota { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; }
-.jp-quota > div { background: rgba(255,255,255,.05); border-radius: 12px; padding: 8px 10px; }
-.jp-quota span { display: block; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); }
-.jp-quota b { font-family: var(--font-display); font-weight: 400; font-size: 20px; }
-.jp-quota small { color: var(--text-3); font-size: 12px; }
-.jp-big { width: 100%; min-height: 52px; font-size: 15px; margin-top: 4px; }
-.jp-session { display: flex; flex-direction: column; gap: 12px; }
-.jp-prog { height: 4px; border-radius: 4px; background: rgba(255,255,255,.08); overflow: hidden; }
-.jp-prog i { display: block; height: 100%; background: var(--jp-verm); border-radius: 4px; transition: width 300ms var(--ease); }
-.jp-sub { text-align: center; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); }
-.jp-card { position: relative; text-align: center; padding: 26px 18px 18px; border-radius: var(--r-md); background: linear-gradient(180deg, rgba(var(--jp-verm-rgb), .06), rgba(255,255,255,.04)), var(--glass); border: 1px solid var(--glass-border); box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.08); transition: transform 240ms var(--ease), border-color 240ms; }
-.jp-card.ok { border-color: rgba(255,183,197,.7); animation: jp-pulse 500ms var(--ease); }
-.jp-card.bad { border-color: rgba(var(--jp-verm-rgb), .7); animation: jp-shake 320ms var(--ease); }
-@keyframes jp-pulse { 0% { box-shadow: 0 0 0 0 rgba(255,183,197,.6); } 100% { box-shadow: 0 0 0 18px rgba(255,183,197,0); } }
-@keyframes jp-shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
-.jp-glyph { line-height: 1.1; font-weight: 400; color: var(--text); }
+.jp-stage .st b { display: inline; font-size: 14.5px; font-weight: 600; margin-right: 8px; }
+.jp-stage .st span { font-size: 12.5px; color: var(--ink-2); }
+.jp-stage .bar { height: 3px; border-radius: 3px; background: var(--fill-2); margin-top: 6px; overflow: hidden; }
+.jp-stage .bar i { display: block; height: 100%; background: var(--jp); }
+
+.jp-quota { display: flex; flex-wrap: wrap; gap: 8px 28px; }
+.jp-quota > div { min-width: 64px; }
+.jp-quota span { display: block; font-size: 12.5px; color: var(--ink-2); }
+.jp-quota b { font-weight: 650; font-size: 22px; font-variant-numeric: tabular-nums; }
+.jp-quota small { color: var(--ink-2); font-size: 13px; font-weight: 500; }
+.jp-big { width: 100%; height: 46px; font-size: 15px; margin-top: 8px; }
+
+/* review session */
+.jp-session { display: flex; flex-direction: column; gap: 14px; }
+.jp-prog { height: 3px; border-radius: 3px; background: var(--fill-2); overflow: hidden; }
+.jp-prog i { display: block; height: 100%; background: var(--jp); }
+.jp-sub { text-align: center; font-size: 13px; color: var(--ink-2); }
+.jp-card { position: relative; text-align: center; padding: 32px 18px 22px; border-radius: var(--r-lg); background: var(--surface); box-shadow: 0 0 0 1px var(--line); transition: box-shadow 200ms var(--ease); }
+.jp-card.ok { box-shadow: 0 0 0 1.5px var(--ok); }
+.jp-card.bad { box-shadow: 0 0 0 1.5px var(--jp); animation: jp-shake 280ms var(--ease); }
+@keyframes jp-shake { 0%, 100% { transform: translateX(0); } 30% { transform: translateX(-3px); } 70% { transform: translateX(3px); } }
+.jp-glyph { line-height: 1.1; font-weight: 400; color: var(--ink); }
 .jp-glyph.huge { font-size: 112px; }
 .jp-glyph.big { font-size: 56px; }
-.jp-glyph.mid { font-size: 30px; }
-.jp-read { font-size: 22px; color: var(--jp-blossom); margin-top: 6px; }
-.jp-ans { font-size: 17px; margin-top: 8px; color: var(--text); }
-.jp-mn { color: var(--text-2); font-size: 13.5px; margin-top: 10px; line-height: 1.5; }
-.jp-readings { display: flex; justify-content: center; gap: 16px; margin-top: 8px; font-size: 14px; color: var(--text-2); }
-.jp-ex { text-align: left; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,.05); }
+.jp-glyph.mid { font-size: 32px; }
+.jp-read { font-size: 22px; color: var(--jp); margin-top: 6px; }
+.jp-ans { font-size: 17px; margin-top: 8px; }
+.jp-mn { color: var(--ink-2); font-size: 14px; margin-top: 10px; line-height: 1.5; }
+.jp-readings { display: flex; justify-content: center; gap: 16px; margin-top: 8px; font-size: 14px; color: var(--ink-2); }
+.jp-ex { text-align: left; margin-top: 12px; padding: 10px 0 0; border-top: 1px solid var(--line); }
 .jp-ex .ja { font-size: 17px; }
-.jp-ex .ro { font-size: 12.5px; color: var(--jp-blossom); margin-top: 2px; }
-.jp-ex .en { font-size: 12.5px; color: var(--text-2); margin-top: 2px; }
-.jp-card .chip { margin-top: 10px; }
-.jp-listen { font-size: 40px; display: block; margin: 0 auto 8px; }
+.jp-ex .ro { font-size: 13px; color: var(--jp); margin-top: 2px; }
+.jp-ex .en { font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+.jp-card .chip { margin-top: 12px; }
+.jp-listen { font-size: 36px; display: block; margin: 0 auto 8px; }
 .jp-hidden { opacity: 0; height: 0; overflow: hidden; }
 .jp-input { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.jp-input input { flex: 1; min-width: 0; height: 52px; border-radius: 16px; padding: 0 16px; background: rgba(255,255,255,.07); border: 1px solid var(--glass-border-2); color: var(--text); font-size: 18px; outline: none; }
-.jp-input input:focus { border-color: var(--jp-verm); }
-.jp-ime { flex-basis: 100%; font-size: 24px; color: var(--jp-blossom); text-align: center; min-height: 30px; }
+.jp-input input { flex: 1; min-width: 0; height: 48px; border-radius: var(--r); padding: 0 14px; background: var(--surface); border: 0; box-shadow: inset 0 0 0 1px var(--line-2); font-size: 18px; }
+.jp-input input:focus { box-shadow: inset 0 0 0 1.5px var(--ink); outline: none; }
+.jp-ime { flex-basis: 100%; font-size: 24px; color: var(--jp); text-align: center; min-height: 30px; }
 .jp-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.jp-choice { min-height: 56px; padding: 10px 12px; border-radius: 16px; background: rgba(255,255,255,.06); border: 1px solid var(--glass-border); color: var(--text); font-size: 14px; line-height: 1.3; text-align: center; transition: background var(--dur), border-color var(--dur); }
-.jp-choice.ja { font-size: 17px; }
-.jp-choice:active { background: rgba(255,255,255,.12); }
-.jp-choice.ok { border-color: var(--jp-blossom); background: rgba(255,183,197,.16); }
-.jp-choice.bad { border-color: var(--jp-verm); background: rgba(var(--jp-verm-rgb), .14); }
+.jp-choice { min-height: 54px; padding: 10px 12px; border-radius: var(--r); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-2); font-size: 14.5px; line-height: 1.3; text-align: center; transition: background var(--t-fast), box-shadow var(--t-fast); }
+.jp-choice.ja { font-size: 18px; }
+.jp-choice:hover { background: var(--fill); }
+.jp-choice:active { transform: scale(.98); }
+.jp-choice.ok { box-shadow: inset 0 0 0 1.5px var(--ok); background: color-mix(in srgb, var(--ok) 10%, var(--surface)); }
+.jp-choice.bad { box-shadow: inset 0 0 0 1.5px var(--jp); background: var(--jp-soft); }
 .jp-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; }
 .jp-reveal { display: flex; flex-direction: column; gap: 10px; }
 .jp-grades { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-.jp-grades button { min-height: 46px; border-radius: 14px; background: rgba(255,255,255,.06); border: 1px solid var(--glass-border); font-weight: 600; font-size: 13px; }
-.jp-grades button[data-g="1"] { color: var(--jp-verm); } .jp-grades button[data-g="2"] { color: var(--warn); } .jp-grades button[data-g="3"] { color: var(--jp-blossom); } .jp-grades button[data-g="4"] { color: var(--ok); }
+.jp-grades button { height: 44px; border-radius: var(--r); background: var(--fill); font-weight: 650; font-size: 13.5px; }
+.jp-grades button:hover { background: var(--fill-2); }
+.jp-grades button[data-g="1"] { color: var(--jp); } .jp-grades button[data-g="2"] { color: var(--p2); } .jp-grades button[data-g="3"] { color: var(--ink); } .jp-grades button[data-g="4"] { color: var(--ok); }
 .jp-done .jp-glyph { margin-bottom: 8px; }
 .jp-start { text-align: center; }
-.jp-start .jp-glyph { margin-bottom: 4px; }
-.jp-seg { width: 100%; display: flex; overflow-x: auto; scrollbar-width: none; }
+.jp-seg { width: 100%; display: flex; overflow-x: auto; scrollbar-width: none; margin-bottom: 10px; }
 .jp-seg button { flex: 1; white-space: nowrap; }
-.jp-grid { display: grid; gap: 6px; }
+
+/* library */
+.jp-grid { display: grid; gap: 4px; }
 .jp-grid.kana { grid-template-columns: repeat(5, 1fr); }
 .jp-grid.kanji { grid-template-columns: repeat(6, 1fr); }
-.jp-cell { aspect-ratio: 1; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); color: var(--text-2); }
-.jp-cell .g { font-size: 24px; color: var(--text); }
-.jp-cell .r { font-size: 10px; color: var(--text-3); }
-.jp-cell.bronze { border-color: rgba(208,138,91,.6); background: rgba(208,138,91,.12); }
-.jp-cell.silver { border-color: rgba(201,209,227,.6); background: rgba(201,209,227,.12); }
-.jp-cell.gold { border-color: rgba(245,197,66,.7); background: rgba(245,197,66,.14); box-shadow: 0 0 10px rgba(245,197,66,.25); }
-.mat { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.15); flex: none; }
-.mat.bronze { background: var(--jp-bronze); } .mat.silver { background: var(--jp-silver); } .mat.gold { background: var(--jp-gold); box-shadow: 0 0 6px var(--jp-gold); }
-.jp-legend { margin: 8px 0 10px; }
+@media (min-width: 700px) { .jp-grid.kana { grid-template-columns: repeat(10, 1fr); } .jp-grid.kanji { grid-template-columns: repeat(10, 1fr); } }
+.jp-cell { aspect-ratio: 1; border-radius: var(--r); display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); color: var(--ink-2); }
+.jp-cell:hover { box-shadow: inset 0 0 0 1px var(--line-2); }
+.jp-cell .g { font-size: 24px; color: var(--ink); }
+.jp-cell .r { font-size: 10.5px; color: var(--ink-2); }
+.jp-cell { position: relative; }
+.jp-cell.bronze::after, .jp-cell.silver::after, .jp-cell.gold::after { content: ""; position: absolute; top: 5px; right: 5px; width: 6px; height: 6px; border-radius: 50%; }
+.jp-cell.bronze::after { background: var(--jp-bronze); } .jp-cell.silver::after { background: var(--jp-silver); } .jp-cell.gold::after { background: var(--jp-gold); }
+.mat { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--fill-2); flex: none; }
+.mat.bronze { background: var(--jp-bronze); } .mat.silver { background: var(--jp-silver); } .mat.gold { background: var(--jp-gold); }
+.jp-legend { margin: 8px 0 10px; display: flex; gap: 14px; flex-wrap: wrap; }
 .jp-legend .mat { margin-right: 6px; vertical-align: -1px; }
-.jp-phrases { display: flex; flex-direction: column; gap: 8px; }
-.jp-phrase { position: relative; text-align: left; padding: 12px 44px 12px 14px; border-radius: var(--r-sm); background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); }
-.jp-phrase .mat { position: absolute; left: 6px; top: 50%; transform: translateY(-50%); width: 4px; height: 60%; border-radius: 4px; }
-.jp-phrase .ja { font-size: 20px; margin-left: 4px; }
-.jp-phrase .ro { font-size: 15px; color: var(--jp-blossom); margin: 2px 0 0 4px; }
-.jp-phrase .en { font-size: 12.5px; color: var(--text-2); margin-left: 4px; }
-.jp-phrase .say { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 20px; }
-.jp-nums { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; margin-top: 8px; }
-.jp-nums > div { background: rgba(255,255,255,.05); border-radius: 12px; padding: 8px 10px; }
+.jp-phrases { display: flex; flex-direction: column; }
+.jp-phrase { position: relative; text-align: left; padding: 12px 44px 12px 14px; border-bottom: 1px solid var(--line); }
+.jp-phrase .mat { position: absolute; left: 0; top: 14px; width: 3px; height: 26px; border-radius: 2px; }
+.jp-phrase .ja { font-size: 19px; }
+.jp-phrase .ro { font-size: 14px; color: var(--jp); margin-top: 2px; }
+.jp-phrase .en { font-size: 13px; color: var(--ink-2); }
+.jp-phrase .say { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 18px; }
+.jp-nums { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 12px 16px; margin-top: 8px; }
 .jp-nums b { display: block; font-size: 22px; font-weight: 400; }
-.jp-nums span { display: block; font-size: 12px; color: var(--text); }
-.jp-nums small { display: block; font-size: 11px; color: var(--text-3); }
-.jp-nums em { display: block; font-size: 10.5px; color: var(--text-3); font-style: normal; margin-top: 2px; }
-.jp-counter { padding: 8px 0; border-top: 1px solid rgba(255,255,255,.06); }
+.jp-nums span { display: block; font-size: 13px; }
+.jp-nums small, .jp-nums em { display: block; font-size: 12px; color: var(--ink-2); font-style: normal; }
+.jp-counter { padding: 10px 0; border-top: 1px solid var(--line); }
 .jp-counter:first-of-type { border-top: 0; }
 .jp-counter b { font-size: 20px; font-weight: 400; margin-right: 8px; }
-.jp-counter span { font-size: 13px; }
-.jp-counter small, .jp-counter em { display: block; font-size: 11.5px; color: var(--text-3); font-style: normal; margin-top: 2px; }
-.jp-sheet .sheet-panel { max-height: 86vh; overflow-y: auto; }
+.jp-counter span { font-size: 14px; }
+.jp-counter small, .jp-counter em { display: block; font-size: 12.5px; color: var(--ink-2); font-style: normal; margin-top: 2px; }
 .row .t b.ja { white-space: normal; }
-.row .t b.ja small { color: var(--jp-blossom); font-weight: 400; margin-left: 4px; }
+.row .t b.ja small { color: var(--jp); font-weight: 400; margin-left: 4px; }
 @media (max-width: 360px) { .jp-glyph.huge { font-size: 92px; } .jp-grid.kanji { grid-template-columns: repeat(5, 1fr); } }
 body.reduce-motion .jp-card { animation: none !important; }
+
+.jp-lead { font-size: 17px; line-height: 1.5; max-width: 56ch; }
+.jp-lead b { font-weight: 650; }
+.jp-eden { margin-top: 12px; display: grid; grid-template-columns: 16px 1fr; gap: 10px; align-items: start; }
+.jp-eden .mark { width: 16px; height: 16px; margin-top: 2px; }
+.jp-hero-acts { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.jp-tab .k { color: var(--ink-3); } .jp-tab.active .k { color: var(--ink); }

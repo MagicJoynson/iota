@@ -25,7 +25,7 @@
     if (useBearer && session) h.Authorization = 'Bearer ' + session.access_token;
     const r = await fetch(URL + path, { method: 'POST', headers: h, body: JSON.stringify(body || {}) });
     const j = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(j.msg || j.error_description || j.message || ('Error ' + r.status));
+    if (!r.ok) { const e = new Error(j.msg || j.error_description || j.message || ('Error ' + r.status)); e.status = r.status; throw e; }
     return j;
   }
   async function signIn(email, password) {
@@ -38,7 +38,12 @@
     if (refreshing) return refreshing;
     refreshing = (async () => {
       try { const j = await authPost('/auth/v1/token?grant_type=refresh_token', { refresh_token: session.refresh_token }); saveSession(j); return true; }
-      catch (_) { saveSession(null); return false; }
+      catch (e) {
+        // Only a genuine auth rejection signs you out. Network failures, a paused project (5xx/540) or CORS errors
+        // keep the cached session so Iota stays usable offline and resumes when the backend is back.
+        if (e && (e.status === 400 || e.status === 401 || e.status === 403)) saveSession(null);
+        return false;
+      }
       finally { refreshing = null; }
     })();
     return refreshing;
@@ -50,6 +55,7 @@
   /** Proactively refresh if the token is within 2 minutes of expiry. */
   async function ensureFresh() {
     if (!session) return false;
+    if (!navigator.onLine) return false;
     const exp = session.expires_at ? session.expires_at * 1000 : 0;
     if (exp && exp - Date.now() < 120000) return refresh();
     return true;

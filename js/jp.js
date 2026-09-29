@@ -266,16 +266,14 @@
     const line = s.due > 40 ? `${s.due} reviews are stacking up — ${s.minutesDue} minutes clears the pile. Do it before it becomes a wall.` : s.due ? `${s.due} due, about ${Math.max(1, s.minutesDue)} min. Do them now and the rest of the day is yours.` : nq ? `Nothing due. ${nq} new item${nq === 1 ? '' : 's'} waiting in Learn if you fancy it.` : `Clear. Streak ${s.streak} — see you tomorrow.`;
     body.innerHTML = `
       <div class="jp-hero card">
-        <div class="jp-hero-top"><div><div class="jp-title">日本語</div><div class="sub">${esc(wk ? `Week ${wk.week} · ${wk.stage}` : 'Japanese')}</div></div><div class="jp-count"><b>${s.daysToJapan}</b><small>days to Japan</small></div></div>
-        <div class="jp-ring-wrap">
-          <button class="jp-ring" data-jgo="review" aria-label="Start reviews"><svg viewBox="0 0 128 128"><circle cx="64" cy="64" r="${R}" class="track"/><circle cx="64" cy="64" r="${R}" class="fill" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C * (1 - ringPct)).toFixed(1)}"/></svg><div class="jp-ring-txt"><b>${s.due}</b><small>${s.due ? 'due' : 'clear'}</small></div></button>
-          <div class="jp-kpis"><div><b>${s.streak}</b><small>day streak</small></div><div><b>${s.learned}</b><small>items learned</small></div><div><b>${s.minutesDue}</b><small>min today</small></div></div>
-        </div>
-        <div class="jp-eden"><b>EDEN</b><span>${esc(line)}</span></div>
+        <p class="jp-lead">${s.learned ? `${s.learned} items learned, ${s.streak}-day streak.` : 'Nothing learned yet — kana first.'} ${s.daysToJapan} days until Japan.</p>
+        <div class="jp-eden">${UI.mark()}<span>${esc(line)}</span></div>
+        <div class="jp-hero-acts">${s.due ? `<button class="btn primary" data-jgo="review">Review ${s.due}</button>` : ''}${nq ? `<button class="btn ${s.due ? '' : 'primary'}" data-jgo="learn">Learn ${Math.min(6, nq)} new</button>` : ''}</div>
+        ${wk ? `<p class="note" style="margin-top:12px">Week ${wk.week} of 57 · ${esc(wk.stage)}</p>` : ''}
       </div>
-      ${wk ? `<div class="card"><h3>This week</h3><p class="sub">${esc(wk.goals)}</p><p class="sub" style="margin-top:6px;color:var(--text-3)">${esc(wk.quota)}</p></div>` : ''}
+      ${wk ? `<div class="card"><h3>This week</h3><p class="sub">${esc(wk.goals)}</p><p class="sub" style="margin-top:6px">${esc(wk.quota)}</p></div>` : ''}
       <div class="tab-title" style="margin-top:6px">The Path · 57 weeks</div>
-      <div class="jp-path">${stages.map((st, si) => { const wks = plan.weeks.filter(w => w.stage === st); const cur = wks.some(w => w.week === wk?.week); const done = wk && wks[wks.length - 1].week < wk.week; const pct = stagePct(st); return `<div class="jp-stage ${cur ? 'cur' : ''} ${done ? 'done' : ''}"><div class="torii">${done ? '⛩' : cur ? '⛩' : '⛩'}</div><div class="st"><b>${esc(st)}</b><span>wk ${wks[0].week}–${wks[wks.length - 1].week} · ${pct}%</span><div class="bar"><i style="width:${pct}%"></i></div></div></div>`; }).join('')}<div class="jp-stage plane"><div class="torii">✈️</div><div class="st"><b>Japan</b><span>${esc(plan?.departure_target || 'Sept 2027')}</span></div></div></div>
+      <div class="jp-path">${stages.map((st, si) => { const wks = plan.weeks.filter(w => w.stage === st); const cur = wks.some(w => w.week === wk?.week); const done = wk && wks[wks.length - 1].week < wk.week; const pct = stagePct(st); return `<div class="jp-stage ${cur ? 'cur' : ''} ${done ? 'done' : ''}"><div class="torii" aria-hidden="true"></div><div class="st"><b>${esc(st)}</b><span>wk ${wks[0].week}–${wks[wks.length - 1].week} · ${pct}%</span><div class="bar"><i style="width:${pct}%"></i></div></div></div>`; }).join('')}<div class="jp-stage plane"><div class="torii" aria-hidden="true"></div><div class="st"><b>Japan</b><span>${esc(plan?.departure_target || 'Sept 2027')}</span></div></div></div>
       <div class="card"><h3>About</h3><p class="sub">${esc(plan?.realistic_target || '')}</p><p class="field-note" style="padding:8px 0 0">Content: ${attributions.map(a => esc(a)).join(' · ')}. Scheduler: FSRS-4.5 defaults, target retention 90%.</p></div>`;
     body.querySelectorAll('[data-jgo]').forEach(b => b.addEventListener('click', () => JP.setTab(mod.id, b.dataset.jgo)));
   }
@@ -287,7 +285,7 @@
     body.innerHTML = `<div class="tab-title">Today's new items</div>
       <div class="card"><div class="jp-quota">${Object.keys(q).filter(t => q[t] || done[t]).map(t => `<div><span>${TYPE_LABEL[t]}</span><b>${done[t]}<small>/${q[t]}</small></b></div>`).join('') || '<p class="sub">Nothing scheduled today.</p>'}</div>
         <p class="field-note" style="padding:8px 0 0">${kanaLeft ? `Kana first — ${kanaLeft} to go, then vocab, kanji and grammar open up.` : 'Quotas follow the 57-week plan so reviews never turn into a wall.'} Cap ${+S().jpDailyNewCap || 10}/day (Settings → Japanese).</p></div>
-      ${queue.length ? `<button class="btn primary jp-big" data-lesson>Learn ${Math.min(6, queue.length)} new item${Math.min(6, queue.length) === 1 ? '' : 's'}</button><p class="field-note" style="text-align:center;padding-top:8px">${queue.length} available today: ${Object.entries(queue.reduce((a, x) => (a[x.type] = (a[x.type] || 0) + 1, a), {})).map(([t, n]) => `${n} ${TYPE_LABEL[t].toLowerCase()}`).join(', ')}</p>` : `<div class="card empty"><div class="ico">🌸</div><h3>Done for today</h3><p>Today's new-item quota is filled. Reviews are where the memory happens — check the 復 tab.</p></div>`}
+      ${queue.length ? `<button class="btn primary jp-big" data-lesson>Learn ${Math.min(6, queue.length)} new item${Math.min(6, queue.length) === 1 ? '' : 's'}</button><p class="field-note" style="text-align:center;padding-top:8px">${queue.length} available today: ${Object.entries(queue.reduce((a, x) => (a[x.type] = (a[x.type] || 0) + 1, a), {})).map(([t, n]) => `${n} ${TYPE_LABEL[t].toLowerCase()}`).join(', ')}</p>` : `<div class="card empty"><div class="jp-glyph mid">済</div><h3>Done for today</h3><p>Today's new-item quota is filled. Reviews are where the memory happens — check the 復 tab.</p></div>`}
       <div class="tab-title" style="margin-top:18px">Grammar lessons</div>
       <div class="list">${byType('grammar').filter(x => unlocked(x)).slice(0, 80).map(g => { const r = srsMap().get(g.id); return `<button class="row link" data-gram="${g.id}"><span class="bar" style="background:${r ? 'var(--jp-blossom)' : 'rgba(255,255,255,.15)'}"></span><div class="t"><b class="ja">${esc(g.p.pattern)}</b><span>${esc(g.p.meaning)} · ${g.level.toUpperCase()} u${g.p.unit}</span></div>${r ? '<span class="pill" style="background:rgba(255,183,197,.16);color:var(--jp-blossom)">in SRS</span>' : ''}</button>`; }).join('')}</div>`;
     $('[data-lesson]', body)?.addEventListener('click', () => runLesson(body, mod, queue.slice(0, 6), repaint));
@@ -296,10 +294,10 @@
   function itemCard(it, full = true) {
     const p = it.p;
     if (it.type === 'kana') return `<div class="jp-card"><div class="jp-glyph huge">${esc(p.kana)}</div><div class="jp-ans">${esc(p.romaji)}</div>${full && p.mnemonic ? `<p class="jp-mn">${esc(p.mnemonic)}</p>` : ''}<p class="sub">${esc(p.script)} · ${esc(p.group)}</p></div>`;
-    if (it.type === 'vocab') return `<div class="jp-card"><div class="jp-glyph big">${esc(p.word)}</div>${p.reading ? `<div class="jp-read">${esc(p.reading)}</div>` : ''}<div class="jp-ans">${esc(p.meaning)}</div><p class="sub">${esc(it.level.toUpperCase())} vocab</p><button class="chip" data-say="${esc(p.reading || p.word)}">🔊 listen</button></div>`;
+    if (it.type === 'vocab') return `<div class="jp-card"><div class="jp-glyph big">${esc(p.word)}</div>${p.reading ? `<div class="jp-read">${esc(p.reading)}</div>` : ''}<div class="jp-ans">${esc(p.meaning)}</div><p class="sub">${esc(it.level.toUpperCase())} vocab</p><button class="chip" data-say="${esc(p.reading || p.word)}"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 9.5h3l4.5-4v13l-4.5-4h-3z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg> listen</button></div>`;
     if (it.type === 'kanji') return `<div class="jp-card"><div class="jp-glyph huge">${esc(p.kanji)}</div><div class="jp-ans">${esc((p.meanings || []).join(', '))}</div><div class="jp-readings"><span>音 ${esc((p.on || []).join('・') || '—')}</span><span>訓 ${esc((p.kun || []).join('・') || '—')}</span></div><p class="sub">${p.strokes} strokes · ${esc((p.radicals || []).join(', '))} · ${esc(it.level.toUpperCase())}</p></div>`;
     if (it.type === 'grammar') return `<div class="jp-card gram"><div class="jp-glyph mid">${esc(p.pattern)}</div><div class="jp-ans">${esc(p.meaning)}</div><p class="jp-mn">${esc(p.explain)}</p>${(p.ex || []).map(e => `<div class="jp-ex"><div class="ja">${esc(e.ja)}</div><div class="ro">${esc(e.romaji)}</div><div class="en">${esc(e.en)}</div></div>`).join('')}</div>`;
-    return `<div class="jp-card"><div class="jp-glyph mid">${esc(p.ja)}</div><div class="jp-read">${esc(p.romaji)}</div><div class="jp-ans">${esc(p.en)}</div><p class="sub">${esc(String(p.cat || '').replace(/_/g, ' '))}</p><button class="chip" data-say="${esc(p.ja)}">🔊 listen</button></div>`;
+    return `<div class="jp-card"><div class="jp-glyph mid">${esc(p.ja)}</div><div class="jp-read">${esc(p.romaji)}</div><div class="jp-ans">${esc(p.en)}</div><p class="sub">${esc(String(p.cat || '').replace(/_/g, ' '))}</p><button class="chip" data-say="${esc(p.ja)}"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 9.5h3l4.5-4v13l-4.5-4h-3z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg> listen</button></div>`;
   }
   function openGrammar(g, onDone) {
     const sheet = document.createElement('div'); sheet.className = 'sheet jp-sheet';
@@ -364,7 +362,7 @@
       mode = 'grammar'; const ex = (p.ex || [])[0]; const ds = others(x => x.type === 'grammar', 3).map(x => x.p.pattern); const opts4 = shuffle([p.pattern, ...ds]);
       html += `<div class="jp-card gram"><div class="sub">Which pattern says…</div><div class="jp-ans" style="font-size:20px">${esc(p.meaning)}</div>${ex ? `<div class="jp-ex"><div class="en">${esc(ex.en)}</div></div>` : ''}</div><div class="jp-choices">${opts4.map(o => `<button class="jp-choice ja" data-c="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
     }
-    else { mode = 'choice'; const ans = p.en; const ds = others(x => x.type === 'phrase', 3).map(x => x.p.en); const opts4 = shuffle([ans, ...ds]); html += `<div class="jp-card"><button class="jp-listen" data-say="${esc(p.ja)}">🔊</button><div class="jp-glyph mid jp-hidden" data-reveal>${esc(p.ja)}</div><p class="sub">Listen — what does it mean? <button class="chip" data-show>show text</button></p></div><div class="jp-choices">${opts4.map(o => `<button class="jp-choice" data-c="${esc(o)}">${esc(o)}</button>`).join('')}</div>`; }
+    else { mode = 'choice'; const ans = p.en; const ds = others(x => x.type === 'phrase', 3).map(x => x.p.en); const opts4 = shuffle([ans, ...ds]); html += `<div class="jp-card"><button class="jp-listen" data-say="${esc(p.ja)}"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 9.5h3l4.5-4v13l-4.5-4h-3z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></button><div class="jp-glyph mid jp-hidden" data-reveal>${esc(p.ja)}</div><p class="sub">Listen — what does it mean? <button class="chip" data-show>show text</button></p></div><div class="jp-choices">${opts4.map(o => `<button class="jp-choice" data-c="${esc(o)}">${esc(o)}</button>`).join('')}</div>`; }
     html += `<div class="jp-actions"><button class="btn ghost" data-quit>Stop</button></div></div>`;
     body.innerHTML = html;
     $('[data-quit]', body).addEventListener('click', quit);
@@ -460,7 +458,7 @@
     const m = srsMap();
     const views = [['kana', 'Kana'], ['kanji', 'Kanji'], ['vocab', 'Vocab'], ['grammar', 'Grammar'], ['phrase', 'Phrases'], ['numbers', 'Numbers']];
     let html = `<div class="seg jp-seg">${views.map(v => `<button data-v="${v[0]}" class="${libState.view === v[0] ? 'active' : ''}">${v[1]}</button>`).join('')}</div>`;
-    if (['vocab', 'kanji', 'grammar', 'phrase'].includes(libState.view)) html += `<label class="search glass" style="margin-top:10px"><span>🔍</span><input type="search" data-q value="${esc(libState.q)}" placeholder="Search ${libState.view}…"></label>`;
+    if (['vocab', 'kanji', 'grammar', 'phrase'].includes(libState.view)) html += `<label class="search glass" style="margin-top:10px">${UI.icon('search', 'i-sm')}<input type="search" data-q value="${esc(libState.q)}" placeholder="Search ${libState.view}…"></label>`;
     const dot = r => `<i class="mat ${maturity(r)}"></i>`;
     if (libState.view === 'kana') {
       const list = byType('kana').filter(x => x.p.script === libState.script);
@@ -481,7 +479,7 @@
     } else if (libState.view === 'phrase') {
       const cats = [...new Set(byType('phrase').map(x => x.p.cat))]; const cat = libState.cat || cats[0];
       const q = libState.q.toLowerCase(); const list = byType('phrase').filter(x => q ? (x.p.ja.includes(q) || x.p.romaji.toLowerCase().includes(q) || x.p.en.toLowerCase().includes(q)) : x.p.cat === cat);
-      html += `<div class="chips" style="padding:10px 0 6px">${cats.map(c => `<button class="chip ${c === cat && !q ? 'accent' : ''}" data-cat="${c}">${esc(c.replace(/_/g, ' '))}</button>`).join('')}</div><div class="jp-phrases">${list.map(x => `<button class="jp-phrase" data-item="${x.id}">${dot(m.get(x.id))}<div class="ja">${esc(x.p.ja)}</div><div class="ro">${esc(x.p.romaji)}</div><div class="en">${esc(x.p.en)}</div><span class="say" data-say="${esc(x.p.ja)}">🔊</span></button>`).join('')}</div>`;
+      html += `<div class="chips" style="padding:10px 0 6px">${cats.map(c => `<button class="chip ${c === cat && !q ? 'accent' : ''}" data-cat="${c}">${esc(c.replace(/_/g, ' '))}</button>`).join('')}</div><div class="jp-phrases">${list.map(x => `<button class="jp-phrase" data-item="${x.id}">${dot(m.get(x.id))}<div class="ja">${esc(x.p.ja)}</div><div class="ro">${esc(x.p.romaji)}</div><div class="en">${esc(x.p.en)}</div><span class="say" data-say="${esc(x.p.ja)}"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 9.5h3l4.5-4v13l-4.5-4h-3z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></span></button>`).join('')}</div>`;
     } else if (libState.view === 'numbers' && numbers) {
       html += `<div class="card"><h3>Numbers</h3><div class="jp-nums">${(numbers.numbers || []).map(n => `<div><b class="ja">${esc(n.ja)}</b><span>${n.n.toLocaleString()}</span><small>${esc(n.kana)} · ${esc(n.romaji)}</small>${n.note ? `<em>${esc(n.note)}</em>` : ''}</div>`).join('')}</div></div>`;
       html += `<div class="card"><h3>Counters</h3>${(numbers.counters || []).map(c => `<div class="jp-counter"><b class="ja">${esc(c.counter)}</b><span>${esc(c.use)}</span>${c.forms ? `<small>${esc(typeof c.forms === 'string' ? c.forms : JSON.stringify(c.forms).replace(/[{}"]/g, '').replace(/,/g, ' · ').replace(/:/g, ' '))}</small>` : ''}${c.note ? `<em>${esc(c.note)}</em>` : ''}</div>`).join('')}</div>`;
@@ -510,15 +508,15 @@
 
   // ---- 話 Speak ----
   const SCENARIOS = [
-    ['greetings', '👋 Meeting someone', 'Introduce yourself to a new classmate and ask them two questions.'],
-    ['konbini_shopping', '🏪 At the konbini', 'Buy a drink and an onigiri; ask if they have a bag; pay.'],
-    ['restaurant', '🍜 Ordering food', 'Order for two, ask what they recommend, ask for the bill.'],
-    ['directions_transport', '🚉 Lost at the station', 'Ask which platform, whether the train stops at your stop, and where the exit is.'],
-    ['social', '🍻 Izakaya with friends', 'Small talk: weekend, hobbies, karting. Keep it casual.'],
-    ['dorm_daily', '🏠 Dorm life', 'Tell EDEN about your day in Japanese, in three or four sentences.'],
-    ['phone_admin', '📱 Phone & admin', 'Ask about a SIM contract: price per month, ID needed, cancelling.'],
-    ['emergency_health', '🏥 Feeling ill', 'Explain a headache and a fever at a pharmacy; ask what to take.'],
-    ['karting', '🏎️ Karting', 'Talk about a race: tyres, laps, position, what went wrong.'],
+    ['greetings', 'Meeting someone', 'Introduce yourself to a new classmate and ask them two questions.'],
+    ['konbini_shopping', 'At the konbini', 'Buy a drink and an onigiri; ask if they have a bag; pay.'],
+    ['restaurant', 'Ordering food', 'Order for two, ask what they recommend, ask for the bill.'],
+    ['directions_transport', 'Lost at the station', 'Ask which platform, whether the train stops at your stop, and where the exit is.'],
+    ['social', 'Izakaya with friends', 'Small talk: weekend, hobbies, karting. Keep it casual.'],
+    ['dorm_daily', 'Dorm life', 'Tell EDEN about your day in Japanese, in three or four sentences.'],
+    ['phone_admin', 'Phone & admin', 'Ask about a SIM contract: price per month, ID needed, cancelling.'],
+    ['emergency_health', 'Feeling ill', 'Explain a headache and a fever at a pharmacy; ask what to take.'],
+    ['karting', 'Karting', 'Talk about a race: tyres, laps, position, what went wrong.'],
   ];
   function renderSpeak(body, mod, repaint) {
     const s = stats(); const live = window.Eden && Eden.available;
