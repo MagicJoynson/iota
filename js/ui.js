@@ -58,6 +58,11 @@
     up: P('<path d="M6 14.5l6-6 6 6"/>'),
     eye: P('<path d="M2.8 12S6 5.8 12 5.8 21.2 12 21.2 12 18 18.2 12 18.2 2.8 12 2.8 12z"/><circle cx="12" cy="12" r="2.8"/>'),
     eyeoff: P('<path d="M4 4l16 16M9.9 6.1A9.6 9.6 0 0 1 12 5.8C18 5.8 21.2 12 21.2 12a15.6 15.6 0 0 1-2.9 3.6M6.3 7.7A15 15 0 0 0 2.8 12S6 18.2 12 18.2a9 9 0 0 0 4-.9M10 10a2.8 2.8 0 0 0 4 4"/>'),
+    cap: P('<path d="M2.8 9.2L12 5l9.2 4.2L12 13.4 2.8 9.2z"/><path d="M6.5 11v4.2c1.4 1.4 3.3 2.1 5.5 2.1s4.1-.7 5.5-2.1V11M21.2 9.2v5.3"/>'),
+    building: P('<path d="M4.5 20.5V5.5A1.5 1.5 0 0 1 6 4h7a1.5 1.5 0 0 1 1.5 1.5v15M14.5 9.5H18a1.5 1.5 0 0 1 1.5 1.5v9.5M3 20.5h18M8 8h3M8 11.5h3M8 15h3"/>'),
+    pen: P('<path d="M14.8 5.2l4 4L9 19H5v-4l9.8-9.8zM12.8 7.2l4 4"/>'),
+    globe: P('<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.3 2.4 3.5 5.2 3.5 8.5s-1.2 6.1-3.5 8.5c-2.3-2.4-3.5-5.2-3.5-8.5S9.7 5.9 12 3.5z"/>'),
+    projects: P('<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M3.5 9h17M8 13.5h4.5M8 16.5h7"/>'),
     dot: P('<circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/>'),
     dots: P('<circle cx="6" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="18" cy="12" r="1" fill="currentColor"/>'),
   };
@@ -124,6 +129,7 @@
     const due = Tasks.dueLabel(t, now), dc = Tasks.dueClass(t, now);
     const meta = [
       opts.hideArea ? '' : `<span><i class="dot ${sec}"></i>${esc(area)}</span>`,
+      t.project_id && !opts.hideProject && Store.get('projects', t.project_id) ? `<span class="proj">${icon('projects', 'i-sm')}${esc(Store.get('projects', t.project_id).name)}</span>` : '',
       t.due_kind === 'hard' && t.due ? `<span class="tag hard">Deadline</span>` : '',
       m ? `<span class="tnum">${Tasks.fmtMins(m)}</span>` : '',
       opts.showSource && t.source ? `<span class="src">${icon(SRC_ICON[t.source] || 'note', 'i-sm')}${esc(t.source)}</span>` : '',

@@ -45,7 +45,7 @@
     notes: [{ id: 'n1', section: 'uni', module_id: 'm1', week: 1, title: 'Lecture 1 — the 4 Ps', md: 'Product, price, place, promotion. Reading: ch. 1–2.', tags: [], created_at: iso(-1, 10) }, { id: 'n2', section: 'uni', module_id: null, title: null, md: 'Ask about the group project split', tags: [], created_at: iso(-2, 10) }],
     assessments: [{ id: 'a1', module_id: 'm1', title: 'Marketing report', weight_pct: 40, due_at: iso(20, 16), status: 'not_started' }],
     renewals: [{ id: 'rn1', name: '16–25 Railcard', expires_on: '2027-03-01', notes: null }],
-    briefings: [], captures: [], jp_srs: [], jp_reviews: [],
+    briefings: [], captures: [], jp_srs: [], jp_reviews: [], projects: [],
   };
   window.__previewWrites = [];
   try { const saved = JSON.parse(localStorage.getItem('iota.previewdb') || 'null'); if (saved) Object.assign(fx, saved); } catch (_) {}

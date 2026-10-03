@@ -374,10 +374,34 @@ A glyph reduced from the original Iota Ring (`MARK_ARCS` in `js/ui.js`): three a
 - **Sidebar area groups:** University, Work and Personal are collapsible groups (a 14px chevron that rotates, state remembered per device). Their areas sit beneath as 28px, 13px items indented to 30px along a 1px `line` rail. The current area shows a 2px ink tick on the rail rather than a new colour. A collapsed group shows its total count.
 - **Crumb/back:** 13.5px 500 ink-2 with a 15px chevron.
 
-### Areas
-- **Taxonomy:** twenty areas under the three sections, defined once in `Tasks.AREA_DEFS` (key, group, icon, blurb, hub, public links). Private links arrive with the task import. The person can rename, hide and reorder them (`areaPrefs`). Section hue stays on dots only; each area gets a line icon, never a colour of its own.
-- **Areas index (phone tab):** each section is a 17px 650 heading row with a dot and the next thing on its calendar, over a list of its areas. Each area row shows the soonest dated task and an open count.
-- **Area page (`#/area/<slug>`):** crumb to the section, a 34px `fill` icon tile beside the h1, a blurb, and one EDEN line that says what's open and where to start. Tasks follow grouped by bucket, with the area meta dropped because it's redundant here. At ≥1180px a 300px side column holds Coming up, Links and the hub link.
+### Spaces, areas and projects
+- **Model:** three levels, borrowed from PARA, GTD's horizons of focus, Things 3 and Linear.
+  - **Space:** a role Alex answers for. It has a one-line charter and a *standard*, the PARA "standard to be maintained".
+  - **Area:** an ongoing responsibility with no end date. Every task lives in exactly one.
+  - **Project:** a finite outcome with a finish date and a "done when" line, stored in `iota.projects`. Tasks join a project with `project_id`, and can join one from any area.
+- **Spaces:** there are seven (Degree, FallingHippo, MMU Karting, Work, Life admin, Health, Creative), inside the 5–7 range Sunsama recommends for top-level channels.
+  - They're defined in `Tasks.SPACE_DEFS`. Areas are defined in `Tasks.AREA_DEFS` and carry `space`.
+  - The user can rename, hide and reorder both (`spacePrefs`, `areaPrefs`) and move areas between spaces.
+- **Colour:** spaces don't get colours of their own. Each reuses one of the four calendar lanes (`lane`: uni / kart / work / personal), so hue stays a quiet calendar signal. Spaces are told apart by a 16px line icon.
+- **Sidebar:** spaces are collapsible groups with their icon. The first three are open by default, the rest collapsed with a total count, following Notion's "most used on top" guidance. Areas nest beneath. A **Projects** item sits in the main navigation with the active count.
+- **Space page (`#/space/<key>`):**
+  - The h1 sits beside a 34px `fill` icon tile, with the charter as the sub line.
+  - **The standard** is a 12px 600 ink-3 label followed by body text.
+  - EDEN's line covers what's open, what's slipping and where to start.
+  - **Projects** come before **Areas** ("Ongoing, no finish line").
+  - At ≥1180px a side column holds Coming up (the space's lane) and Go to (the old hub tabs).
+- **Project row:** an 18px pie in ink (the Things completion pie), the name, then "due · N days · done/total" as meta. The trailing state word:
+  - On track (`ok`)
+  - Tight or Behind (`p2`), when a task is overdue or under 60% done with a week left
+  - Past its date (`p1`)
+- **Project page (`#/project/<id>`):**
+  - Crumbs read space / area.
+  - The pie sits in the title tile, and the state and date form the sub line.
+  - **Done when** uses the same label treatment as The standard.
+  - A 4px ink progress bar on `fill-2` sits above EDEN's line ("N of M done, D days to go. Next: …").
+  - Tasks are grouped To do / Snoozed / Done. **Mark project done** comes last.
+- **Quick add:** `+word` attaches the first active project whose name has a word starting with it, and the token reads the project name. `#area` works as before, and adding to an area from a project's page fills in that area.
+- **Phone:** the fifth tab is **Spaces**. Its index is a Projects link, then each space's header row (icon tile, charter, count) over its area rows. Heads with two actions stack under 560px.
 
 ### Settings
 - **Structure:** a declarative schema (`js/settings.js`) of panes → sections → rows. Every row has a label, an optional description and search synonyms.

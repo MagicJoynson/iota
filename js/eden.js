@@ -76,6 +76,8 @@ Japanese: Alex is learning Japanese for a year abroad in Japan (Sept 2027) — m
     if (window.Tasks) {
       const rk = Tasks.ranked(now);
       if (rk.length) { lines.push(`Open tasks, ranked by Iota's engine (${rk.length}) — id | P | area | title | due | effort | note:`); for (const t of rk.slice(0, 45)) lines.push(`- ${t.id} | P${Tasks.pr(t)} | ${Tasks.area(t)} | ${t.title} | ${t.due ? fmt(t.due) + (t.due_kind === 'hard' ? ' HARD' : '') : 'no date'} | ${Tasks.fmtMins(Tasks.mins(t)) || '?'} | ${(t.notes || '').slice(0, 140)}`); if (rk.length > 45) lines.push(`- …and ${rk.length - 45} lower-ranked.`); }
+      const pj = Tasks.projects().filter(p => p.status === 'active');
+      if (pj.length) { lines.push('Active projects — name | space | due | progress | state | done when:'); for (const p of pj) { const g = Tasks.progress(p); lines.push(`- ${p.name} | ${Tasks.spaceDef(p.space)?.name || p.space} | ${p.due ? fmt(p.due) : 'no date'} | ${g.done}/${g.total} | ${Tasks.projectState(p, now).label} | ${(p.outcome || '').slice(0, 120)}`); } }
       const fw = Tasks.freeWindow(now); if (fw.next) lines.push(`Free before the next commitment (${fw.next.title}): ${fw.mins == null ? 'plenty' : fw.mins + ' min'}.`);
     } else {
       const tasks = Store.tasks_open().filter(t => !t.due);

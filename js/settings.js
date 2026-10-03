@@ -9,7 +9,7 @@
 (function () {
   'use strict';
   const { MOD, $, $$, esc, icon, mark, fmtTime, dayKey, relDay } = UI;
-  const VERSION = '1.0.0', BUILD = 'iota-shell-v1.0.1';
+  const VERSION = '1.1.0', BUILD = 'iota-shell-v1.1.0';
   const S = () => Store.settings;
   const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (_) { return d; } };
   const lsSet = (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (_) {} };
@@ -23,7 +23,7 @@
     { k: 'account', t: 'Account & sync', ic: 'user', g: 'General' },
     { k: 'appearance', t: 'Appearance', ic: 'sun', g: 'General' },
     { k: 'tasks', t: 'Tasks', ic: 'tasks', g: 'Planning' },
-    { k: 'areas', t: 'Areas', ic: 'areas', g: 'Planning' },
+    { k: 'areas', t: 'Spaces & areas', ic: 'areas', g: 'Planning' },
     { k: 'schedule', t: 'Schedule & travel', ic: 'clock', g: 'Planning' },
     { k: 'work', t: 'Work & pay', ic: 'briefcase', g: 'Planning' },
     { k: 'eden', t: 'EDEN', ic: 'eden', g: 'Assistant' },
@@ -41,7 +41,7 @@
     switch (k) {
       case 'account': return SB.session ? (SB.user?.email || 'Signed in') : window.IOTA_STANDALONE ? 'Private preview' : 'Offline';
       case 'appearance': return THEMES.find(t => t[0] === (s.theme || 'system'))[1];
-      case 'areas': return plural(Tasks.areaDefs().filter(d => !d.hidden).length, 'area');
+      case 'areas': return `${Tasks.spaceDefs().filter(x => !x.hidden).length} spaces`;
       case 'eden': return Eden.available ? 'Live' : 'Rules mode';
       case 'data': return Store.pending ? `${Store.pending} waiting` : '';
       case 'about': return VERSION;
@@ -124,21 +124,34 @@
         ] };
       // ---------------- Areas ----------------
       case 'areas': {
-        const defs = Tasks.areaDefs(), cnt = {}; for (const t of Tasks.open()) { const a = Tasks.area(t); cnt[a] = (cnt[a] || 0) + 1; }
-        return { desc: 'The finer grain under University, Work and Personal. Rename them, hide the ones you don\'t use, and put them in the order you think in.', sections: [
-          ...Tasks.GROUPS.map(([g, name]) => ({ h: name, dot: g, rows: defs.filter(d => d.group === g).map((d, i, arr) => R.custom('area-' + d.slug, d.name, { kw: `${d.key} area rename hide order ${name}`, bare: true, html: () => `
+        const defs = Tasks.areaDefs(), sps = Tasks.spaceDefs(), cnt = {}; for (const t of Tasks.open()) { const a = Tasks.area(t); cnt[a] = (cnt[a] || 0) + 1; }
+        const spaceSel = d => `<select class="ae-space" data-area-space aria-label="Space for ${esc(d.name)}">${sps.map(x => `<option value="${x.key}" ${x.key === d.space ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>`;
+        return { desc: 'Spaces are the parts of your life you answer for. Areas are the ongoing responsibilities inside them. Rename, reorder, hide, or move an area to another space.', sections: [
+          { h: 'Spaces', rows: sps.map((x, i, arr) => R.custom('space-' + x.key, x.name, { kw: `${x.key} space rename hide order`, bare: true, html: () => `
+            <div class="area-edit space-edit ${x.hidden ? 'is-hidden' : ''}" data-space-key="${x.key}">
+              <span class="ae-ico">${icon(x.icon, 'i-sm')}</span>
+              <input class="ae-name" value="${esc(x.name)}" aria-label="Name for ${esc(x.key)} space" data-space-name spellcheck="false">
+              <span class="ae-n">${plural(defs.filter(d => d.space === x.key).length, 'area')}</span>
+              <span class="ae-acts">
+                <button class="btn icon ghost sm" data-space-move="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move ${esc(x.name)} up">${icon('up', 'i-sm')}</button>
+                <button class="btn icon ghost sm" data-space-move="1" ${i === arr.length - 1 ? 'disabled' : ''} aria-label="Move ${esc(x.name)} down">${icon('down', 'i-sm')}</button>
+                <button class="btn icon ghost sm" data-space-hide aria-pressed="${x.hidden}" aria-label="${x.hidden ? 'Show' : 'Hide'} ${esc(x.name)}">${icon(x.hidden ? 'eyeoff' : 'eye', 'i-sm')}</button>
+              </span>
+            </div>` })) },
+          ...sps.map(x => ({ h: x.name + ' areas', icon: x.icon, rows: defs.filter(d => d.space === x.key).map((d, i, arr) => R.custom('area-' + d.slug, d.name, { kw: `${d.key} area rename hide order move ${x.name}`, bare: true, html: () => `
             <div class="area-edit ${d.hidden ? 'is-hidden' : ''}" data-area-key="${esc(d.key)}">
               <span class="ae-ico">${icon(d.icon || 'dot', 'i-sm')}</span>
               <input class="ae-name" value="${esc(d.name)}" aria-label="Name for ${esc(d.key)}" data-area-name spellcheck="false">
               <span class="ae-n">${cnt[d.key] ? plural(cnt[d.key], 'task') : ''}</span>
+              ${spaceSel(d)}
               <span class="ae-acts">
                 <button class="btn icon ghost sm" data-area-move="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move ${esc(d.name)} up">${icon('up', 'i-sm')}</button>
                 <button class="btn icon ghost sm" data-area-move="1" ${i === arr.length - 1 ? 'disabled' : ''} aria-label="Move ${esc(d.name)} down">${icon('down', 'i-sm')}</button>
                 <button class="btn icon ghost sm" data-area-hide aria-pressed="${d.hidden}" aria-label="${d.hidden ? 'Show' : 'Hide'} ${esc(d.name)}" title="${d.hidden ? 'Hidden from the sidebar' : 'Shown in the sidebar'}">${icon(d.hidden ? 'eyeoff' : 'eye', 'i-sm')}</button>
               </span>
-            </div>` })) })),
-          { rows: [R.custom('areas-reset', 'Reset areas', { desc: 'Back to the original names and order. Tasks aren\'t touched.', kw: 'restore default', html: () => `<button class="btn sm ghost" data-act="areas-reset" ${Object.keys(s.areaPrefs || {}).length ? '' : 'disabled'}>Reset</button>` })],
-            note: 'Tag a task with a new #name and it gets an area of its own.' },
+            </div>` })) })).filter(sec => sec.rows.length),
+          { rows: [R.custom('areas-reset', 'Reset spaces and areas', { desc: 'Back to the original names, order and spaces. Tasks aren\'t touched.', kw: 'restore default', html: () => `<button class="btn sm ghost" data-act="areas-reset" ${Object.keys(s.areaPrefs || {}).length || Object.keys(s.spacePrefs || {}).length ? '' : 'disabled'}>Reset</button>` })],
+            note: 'Tag a task with a new #name and it gets an area of its own. Projects, the things with a finish line, live on each space\'s page.' },
         ] };
       }
       // ---------------- Schedule & travel ----------------
@@ -243,7 +256,7 @@
         const list = (items) => ({ stack: true, bare: true, html: () => `<dl class="keys">${items.map(([k, d]) => `<dt>${d}</dt><dd>${k}</dd>`).join('')}</dl>` });
         return { desc: 'Everything has a key on a laptop, and a gesture on a phone.', sections: [
           { h: 'Anywhere', rows: [R.custom('keys-any', 'Anywhere', { kw: 'keyboard hotkeys', ...list([[K('N'), 'New task'], [K(MOD, 'K') + ' or ' + K('/'), 'Search and jump'], [K(MOD, ','), 'Settings'], [K(MOD, 'Z'), 'Undo the last change']]) })] },
-          { h: 'Go to', rows: [R.custom('keys-go', 'Go to', { kw: 'navigate g then', ...list([[K('G') + ' ' + K('T'), 'Today'], [K('G') + ' ' + K('K'), 'Tasks'], [K('G') + ' ' + K('C'), 'Calendar'], [K('G') + ' ' + K('E'), 'EDEN'], [K('G') + ' ' + K('U') + ' ' + K('W') + ' ' + K('P'), 'University, Work, Personal'], [K('G') + ' ' + K('S'), 'Settings']]) })] },
+          { h: 'Go to', rows: [R.custom('keys-go', 'Go to', { kw: 'navigate g then', ...list([[K('G') + ' ' + K('T'), 'Today'], [K('G') + ' ' + K('K'), 'Tasks'], [K('G') + ' ' + K('C'), 'Calendar'], [K('G') + ' ' + K('E'), 'EDEN'], [K('G') + ' ' + K('P'), 'Projects'], [K('G') + ' ' + K('U') + ' ' + K('F') + ' ' + K('W') + ' ' + K('L'), 'Degree, FallingHippo, Work, Life admin'], [K('G') + ' ' + K('S'), 'Settings']]) })] },
           { h: 'In a list', rows: [R.custom('keys-list', 'In a list', { kw: 'j k x enter complete', ...list([[K('J') + ' ' + K('K'), 'Move down and up'], [K('X'), 'Complete'], [K('Enter'), 'Open'], [K('Esc'), 'Close']]) })] },
           { h: 'On a phone', rows: [R.custom('gestures', 'On a phone', { kw: 'swipe gesture touch hold', ...list([['Swipe right', 'Complete a task'], ['Swipe left', 'Snooze it'], ['Hold the EDEN tab', 'New task']]) })] },
         ] };
@@ -261,7 +274,7 @@
             'A redesign from the ground up: plain rows, one ink, light and dark.',
             'Tasks with priority, effort, hard deadlines, snooze and where each one came from.',
             'EDEN picks the one thing to do next, and says why.',
-            'Twenty areas under University, Work and Personal, each with its own page.',
+            'Seven spaces, each with its standard, its areas and its projects with a finish line.',
             'Works offline. Changes wait and sync when the server is back.',
             'These settings: searchable, and every change saves itself.',
           ].map(x => `<li>${esc(x)}</li>`).join('')}</ul>` })] },
@@ -305,7 +318,7 @@
     const p = PANES.find(x => x.k === k), b = build(k);
     return `<div class="pane" data-pane="${k}">
       <header class="pane-h"><h1>${esc(p.t)}</h1>${b.desc ? `<p class="sub">${esc(b.desc)}</p>` : ''}</header>
-      ${b.sections.map(sec => `<section class="sgroup">${sec.h ? `<h2>${sec.dot ? `<i class="dot ${sec.dot}"></i>` : ''}${esc(sec.h)}</h2>` : ''}${sec.rows?.length ? `<div class="spanel ${sec.danger ? 'danger' : ''}">${sec.rows.map(rowHTML).join('')}</div>` : ''}${sec.note ? `<p class="snote">${esc(sec.note)}</p>` : ''}</section>`).join('')}
+      ${b.sections.map(sec => `<section class="sgroup">${sec.h ? `<h2>${sec.dot ? `<i class="dot ${sec.dot}"></i>` : ''}${sec.icon ? icon(sec.icon, 'i-sm') : ''}${esc(sec.h)}</h2>` : ''}${sec.rows?.length ? `<div class="spanel ${sec.danger ? 'danger' : ''}">${sec.rows.map(rowHTML).join('')}</div>` : ''}${sec.note ? `<p class="snote">${esc(sec.note)}</p>` : ''}</section>`).join('')}
     </div>`;
   }
   function navHTML(active, phone) {
@@ -394,18 +407,32 @@
     // areas editor
     const prefs = () => JSON.parse(JSON.stringify(S().areaPrefs || {}));
     const savePrefs = (p, el) => { set('areaPrefs', p, el); ctx.refreshShell(); };
+    const sprefs = () => JSON.parse(JSON.stringify(S().spacePrefs || {}));
+    const saveSp = (p, el) => { set('spacePrefs', p, el); ctx.refreshShell(); };
+    const tidy = (p, k) => { if (p[k] && !Object.keys(p[k]).length) delete p[k]; };
+    $$('[data-space-key]', page).forEach(row => {
+      const key = row.dataset.spaceKey, nm = $('[data-space-name]', row);
+      nm.addEventListener('keydown', e => { if (e.key === 'Enter') nm.blur(); if (e.key === 'Escape') { nm.value = Tasks.spaceDef(key)?.name || key; nm.blur(); } });
+      nm.addEventListener('change', () => { const p = sprefs(), v = nm.value.trim(), def = Tasks.SPACE_DEFS.find(x => x.key === key); p[key] = p[key] || {}; if (!v || v === def.name) delete p[key].name; else p[key].name = v; tidy(p, key); saveSp(p, nm); });
+      $('[data-space-hide]', row).addEventListener('click', () => { const p = sprefs(); p[key] = p[key] || {}; if (Tasks.spaceDef(key)?.hidden) delete p[key].hidden; else p[key].hidden = true; tidy(p, key); saveSp(p); rerender(); });
+      $$('[data-space-move]', row).forEach(b => b.addEventListener('click', () => {
+        const all = Tasks.spaceDefs(), i = all.findIndex(x => x.key === key), j = i + +b.dataset.spaceMove; if (j < 0 || j >= all.length) return;
+        [all[i], all[j]] = [all[j], all[i]]; const p = sprefs(); all.forEach((x, n) => { p[x.key] = { ...(p[x.key] || {}), order: n }; }); saveSp(p); rerender();
+        setTimeout(() => $(`[data-space-key="${key}"] [data-space-move="${b.dataset.spaceMove}"]`)?.focus(), 0);
+      }));
+    });
     $$('[data-area-key]', page).forEach(row => {
       const key = row.dataset.areaKey;
       const nm = $('[data-area-name]', row);
       nm.addEventListener('keydown', e => { if (e.key === 'Enter') nm.blur(); if (e.key === 'Escape') { nm.value = Tasks.areaDef(key)?.name || key; nm.blur(); } });
-      nm.addEventListener('change', () => { const p = prefs(), v = nm.value.trim(); const def = Tasks.AREA_DEFS.find(d => d.key === key); p[key] = p[key] || {}; if (!v || v === (def?.name || key)) delete p[key].name; else p[key].name = v; if (!Object.keys(p[key]).length) delete p[key]; savePrefs(p, nm); });
-      $('[data-area-hide]', row).addEventListener('click', () => { const p = prefs(); p[key] = p[key] || {}; p[key].hidden = !Tasks.areaDef(key)?.hidden; if (!p[key].hidden) delete p[key].hidden; if (!Object.keys(p[key]).length) delete p[key]; savePrefs(p); rerender(); });
+      nm.addEventListener('change', () => { const p = prefs(), v = nm.value.trim(); const def = Tasks.AREA_DEFS.find(d => d.key === key); p[key] = p[key] || {}; if (!v || v === (def?.name || key)) delete p[key].name; else p[key].name = v; tidy(p, key); savePrefs(p, nm); });
+      $('[data-area-space]', row).addEventListener('change', e => { const p = prefs(), v = e.target.value, def = Tasks.AREA_DEFS.find(d => d.key === key); p[key] = p[key] || {}; if (def && v === def.space) delete p[key].space; else p[key].space = v; tidy(p, key); savePrefs(p); rerender(); });
+      $('[data-area-hide]', row).addEventListener('click', () => { const p = prefs(); p[key] = p[key] || {}; p[key].hidden = !Tasks.areaDef(key)?.hidden; if (!p[key].hidden) delete p[key].hidden; tidy(p, key); savePrefs(p); rerender(); });
       $$('[data-area-move]', row).forEach(b => b.addEventListener('click', () => {
-        const d = Tasks.areaDef(key), all = Tasks.areaDefs(), grp = all.filter(x => x.group === d.group), i = grp.findIndex(x => x.key === key), j = i + +b.dataset.areaMove;
+        const d = Tasks.areaDef(key), all = Tasks.areaDefs(), grp = all.filter(x => x.space === d.space), i = grp.findIndex(x => x.key === key), j = i + +b.dataset.areaMove;
         if (j < 0 || j >= grp.length) return;
         [grp[i], grp[j]] = [grp[j], grp[i]];
-        const order = [...all.filter(x => x.group !== d.group && Tasks.GROUPS.findIndex(g => g[0] === x.group) < Tasks.GROUPS.findIndex(g => g[0] === d.group)), ...grp, ...all.filter(x => x.group !== d.group && Tasks.GROUPS.findIndex(g => g[0] === x.group) > Tasks.GROUPS.findIndex(g => g[0] === d.group))];
-        const p = prefs(); order.forEach((x, n) => { p[x.key] = { ...(p[x.key] || {}), order: n }; });
+        const p = prefs(); let n = 0; for (const sp of Tasks.spaceDefs()) for (const x of (sp.key === d.space ? grp : all.filter(y => y.space === sp.key))) p[x.key] = { ...(p[x.key] || {}), order: n++ };
         savePrefs(p); rerender();
         setTimeout(() => $(`[data-area-key="${CSS.escape(key)}"] [data-area-move="${b.dataset.areaMove}"]`)?.focus(), 0);
       }));
@@ -425,7 +452,7 @@
     act('sync', async b => { b.disabled = true; b.innerHTML = `${icon('sync', 'i-sm')}Syncing…`; const ok = await Store.sync(); rerender(); saved($('#row-sync') || b); if (!ok) ctx.toast('Couldn\'t reach the server. Your changes are kept.'); });
     act('signout', async () => { await SB.signOut(); Store.setOfflineMode(false); Store.clearLocal(); ctx.boot(); });
     act('signin', () => { Store.setOfflineMode(false); ctx.boot(); });
-    act('areas-reset', b => { savePrefs({}); rerender(); });
+    act('areas-reset', b => { savePrefs({}); saveSp({}); rerender(); });
     act('export-tasks', () => ctx.saveFile(`iota-tasks-${dayKey(new Date())}.seed.json`, JSON.stringify(Store.exportSeed(), null, 1)));
     act('export-all', () => ctx.saveFile(`iota-export-${dayKey(new Date())}.json`, Store.exportJSON()));
     act('reseed', b => { const n = Store.applySeed(true); rerender(); const row = $('#row-reseed .sd'); if (row) row.textContent = n ? `${plural(n, 'task')} restored.` : 'Nothing was missing.'; });

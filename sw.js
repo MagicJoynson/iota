@@ -1,6 +1,6 @@
 /* Iota service worker — caches the app shell so Iota opens offline.
    Bump CACHE on every deploy that changes shell files. */
-const CACHE = 'iota-shell-v1.0.1';
+const CACHE = 'iota-shell-v1.1.0';
 const SHELL = [
   './', './index.html',
   './css/app.css', './css/jp.css',

@@ -9,7 +9,7 @@
 
   const CACHE_KEY = 'iota.cache.v2';
   const OUTBOX_KEY = 'iota.outbox.v1';
-  const TABLES = ['events', 'shifts', 'pay_rates', 'tasks', 'notes', 'societies', 'watches', 'briefings', 'modules', 'assessments', 'captures', 'time_off', 'renewals', 'module_reviews', 'theories', 'jp_srs', 'jp_reviews'];
+  const TABLES = ['events', 'shifts', 'pay_rates', 'tasks', 'notes', 'societies', 'watches', 'briefings', 'modules', 'assessments', 'captures', 'time_off', 'renewals', 'module_reviews', 'theories', 'jp_srs', 'jp_reviews', 'projects'];
   const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }));
 
   const DEFAULT_SETTINGS = {
@@ -17,7 +17,7 @@
     travelMode: 'walk', travelCampusMin: 15, travelWorkMin: 30, travelTrackMin: 40, loadingMin: 15,
     homeAddress: '', campusAddress: '', workAddress: '', trackAddress: '',
     termStart: '', termWeeks: 12, apiKey: '', reduceMotion: false,
-    defaultPriority: 4, defaultDueTime: '18:00', dayEndHour: 23, weekStart: 1, snoozeMorning: '09:00', snoozeEvening: '18:00', areaPrefs: {},
+    defaultPriority: 4, defaultDueTime: '18:00', dayEndHour: 23, weekStart: 1, snoozeMorning: '09:00', snoozeEvening: '18:00', areaPrefs: {}, spacePrefs: {},
   };
   const LOCAL_ONLY_KEYS = new Set(['apiKey', 'theme']); // never leaves the device
 
@@ -47,7 +47,7 @@
   // ---- task metadata (priority, area, notes, link, source, due_kind, snoozed_until) ----
   // Written to the server once the tasks-v1 migration exists (docs/migrations). Until then the server rejects unknown
   // columns (PGRST204), so we strip them, retry, and keep them in a local side-table merged back on every sync.
-  const TASK_META = ['priority', 'area', 'notes', 'link', 'source', 'due_kind', 'snoozed_until', 'duration_min', 'done_at'];
+  const TASK_META = ['priority', 'area', 'notes', 'link', 'source', 'due_kind', 'snoozed_until', 'duration_min', 'done_at', 'project_id'];
   const META_KEY = 'iota.taskMeta.v1';
   let taskMeta = {}; try { taskMeta = JSON.parse(localStorage.getItem(META_KEY) || '{}'); } catch (_) {}
   const saveMeta = () => { try { localStorage.setItem(META_KEY, JSON.stringify(taskMeta)); } catch (_) {} };
@@ -101,8 +101,8 @@
     db.events = [...real, ...seeds];
   }
   /** Fields an import owns. If a task still matches what the last import wrote, a newer import may refresh it; once you edit it, it's yours. */
-  const seedRow = x => ({ title: x.t, due: x.d || null, due_kind: x.d ? (x.h ? 'hard' : 'soft') : null, priority: x.p || 4, duration_min: x.m || null, notes: x.n || null, link: x.u || null, area: x.a || null, section: x.s });
-  const sigOf = r => JSON.stringify([r.title, r.due || null, r.due_kind || null, +r.priority || 4, +r.duration_min || null, r.notes || null, r.link || null, r.area || null]);
+  const seedRow = x => ({ title: x.t, due: x.d || null, due_kind: x.d ? (x.h ? 'hard' : 'soft') : null, priority: x.p || 4, duration_min: x.m || null, notes: x.n || null, link: x.u || null, area: x.a || null, section: x.s, project_id: x.pj || null });
+  const sigOf = r => JSON.stringify([r.title, r.due || null, r.due_kind || null, +r.priority || 4, +r.duration_min || null, r.notes || null, r.link || null, r.area || null]); // project_id is left out so older imports still match
   const SIG_KEY = 'iota.seedSig';
   /** Apply the task import once per version: adds what's missing, refreshes imported tasks you haven't touched. Deleted or completed ones stay that way. */
   function applySeed(force) {
@@ -110,10 +110,13 @@
     if (!force && localStorage.getItem('iota.seed') === S.version) { ensureSeedEvents(); return 0; }
     let sigs = {}; try { sigs = JSON.parse(localStorage.getItem(SIG_KEY) || '{}'); } catch (_) {}
     let n = 0, refreshed = 0; const byId = new Map(db.tasks.map(t => [t.id, t]));
+    const haveP = new Set((db.projects || []).map(p => p.id));
+    for (const p of (S.projects || [])) if (!haveP.has(p.id)) Store.insert('projects', { id: p.id, name: p.name, space: p.space, area: p.area || null, outcome: p.outcome || null, due: p.due || null, status: p.status || 'active', sort: p.sort || 0 }, { silent: true, ignoreDup: true });
     for (const x of S.tasks) {
       const id = x.id || uuidFrom('task:' + x.k), row = seedRow(x), sig = sigOf(row);
       const cur = byId.get(id);
       if (cur) {
+        if (x.pj && !cur.project_id && cur.status === 'open') Store.update('tasks', id, { project_id: x.pj });
         const expected = sigs[id] || (S.prevSigs && S.prevSigs[x.k]) || null;
         if (cur.status === 'open' && expected && sigOf(cur) === expected && sig !== expected) {
           const patch = {}; for (const k of Object.keys(row)) if ((cur[k] ?? null) !== (row[k] ?? null)) patch[k] = row[k];
@@ -134,9 +137,9 @@
   }
   /** Export every task in the import format, so a list can move between devices or from the preview into the real app. */
   function exportSeed() {
-    const tasks = db.tasks.filter(t => t.status !== 'dropped').map(t => ({ id: t.id, t: t.title, s: t.section, a: t.area || null, d: t.due || null, h: t.due_kind === 'hard', p: t.priority || 4, m: t.duration_min || null, n: t.notes || null, src: t.source || null, u: t.link || null, st: t.status, da: t.done_at || null, sz: t.snoozed_until || null, ca: t.created_at || null }));
+    const tasks = db.tasks.filter(t => t.status !== 'dropped').map(t => ({ id: t.id, t: t.title, s: t.section, a: t.area || null, d: t.due || null, h: t.due_kind === 'hard', p: t.priority || 4, m: t.duration_min || null, n: t.notes || null, src: t.source || null, u: t.link || null, pj: t.project_id || null, st: t.status, da: t.done_at || null, sz: t.snoozed_until || null, ca: t.created_at || null }));
     const S = seedData();
-    return { format: 'iota-seed/1', version: 'export-' + new Date().toISOString(), created: new Date().toISOString().slice(0, 10), tasks, events: S?.events || [], areas: S?.areas || null };
+    return { format: 'iota-seed/1', version: 'export-' + new Date().toISOString(), created: new Date().toISOString().slice(0, 10), tasks, projects: (db.projects || []).map(p => ({ id: p.id, name: p.name, space: p.space, area: p.area, outcome: p.outcome, due: p.due, status: p.status, sort: p.sort })), events: S?.events || [], areas: S?.areas || null };
   }
   /** Import a task file (the JSON Claude writes to OneDrive). Returns how many tasks were added. */
   function importSeed(obj) {
@@ -212,6 +215,7 @@
         theories: 'theories?select=*&order=name',
         jp_srs: 'jp_srs?select=*&order=due.asc.nullsfirst&limit=6000',
         jp_reviews: `jp_reviews?select=id,item_id,reviewed_at,grade,ms&reviewed_at=gte.${new Date(Date.now() - 120 * 86400000).toISOString()}&order=reviewed_at.desc&limit=4000`,
+        projects: 'projects?select=*&status=neq.dropped&order=sort',
         settings: 'settings?select=key,value',
       };
       const results = await Promise.allSettled(Object.entries(q).map(([t, path]) => SB.rest('GET', path).then(rows => [t, rows])));
